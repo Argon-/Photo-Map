@@ -1,10 +1,10 @@
-package net.zieglejn.osm_fapra.path_calculation;
+package fapra.path_calculation;
 
 import java.util.Arrays;
 
-import net.zieglejn.osm_fapra.graph.Graph;
-import net.zieglejn.osm_fapra.heap.BinaryMinHeap_Old;
-import net.zieglejn.osm_fapra.heap.HeapNode_Old;
+import fapra.graph.Graph;
+import fapra.heap.BinaryMinHeap_Old;
+import fapra.heap.HeapNode_Old;
 
 
 

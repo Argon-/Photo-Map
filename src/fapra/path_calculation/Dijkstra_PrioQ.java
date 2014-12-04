@@ -1,11 +1,11 @@
-package net.zieglejn.osm_fapra.path_calculation;
+package fapra.path_calculation;
 
 import java.util.Arrays;
 import java.util.PriorityQueue;
 
-import net.zieglejn.osm_fapra.graph.Graph;
-import net.zieglejn.osm_fapra.heap.Node;
-import net.zieglejn.osm_fapra.heap.NodeComparator;
+import fapra.graph.Graph;
+import fapra.heap.Node;
+import fapra.heap.NodeComparator;
 
 
 

@@ -1,4 +1,4 @@
-package net.zieglejn.osm_fapra.graph;
+package fapra.graph;
 
 public class InvalidGraphFormatException extends Exception {
 

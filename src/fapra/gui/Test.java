@@ -1,10 +1,11 @@
-package net.zieglejn.osm_fapra.gui;
+package fapra.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JSplitPane;
 
@@ -21,11 +22,16 @@ import java.awt.Insets;
 
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JScrollPane;
 import javax.swing.JEditorPane;
+
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 
 
@@ -85,6 +91,12 @@ public class Test extends JFrame
 		this.contentPane.setLayout(gbl_contentPane);
 
 		this.mapKit = new JXMapKit();
+		this.mapKit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				mapMouseClicked(e);
+			}
+		});
 		GridBagConstraints gbc_mapKit = new GridBagConstraints();
 		gbc_mapKit.gridheight = 13;
 		gbc_mapKit.gridwidth = 20;
@@ -109,23 +121,30 @@ public class Test extends JFrame
 		this.editorPane.setMinimumSize(new Dimension(20, 10));
 		this.scrollPane.setViewportView(this.editorPane);
 		
-				this.btnNewButton = new JButton("Load Graph");
-				this.btnNewButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						btnLoadGraph(e);
-					}
-				});
-				GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-				gbc_btnNewButton.anchor = GridBagConstraints.WEST;
-				gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
-				gbc_btnNewButton.gridx = 0;
-				gbc_btnNewButton.gridy = 14;
-				this.contentPane.add(this.btnNewButton, gbc_btnNewButton);
+		this.btnNewButton = new JButton("Load Graph");
+		this.btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnLoadGraph(e);
+			}
+		});
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.anchor = GridBagConstraints.WEST;
+		gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
+		gbc_btnNewButton.gridx = 0;
+		gbc_btnNewButton.gridy = 14;
+		this.contentPane.add(this.btnNewButton, gbc_btnNewButton);
 	}
 
 
 	public void myInitComponents()
 	{
+		this.mapKit.getMainMap().addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+            	mapMouseClicked(e);
+            }
+        });
+		
+		
 		this.mapKit.setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
 		// set the initial view on the map
 		this.mapKit.setAddressLocationShown(false); // don't show center
@@ -137,6 +156,21 @@ public class Test extends JFrame
 	public void btnLoadGraph(ActionEvent e)
 	{
 		
+	}
+	
+	
+	public void mapMouseClicked(MouseEvent e)
+	{
+		GeoPosition clickPos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
+		if (SwingUtilities.isLeftMouseButton(e)) {
+			System.out.println("left");
+		}
+		else if (SwingUtilities.isRightMouseButton(e)) {
+			System.out.println("right");
+		}
+		else {
+			System.out.println("wat");
+		}
 	}
 
 }

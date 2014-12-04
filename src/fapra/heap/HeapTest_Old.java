@@ -1,9 +1,9 @@
-package net.zieglejn.osm_fapra.heap;
+package fapra.heap;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import net.zieglejn.osm_fapra.misc.StopWatch;
+import fapra.misc.StopWatch;
 
 
 

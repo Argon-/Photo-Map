@@ -1,4 +1,4 @@
-package net.zieglejn.osm_fapra.main;
+package fapra.main;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -6,12 +6,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 
-import net.zieglejn.osm_fapra.graph.ArrayRepresentation;
-import net.zieglejn.osm_fapra.graph.Graph;
-import net.zieglejn.osm_fapra.misc.StopWatch;
-import net.zieglejn.osm_fapra.path_calculation.Dijkstra_Old;
-import net.zieglejn.osm_fapra.path_calculation.Dijkstra_PrioQ;
-import net.zieglejn.osm_fapra.path_calculation.Dijkstra;
+import fapra.graph.ArrayRepresentation;
+import fapra.graph.Graph;
+import fapra.misc.StopWatch;
+import fapra.path_calculation.Dijkstra;
+import fapra.path_calculation.Dijkstra_Old;
+import fapra.path_calculation.Dijkstra_PrioQ;
 
 
 

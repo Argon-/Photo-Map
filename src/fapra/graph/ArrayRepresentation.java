@@ -1,4 +1,4 @@
-package net.zieglejn.osm_fapra.graph;
+package fapra.graph;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

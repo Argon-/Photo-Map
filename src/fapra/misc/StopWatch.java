@@ -1,4 +1,4 @@
-package net.zieglejn.osm_fapra.misc;
+package fapra.misc;
 
 
 

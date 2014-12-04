@@ -1,4 +1,4 @@
-package net.zieglejn.osm_fapra.heap;
+package fapra.heap;
 
 import java.util.Arrays;
 
