@@ -25,7 +25,6 @@ public final class BinaryMinHeap
 	{
 		this.heap_nid = new int[size];
 		this.heap_val = new int[size];
-		//this.touched  = new boolean[size];
 		this.size = 0;
 	}
 	
