@@ -21,6 +21,11 @@ import java.awt.Insets;
 
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JEditorPane;
+import java.awt.Dimension;
 
 
 
@@ -29,6 +34,8 @@ public class Test extends JFrame
 	private JPanel		contentPane;
 	private JButton		btnNewButton;
 	private JXMapKit	mapKit;
+	private JScrollPane scrollPane;
+	private JEditorPane editorPane;
 
 
 	/**
@@ -70,27 +77,50 @@ public class Test extends JFrame
 		setContentPane(this.contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0 };
+		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		this.contentPane.setLayout(gbl_contentPane);
 
 		this.mapKit = new JXMapKit();
 		GridBagConstraints gbc_mapKit = new GridBagConstraints();
-		gbc_mapKit.insets = new Insets(0, 0, 5, 5);
+		gbc_mapKit.gridheight = 13;
+		gbc_mapKit.gridwidth = 20;
+		gbc_mapKit.insets = new Insets(0, 0, 5, 0);
 		gbc_mapKit.fill = GridBagConstraints.BOTH;
 		gbc_mapKit.gridx = 0;
 		gbc_mapKit.gridy = 0;
 		this.contentPane.add(this.mapKit, gbc_mapKit);
-
-		this.btnNewButton = new JButton("button");
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
-		gbc_btnNewButton.gridx = 0;
-		gbc_btnNewButton.gridy = 13;
-		this.contentPane.add(this.btnNewButton, gbc_btnNewButton);
+		
+		this.scrollPane = new JScrollPane();
+		this.scrollPane.setMinimumSize(new Dimension(200, 100));
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.gridheight = 3;
+		gbc_scrollPane.gridwidth = 19;
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridx = 1;
+		gbc_scrollPane.gridy = 13;
+		this.contentPane.add(this.scrollPane, gbc_scrollPane);
+		
+		this.editorPane = new JEditorPane();
+		this.editorPane.setMinimumSize(new Dimension(20, 10));
+		this.scrollPane.setViewportView(this.editorPane);
+		
+				this.btnNewButton = new JButton("Load Graph");
+				this.btnNewButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						btnLoadGraph(e);
+					}
+				});
+				GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+				gbc_btnNewButton.anchor = GridBagConstraints.WEST;
+				gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
+				gbc_btnNewButton.gridx = 0;
+				gbc_btnNewButton.gridy = 14;
+				this.contentPane.add(this.btnNewButton, gbc_btnNewButton);
 	}
 
 
@@ -101,6 +131,12 @@ public class Test extends JFrame
 		this.mapKit.setAddressLocationShown(false); // don't show center
 		this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
 		this.mapKit.setZoom(1); // set zoom level
+	}
+	
+	
+	public void btnLoadGraph(ActionEvent e)
+	{
+		
 	}
 
 }
