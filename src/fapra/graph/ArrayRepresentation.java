@@ -2,9 +2,13 @@ package fapra.graph;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.util.Arrays;
 
 
@@ -21,20 +25,71 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private int   target[] = null;
 	private int     dist[] = null;
 	private int   offset[] = null;
-	//private float   type[] = null;
+	private int     type[] = null;
+	private double types[] = null;
 	
 	
 	public ArrayRepresentation()
 	{
-		//this.type = new  float[] {-1f, 1.3f, 1.2f, 0.8f, 0.7f, -1f, 1.3f, 0.5f, 0.45f, 0.3f, 0.5f, 0.3f, 0.5f};
+		this.types = new  double[] {-1.0, 1.3, 1.2, 0.8, 0.7, -1, 1.3, 0.5, 0.45, 0.3, 0.5, 0.3, 0.5};
 	}
-		
 	
-	public void readFromFile(FileInputStream f) throws InvalidGraphFormatException
+	
+	public void save(String f) throws IOException
 	{
-		final BufferedReader b = new BufferedReader(new InputStreamReader(f), 8192);
+		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+		
+		oos.writeObject(this.x);
+		oos.writeObject(this.y);
+		//oos.writeObject(this.pred);
+		oos.writeObject(this.elev);
+		oos.writeObject(this.source);
+		oos.writeObject(this.target);
+		oos.writeObject(this.dist);
+		oos.writeObject(this.offset);
+		oos.writeObject(this.type);
+		oos.writeObject(this.types);
+		
+		oos.close();
+	}
+	
+	
+	public void load(String f) throws InvalidGraphFormatException, IOException
+	{
+		System.out.println("Probing file header");
 		
 		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+			System.out.println("Found serialized graph, reading...");
+			
+			this.x = (double[]) ois.readObject();
+			this.y = (double[]) ois.readObject();
+			//this.pred = (int[]) ois.readObject();
+			this.pred = new int[this.x.length];
+			this.elev = (int[]) ois.readObject();
+			this.source = (int[]) ois.readObject();
+			this.target = (int[]) ois.readObject();
+			this.dist = (int[]) ois.readObject();
+			this.offset = (int[]) ois.readObject();
+			this.type = (int[]) ois.readObject();
+			this.types = (double[]) ois.readObject();
+			
+			ois.close();
+			return;
+		}
+		catch (StreamCorruptedException e1) {
+			// do nothing
+		}
+		catch (ClassNotFoundException e) {
+			throw new InvalidGraphFormatException("Invalid serialized graph format");
+		}
+		
+		
+		
+		try {
+			final BufferedReader b = new BufferedReader(new InputStreamReader(new FileInputStream(f)), 8192);
+			System.out.println("Found graph text file, parsing...");
+			
 			final int node_num = Integer.parseInt(b.readLine());
 			final int edge_num = Integer.parseInt(b.readLine());
 			
@@ -56,6 +111,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			this.target = new int[edge_num];
 			this.dist   = new int[edge_num];
 			this.offset = new int[node_num + 1];	// +1 because of getNeighbor()
+			this.type   = new int[/*edge_num*/1];	// dummy
 			Arrays.fill(this.offset, -1);
 			
 			for (int i = 0; i < edge_num; ++i)
@@ -83,11 +139,11 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			}
 
 			b.close();
-		} catch (NumberFormatException e) {
+		} 
+		catch (NumberFormatException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			throw new InvalidGraphFormatException("Invalid graph text file format");
+		} 
 	}
 	
 	

@@ -1,11 +1,5 @@
 package fapra.main;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.StreamCorruptedException;
-
 import fapra.graph.ArrayRepresentation;
 import fapra.graph.Graph;
 import fapra.misc.StopWatch;
@@ -21,7 +15,12 @@ public class Main {
 		//String f = "./150K.txt";
 		//String f = "./15K.txt";
 		String f = "./15000K.bin";
-		Graph g = loadGraph(f);
+		
+		Graph g = new ArrayRepresentation();
+		StopWatch.lap();
+		g.load(f);
+		System.out.println(StopWatch.lapSec() + " sec");
+		System.out.println("");
 		
 		
 		Dijkstra_Old d_old = new Dijkstra_Old(g);
@@ -32,51 +31,6 @@ public class Main {
 		exec(d_old, d_pq, d_2h, 0, 999999);
 		//exec(d_old, d_pq, d_2h, 15, 31);
 		//exec(d_old, d_pq, d_2h, 15, 32);
-	}
-	
-	
-	public static Graph loadGraph(String location) throws Exception
-	{
-		Graph g;
-		
-		System.out.println("Probing header for file: " + location);
-		FileInputStream fos = new FileInputStream(location);
-		ObjectInputStream oos = null;
-		
-		try
-		{
-			oos = new ObjectInputStream(fos);
-			System.out.println("Found serialized graph, reading...");
-			StopWatch.lap();
-			g = (Graph) oos.readObject();
-		}
-		catch (StreamCorruptedException e)
-		{ 
-			System.out.println("Found graph text file, parsing...");
-			g = new ArrayRepresentation();
-			StopWatch.lap();
-			g.readFromFile(new FileInputStream(location));
-		}
-		finally
-		{
-			if (oos != null)
-				oos.close();
-			fos.close();
-		}
-				
-		System.out.println(StopWatch.lapSec() + " sec");
-		System.out.println("");
-		return g;
-	}
-	
-	
-	public static void saveGraph(Graph g, String location) throws Exception
-	{
-	    FileOutputStream fos = new FileOutputStream(location);
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		oos.writeObject(g);
-		oos.close();
-		fos.close();
 	}
 
 	
