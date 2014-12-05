@@ -1,9 +1,9 @@
-package fapra.path_calculation;
+package path.shortest;
 
 import java.util.Arrays;
 
-import fapra.graph.Graph;
-import fapra.heap.BinaryMinHeap;
+import data_structures.graph.Graph;
+import data_structures.heap.BinaryMinHeap;
 
 
 

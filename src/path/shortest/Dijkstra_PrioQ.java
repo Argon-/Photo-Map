@@ -1,11 +1,11 @@
-package fapra.path_calculation;
+package path.shortest;
 
 import java.util.Arrays;
 import java.util.PriorityQueue;
 
-import fapra.graph.Graph;
-import fapra.heap.Node;
-import fapra.heap.NodeComparator;
+import data_structures.graph.Graph;
+import data_structures.heap.Node;
+import data_structures.heap.NodeComparator;
 
 
 

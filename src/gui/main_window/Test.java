@@ -1,4 +1,4 @@
-package fapra.gui;
+package gui.main_window;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;

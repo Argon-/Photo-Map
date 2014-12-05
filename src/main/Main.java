@@ -1,11 +1,11 @@
-package fapra.main;
+package main;
 
-import fapra.graph.Graph;
-import fapra.graph.GraphFactory;
-import fapra.misc.StopWatch;
-import fapra.path_calculation.Dijkstra;
-import fapra.path_calculation.Dijkstra_Old;
-import fapra.path_calculation.Dijkstra_PrioQ;
+import data_structures.graph.Graph;
+import data_structures.graph.GraphFactory;
+import path.shortest.Dijkstra;
+import path.shortest.Dijkstra_Old;
+import path.shortest.Dijkstra_PrioQ;
+import util.StopWatch;
 
 
 

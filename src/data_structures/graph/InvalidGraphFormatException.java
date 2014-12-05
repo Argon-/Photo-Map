@@ -1,4 +1,4 @@
-package fapra.graph;
+package data_structures.graph;
 
 public class InvalidGraphFormatException extends Exception {
 

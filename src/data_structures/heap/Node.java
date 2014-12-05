@@ -1,4 +1,4 @@
-package fapra.heap;
+package data_structures.heap;
 
 final public class Node
 {
