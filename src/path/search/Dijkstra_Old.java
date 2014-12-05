@@ -1,4 +1,4 @@
-package path.shortest;
+package path.search;
 
 import java.util.Arrays;
 
