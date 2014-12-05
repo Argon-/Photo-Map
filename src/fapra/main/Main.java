@@ -1,7 +1,7 @@
 package fapra.main;
 
-import fapra.graph.ArrayRepresentation;
 import fapra.graph.Graph;
+import fapra.graph.GraphFactory;
 import fapra.misc.StopWatch;
 import fapra.path_calculation.Dijkstra;
 import fapra.path_calculation.Dijkstra_Old;
@@ -15,10 +15,9 @@ public class Main {
 		//String f = "./150K.txt";
 		//String f = "./15K.txt";
 		String f = "./15000K.bin";
-		
-		Graph g = new ArrayRepresentation();
+
 		StopWatch.lap();
-		g.load(f);
+		Graph g = GraphFactory.load(f);
 		System.out.println(StopWatch.lapSec() + " sec");
 		System.out.println("");
 		
