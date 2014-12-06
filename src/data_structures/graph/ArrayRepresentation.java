@@ -19,7 +19,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	
 	private double     x[] = null;
 	private double     y[] = null;
-	private int     pred[] = null;
 	private int     elev[] = null;
 	private int   source[] = null;
 	private int   target[] = null;
@@ -41,7 +40,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		
 		oos.writeObject(this.x);
 		oos.writeObject(this.y);
-		//oos.writeObject(this.pred);
 		oos.writeObject(this.elev);
 		oos.writeObject(this.source);
 		oos.writeObject(this.target);
@@ -64,8 +62,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			
 			this.x = (double[]) ois.readObject();
 			this.y = (double[]) ois.readObject();
-			//this.pred = (int[]) ois.readObject();
-			this.pred = new int[this.x.length];
 			this.elev = (int[]) ois.readObject();
 			this.source = (int[]) ois.readObject();
 			this.target = (int[]) ois.readObject();
@@ -96,8 +92,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			this.x    = new double[node_num];
 			this.y    = new double[node_num];
 			this.elev = new int[node_num];
-			this.pred = new int[node_num];
-			this.resetPred();
 
 			for (int i = 0; i < node_num; ++i)
 			{
@@ -231,28 +225,5 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	public int getIthEdgeDistFor(int n, int i)
 	{
 		return this.dist[this.offset[n]+i];
-	}
-	
-	
-	public void resetPred()
-	{
-		Arrays.fill(this.pred, -1);
-	}
-	
-	
-	public int getPred(int n)
-	{
-		return this.pred[n];
-	}
-	
-	
-	public void setPred(int n, int pred)
-	{
-		this.pred[n] = pred;
-	}
-	
-	public boolean hasPred(int n)
-	{
-		return this.pred[n] != -1;
 	}
 }

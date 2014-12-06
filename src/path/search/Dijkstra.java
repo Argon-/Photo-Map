@@ -17,6 +17,7 @@ public final class Dijkstra implements Runnable
 	
 	private BinaryMinHeap heap = null;
 	private int[] state = null;
+	private int[] pred  = null;
 	
 	private int source = 0;
 	private int last_source = -1;
@@ -27,6 +28,8 @@ public final class Dijkstra implements Runnable
 	{
 		this.g = graph;
 		this.state = new int[this.g.size()];
+		this.pred  = new int[this.g.size()];
+		Arrays.fill(this.pred, -1);
 	}
 	
 	
@@ -40,17 +43,17 @@ public final class Dijkstra implements Runnable
 	
 	public void buildNewHeap(int source, boolean cleanup)
 	{
-		// was wird schneller durch touched?
-		// oder: was ist langsam ohne touched?
-		// beim cleanup müsste man den state/settled array doch mit updaten?
 		this.last_source = source;
 		Arrays.fill(this.state, UNSETTLED);
-		this.g.resetPred();
+		//Arrays.fill(this.pred, -1);
 		
 		if (!cleanup) {
 			this.heap = new BinaryMinHeap(this.g.size() / 10);
 		}
 		else {
+			// was wird schneller durch touched?
+			// oder: was ist langsam ohne touched?
+			// beim cleanup müsste man den state/settled array doch mit updaten?
 			this.heap.cleanup();
 		}
 	}
@@ -93,13 +96,13 @@ public final class Dijkstra implements Runnable
 				if (this.state[neighbor] > new_dist) {
 					this.heap.insert(neighbor, new_dist);
 					this.state[neighbor] = new_dist;
-					this.g.setPred(neighbor, u_id);
+					this.pred[neighbor] = u_id;
 				}
 				
 				if (this.target != -1 && this.target == neighbor) {
 					System.out.println("Dist from " + this.source + " to " + this.target + " = " + this.state[neighbor]);
 					this.state[neighbor] = SETTLED;
-					this.g.setPred(neighbor, u_id);
+					this.pred[neighbor] = u_id;
 					break loop;
 				}
 			} // while
@@ -168,13 +171,13 @@ public final class Dijkstra implements Runnable
 		LinkedList<Integer> l = new LinkedList<Integer>();
 		l.addFirst(this.target);
 		
-		int i = this.g.getPred(this.target);
+		int i = this.pred[this.target];
 		while (i != -1) {
 			l.addFirst(i);
 			if (i == this.source) {
 				break;
 			}
-			i = this.g.getPred(i);
+			i = this.pred[i];
 		}
 		return l;
 	}
