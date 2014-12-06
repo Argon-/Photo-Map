@@ -121,7 +121,7 @@ public class MainWindow extends JFrame
         });
 		
 		
-		this.mapKit.setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
+		this.mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
 		// set the initial view on the map
 		this.mapKit.setAddressLocationShown(false); // don't show center
 		this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
@@ -137,7 +137,6 @@ public class MainWindow extends JFrame
 	
 	public void mapMouseClicked(MouseEvent e)
 	{
-		GeoPosition clickPos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			System.out.println("left");
 		}
@@ -145,8 +144,12 @@ public class MainWindow extends JFrame
 			System.out.println("right");
 		}
 		else {
-			System.out.println("wat");
+			System.out.println("unrecognized click, ignoring");
+			return;
 		}
+		
+		GeoPosition pos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
+		
 	}
 	
 	
