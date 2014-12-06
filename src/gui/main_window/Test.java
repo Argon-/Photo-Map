@@ -1,20 +1,13 @@
 package gui.main_window;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JSplitPane;
-
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 
 import javax.swing.JButton;
-
-import org.jdesktop.swingx.JXMapViewer;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -32,23 +25,49 @@ import javax.swing.JEditorPane;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import javax.swing.JTextArea;
+import java.awt.Font;
 
 
 
 public class Test extends JFrame
 {
+	private static final long	serialVersionUID	= -590468540732816556L;
+	
 	private JPanel		contentPane;
 	private JButton		btnNewButton;
 	private JXMapKit	mapKit;
 	private JScrollPane scrollPane;
-	private JEditorPane editorPane;
+	private static JTextArea textArea;
 
 
 	/**
 	 * Launch the application.
+	 * @throws FileNotFoundException 
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException
 	{
+        final PrintStream original = System.out;
+
+        System.setOut(new PrintStream(original) {
+            public void println(String s) {
+                process(s + "\n");
+            }
+
+            public void print(String s) {
+                process(s);
+            }
+
+            private void process(String s) {
+                // Fill some JEditorPane
+                original.print(s);
+                textArea.append(s);
+            }
+        });
+		
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run()
 			{
@@ -84,10 +103,10 @@ public class Test extends JFrame
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		this.contentPane.setLayout(gbl_contentPane);
 
 		this.mapKit = new JXMapKit();
@@ -109,7 +128,7 @@ public class Test extends JFrame
 		this.scrollPane = new JScrollPane();
 		this.scrollPane.setMinimumSize(new Dimension(200, 100));
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.gridheight = 3;
+		gbc_scrollPane.gridheight = 4;
 		gbc_scrollPane.gridwidth = 19;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
@@ -117,9 +136,9 @@ public class Test extends JFrame
 		gbc_scrollPane.gridy = 13;
 		this.contentPane.add(this.scrollPane, gbc_scrollPane);
 		
-		this.editorPane = new JEditorPane();
-		this.editorPane.setMinimumSize(new Dimension(20, 10));
-		this.scrollPane.setViewportView(this.editorPane);
+		this.textArea = new JTextArea();
+		textArea.setFont(new Font("Hasklig", Font.PLAIN, 11));
+		this.scrollPane.setViewportView(this.textArea);
 		
 		this.btnNewButton = new JButton("Load Graph");
 		this.btnNewButton.addActionListener(new ActionListener() {
