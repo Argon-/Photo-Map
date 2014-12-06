@@ -1,6 +1,5 @@
 package gui.main_window;
 
-import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -20,13 +19,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JScrollPane;
-import javax.swing.JEditorPane;
 
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import javax.swing.JTextArea;
 import java.awt.Font;
 
