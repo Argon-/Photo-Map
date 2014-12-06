@@ -12,7 +12,10 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/swingx-ws-2010_10_10-javadoc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="commons-math3-3.3.jar"/>
-	<classpathentry kind="lib" path="commons-math3-3.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="commons-math3-3.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/commons-math3-3.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
