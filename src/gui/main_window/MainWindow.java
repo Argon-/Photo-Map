@@ -32,7 +32,7 @@ import java.awt.Font;
 
 
 
-public class Test extends JFrame
+public class MainWindow extends JFrame
 {
 	private static final long	serialVersionUID	= -590468540732816556L;
 	
@@ -40,53 +40,14 @@ public class Test extends JFrame
 	private JButton		btnNewButton;
 	private JXMapKit	mapKit;
 	private JScrollPane scrollPane;
-	private static JTextArea textArea;
+	private JTextArea textArea;
 
-
-	/**
-	 * Launch the application.
-	 * @throws FileNotFoundException 
-	 */
-	public static void main(String[] args) throws FileNotFoundException
-	{
-        final PrintStream original = System.out;
-
-        System.setOut(new PrintStream(original) {
-            public void println(String s) {
-                process(s + "\n");
-            }
-
-            public void print(String s) {
-                process(s);
-            }
-
-            private void process(String s) {
-                // Fill some JEditorPane
-                original.print(s);
-                textArea.append(s);
-            }
-        });
-		
-		
-		EventQueue.invokeLater(new Runnable() {
-			public void run()
-			{
-				try {
-					Test frame = new Test();
-					frame.setVisible(true);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 
 	/**
 	 * Create the frame.
 	 */
-	public Test()
+	public MainWindow()
 	{
 		initComponents();
 		myInitComponents();
@@ -96,7 +57,7 @@ public class Test extends JFrame
 	private void initComponents()
 	{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 791, 620);
+		setBounds(100, 100, 1000, 900);
 		this.contentPane = new JPanel();
 		this.contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(this.contentPane);
@@ -190,6 +151,12 @@ public class Test extends JFrame
 		else {
 			System.out.println("wat");
 		}
+	}
+	
+	
+	public void log(String s)
+	{
+		this.textArea.append(s);
 	}
 
 }
