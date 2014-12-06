@@ -12,4 +12,6 @@ public interface Graph {
 	public int getIthEdgeDistFor(int n, int i);
 	public int getIthNeighbor(int n, int i);
 	public int getDist(int from, int to);
+	public double[] getLatArray();
+	public double[] getLonArray();
 }
