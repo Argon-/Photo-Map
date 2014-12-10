@@ -65,8 +65,8 @@ public final class Distance
 		double[] lats = g.getLatArray();
 		double[] lons = g.getLonArray();
 		
-		double r2_c_max = Double.MIN_VALUE;
-		double r2_d_max = Double.MIN_VALUE;
+		double r2_c_max = -Double.MAX_VALUE;
+		double r2_d_max = -Double.MAX_VALUE;
 
 
 		long t1 = 0, acc1 = 0, t2 = 0, acc2 = 0;
@@ -119,8 +119,8 @@ public final class Distance
 		double[] lats = g.getLatArray();
 		double[] lons = g.getLonArray();
 
-		double r2_c_max = Double.MIN_VALUE;
-		double r2_d_max = Double.MIN_VALUE;
+		double r2_c_max = -Double.MAX_VALUE;
+		double r2_d_max = -Double.MAX_VALUE;
 		
 		System.out.println("Haversine \t Approx");
 		

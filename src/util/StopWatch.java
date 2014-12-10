@@ -27,7 +27,7 @@ public final class StopWatch {
 	
 	static public double getLastLapSec()
 	{
-		return lastDiff / 1000.0;
+		return lastDiff / 1000000000.0;
 	}
 	
 	static public String lapSecStr()
