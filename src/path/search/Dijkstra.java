@@ -3,6 +3,8 @@ package path.search;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+
 import data_structures.graph.Graph;
 import data_structures.heap.BinaryMinHeap;
 
@@ -59,19 +61,19 @@ public final class Dijkstra implements Runnable
 	}
 	
 	
-	public void pathFromTo(int from, int to)
+	public boolean pathFromTo(int from, int to)
 	{
 		this.setSource(from);
 		this.setTarget(to);
-		this.pathFromTo();
+		return this.pathFromTo();
 	}
 		
 	
-	public void pathFromTo()
+	public boolean pathFromTo()
 	{
 		if (this.state[this.target] == SETTLED) {
 			System.out.println("Dist from " + this.source + " to " + this.target + " = (already settled)");
-			return;
+			return true;
 		}
 				
 		this.heap.insert(this.source, 0);
@@ -107,6 +109,13 @@ public final class Dijkstra implements Runnable
 				}
 			} // while
 		} // while
+		
+		if (this.state[this.target] == SETTLED)
+		{
+			return true;
+		}
+		System.out.println("Found no route from " + this.source + " to " + this.target);
+		return false;
 	}
 	
 	
@@ -128,7 +137,7 @@ public final class Dijkstra implements Runnable
 	
 	public void printRouteStats(int from, int to)
 	{
-		LinkedList<Integer> l = this.getRoute();
+		LinkedList<Integer> l = this.getRoute_NodeIDs();
 		int last = l.pop();
 		int curr;
 		int dist = 0;
@@ -163,7 +172,27 @@ public final class Dijkstra implements Runnable
 	}
 	
 	
-	public LinkedList<Integer> getRoute()
+	public LinkedList<GeoPosition> getRoute()
+	{
+		if (this.target == -1)
+			throw new RuntimeException("Can't return route without target");
+		
+		LinkedList<GeoPosition> l = new LinkedList<GeoPosition>();
+		l.addFirst(this.g.getPosition(this.target));
+		
+		int i = this.pred[this.target];
+		while (i != -1) {
+			l.addFirst(this.g.getPosition(i));
+			if (i == this.source) {
+				break;
+			}
+			i = this.pred[i];
+		}
+		return l;
+	}
+	
+	
+	public LinkedList<Integer> getRoute_NodeIDs()
 	{
 		if (this.target == -1)
 			throw new RuntimeException("Can't return route without target");
