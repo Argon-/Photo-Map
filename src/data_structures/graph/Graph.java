@@ -2,6 +2,8 @@ package data_structures.graph;
 
 import java.io.IOException;
 
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+
 
 
 public interface Graph {
@@ -14,4 +16,7 @@ public interface Graph {
 	public int getDist(int from, int to);
 	public double[] getLatArray();
 	public double[] getLonArray();
+	public double getLat(int n);
+	public double getLon(int n);
+	public GeoPosition getPosition(int n);
 }

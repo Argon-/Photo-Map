@@ -12,4 +12,13 @@ public final class GraphFactory
 		g.load(s);
 		return g;
 	}
+	
+	
+	public static ArrayRepresentation loadArrayRepresentation(String s) throws InvalidGraphFormatException, IOException
+	{
+		ArrayRepresentation g = new ArrayRepresentation();
+		g.load(s);
+		return g;
+	}
+
 }

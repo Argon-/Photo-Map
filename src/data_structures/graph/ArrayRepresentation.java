@@ -1,5 +1,8 @@
 package data_structures.graph;
 
+import gui.main_window.MainWindow;
+
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,6 +13,12 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.Arrays;
+
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+
+import util.Distance;
+import util.OverlayAggregate;
+import util.OverlayElement;
 
 
 
@@ -26,6 +35,21 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private int   offset[] = null;
 	private int     type[] = null;
 	private double types[] = null;
+
+	private int GRID_LAT_CELLS = 10;	// TODO: dynamisch?
+	private int GRID_LON_CELLS = 13;
+	
+	private double LAT_CELL_SIZE;
+	private double LON_CELL_SIZE;
+	
+	private int[] grid        = null;
+	private int[] grid_offset = null;
+	
+	private double minLat =  Double.MAX_VALUE;
+	private double maxLat = -Double.MAX_VALUE;
+	private double minLon =  Double.MAX_VALUE; 
+	private double maxLon = -Double.MAX_VALUE;
+
 	
 	
 	public ArrayRepresentation()
@@ -47,6 +71,17 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		oos.writeObject(this.offset);
 		oos.writeObject(this.type);
 		oos.writeObject(this.types);
+		
+		oos.writeObject(this.grid);
+		oos.writeObject(this.grid_offset);
+		
+		oos.writeDouble(minLat);
+		oos.writeDouble(maxLat);
+		oos.writeDouble(minLon);
+		oos.writeDouble(maxLon);
+		
+		oos.writeInt(GRID_LAT_CELLS);
+		oos.writeInt(GRID_LON_CELLS);
 		
 		oos.close();
 	}
@@ -70,7 +105,22 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			this.type = (int[]) ois.readObject();
 			this.types = (double[]) ois.readObject();
 			
+			this.grid = (int[]) ois.readObject();
+			this.grid_offset = (int[]) ois.readObject();
+			
+			this.minLat = ois.readDouble();
+			this.maxLat = ois.readDouble();
+			this.minLon = ois.readDouble();
+			this.maxLon = ois.readDouble();
+
+			this.GRID_LAT_CELLS = ois.readInt();
+			this.GRID_LON_CELLS = ois.readInt();
+			
 			ois.close();
+			
+			LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
+			LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
+			
 			return;
 		}
 		catch (StreamCorruptedException e1) {
@@ -99,6 +149,11 @@ final public class ArrayRepresentation implements Graph, Serializable {
 				this.lat[i]  = Double.parseDouble(s[1]);
 				this.lon[i]  = Double.parseDouble(s[2]);
 				this.elev[i] = Integer.parseInt(s[3]);
+				
+				this.minLat = Math.min(minLat, this.lat[i]);
+				this.maxLat = Math.max(maxLat, this.lat[i]);
+				this.minLon = Math.min(minLon, this.lon[i]);
+				this.maxLon = Math.max(maxLon, this.lon[i]);
 			}
 			
 			this.source = new int[edge_num];
@@ -133,11 +188,135 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			}
 
 			b.close();
+			this.buildGrid();
 		} 
 		catch (NumberFormatException e) {
 			e.printStackTrace();
 			throw new InvalidGraphFormatException("Invalid graph text file format");
-		} 
+		}
+	}
+	
+	
+	public void buildGrid()
+	{
+		LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
+		LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
+
+		grid = new int[this.lon.length];
+		grid_offset = new int[GRID_LAT_CELLS * GRID_LON_CELLS + 1];
+		int[] count = new int[GRID_LAT_CELLS * GRID_LON_CELLS];
+		Arrays.fill(grid, -1);
+		
+		// first pass
+		for (int i = 0; i < this.lon.length; ++i)
+		{
+			int lat_cell = this.lat[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[i] - this.minLat) / LAT_CELL_SIZE);
+			int lon_cell = this.lon[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[i] - this.minLon) / LON_CELL_SIZE);
+			count[lat_cell * GRID_LON_CELLS + lon_cell] += 1;
+		}
+		
+		
+		for (int i = 0; i < count.length; ++i)
+		{
+			int lat = i / (GRID_LAT_CELLS-1);
+			int lon = i % GRID_LON_CELLS;
+			grid_offset[i+1] = grid_offset[i] + count[i];
+			//System.out.println("Offsets: cell " + lat + "," + lon + " from " + grid_offset[i] + " to " + grid_offset[i+1] + " containing " + count[i] + " nodes");
+			//System.out.println(lat + ", " + lon + " = " + count[i] + " \tnodes" + " \toffset = " + grid_offset[i]);
+		}
+		
+		// second pass
+		for (int i = 0; i < this.lon.length; ++i)
+		{
+			int lat_cell = this.lat[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[i] - this.minLat) / LAT_CELL_SIZE);
+			int lon_cell = this.lon[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[i] - this.minLon) / LON_CELL_SIZE);
+			int pos = grid_offset[lat_cell * GRID_LON_CELLS + lon_cell] + (count[lat_cell * GRID_LON_CELLS + lon_cell]-- - 1);
+			//System.out.println("Node in cell " + lat_cell + "," + lon_cell + " has position " + pos);
+			grid[pos] = i;
+		}
+		
+		for (int i = 0; i < count.length; ++i)
+		{
+			//System.out.println("Remaining count for " + i + " = " + count[i]);
+		}
+		
+		for (int i = 0; i < this.grid.length; ++i)
+		{
+			if (this.grid[i] == -1)
+				System.out.println("Unset positions");
+		}
+
+	}
+		
+	
+	public int getNearestNode(double lat, double lon)
+	{
+		if (lat < this.minLat || lat > this.maxLat || lon < this.minLon || lon > this.maxLon) {
+			return -1;
+		}
+		
+		int lat_cell = lat == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat - this.minLat) / LAT_CELL_SIZE);
+		int lon_cell = lon == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((lon - this.minLon) / LON_CELL_SIZE);
+		int index = lat_cell * GRID_LON_CELLS + lon_cell;
+		
+		int min_id = -1;
+		double min_dist = Double.MAX_VALUE;
+		OverlayAggregate oa = new OverlayAggregate();
+		
+		// suche in "start zelle"
+		//System.out.println("Searching cell " + lat_cell + "," + lon_cell + " with " + (grid_offset[index + 1] - grid_offset[index]) + " nodes");
+		
+		for (int i = 0; i < grid_offset[index + 1] - grid_offset[index]; ++i)
+		{
+			int pos = this.grid[grid_offset[index] + i];
+			double dist = Distance.haversine(lat, lon, this.lat[pos], this.lon[pos]);
+			
+			if (dist < min_dist) {
+				min_dist = dist;
+				min_id = pos;
+			}
+			oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], Color.MAGENTA, 3));
+		}
+		
+		
+		// ring-suche
+		// mindestens 1 level, neben der suche in der start zelle
+		// abbruch-kriterium: nachdem etwas gefunden wurde (im ring, start zelle zählt nicht) noch 1 ring
+		int ring = 1; // 4**ring kästchen, pro ring werden es auf jeder kante 2 kästchen mehr
+		boolean expandAgain = true; 
+		
+		
+		
+		MainWindow.overlayLines.add(oa);
+		return min_id;
+	}
+	
+	
+	public void drawCells()
+	{
+		Color[] c = {Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY};
+		int curr_c = 0;
+		
+		
+		/*for (int i = 0; i < this.lat.length; ++i) {
+			int lat_cell = this.lat[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[i] - this.minLat) / LAT_CELL_SIZE);
+			int lon_cell = this.lon[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[i] - this.minLon) / LON_CELL_SIZE);
+			GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
+			MainWindow.persistentOverlayLines.add(new OverlayLine(g, g, c[(lat_cell + lon_cell) % c.length], 2));
+		}*/
+		
+		for (int base = 0; base < this.grid_offset.length-1; ++base)
+		{
+			for (int i = this.grid_offset[base]; i < this.grid_offset[base+1]; ++i)
+			{
+				int pos = this.grid[i];
+				int lat_cell = this.lat[pos] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[pos] - this.minLat) / LAT_CELL_SIZE);
+				int lon_cell = this.lon[pos] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[pos] - this.minLon) / LON_CELL_SIZE);
+				//System.out.println("Searching node in cell " + lat_cell + "," + lon_cell);
+				GeoPosition g = new GeoPosition(this.lat[pos], this.lon[pos]);
+				MainWindow.persistentOverlayLines.add(new OverlayElement(g, c[base % c.length], 3));
+			}
+		}
 	}
 	
 	
@@ -219,6 +398,12 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	{
 		return this.lat;
 	}
+	
+	
+	public double getLat(int n)
+	{
+		return this.lat[n];
+	}
 
 	
 	/**
@@ -230,8 +415,20 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	{
 		return this.lon;
 	}
-
 	
+	
+	public double getLon(int n)
+	{
+		return this.lon[n];
+	}
+	
+	
+	public GeoPosition getPosition(int n)
+	{
+		return new GeoPosition(this.lat[n], this.lon[n]);
+	}
+	
+
 	public int size()
 	{
 		return this.lat.length;
