@@ -3,6 +3,8 @@ package gui.main_window;
 import java.awt.EventQueue;
 import java.io.PrintStream;
 
+import data_structures.graph.GraphFactory;
+
 public class Main
 {
 
@@ -12,8 +14,8 @@ public class Main
 			public void run()
 			{
 				try {
-					MainWindow frame = new MainWindow();
-					
+					//final MainWindow frame = new MainWindow(GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Dropbox/_Semester 9/Fapra OSM/1/15000.txt"));
+					final MainWindow frame = new MainWindow(GraphFactory.loadArrayRepresentation("./150K.txt"));
 					
 					final PrintStream original = System.out;
 
