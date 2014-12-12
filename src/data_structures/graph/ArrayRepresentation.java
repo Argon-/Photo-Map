@@ -35,9 +35,10 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private int   offset[] = null;
 	private int     type[] = null;
 	private double types[] = null;
-
-	private int GRID_LAT_CELLS = 10;	// TODO: dynamisch?
-	private int GRID_LON_CELLS = 13;
+	
+	private final double GRID_FACTOR = 0.0000076;
+	private int GRID_LAT_CELLS = 10;
+	private int GRID_LON_CELLS = 10;
 	
 	private double LAT_CELL_SIZE;
 	private double LON_CELL_SIZE;
@@ -72,68 +73,25 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		oos.writeObject(this.type);
 		oos.writeObject(this.types);
 		
-		oos.writeObject(this.grid);
-		oos.writeObject(this.grid_offset);
-		
 		oos.writeDouble(minLat);
 		oos.writeDouble(maxLat);
 		oos.writeDouble(minLon);
 		oos.writeDouble(maxLon);
 		
+		/*
+		oos.writeObject(this.grid);
+		oos.writeObject(this.grid_offset);
+		
 		oos.writeInt(GRID_LAT_CELLS);
 		oos.writeInt(GRID_LON_CELLS);
+		*/
 		
 		oos.close();
 	}
 	
-	
-	public void load(String f) throws InvalidGraphFormatException, IOException
+	public void loadFromText(BufferedReader b) throws IOException, InvalidGraphFormatException
 	{
-		System.out.println("Probing file header");
-		
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
-			System.out.println("Found serialized graph, reading...");
-			
-			this.lat = (double[]) ois.readObject();
-			this.lon = (double[]) ois.readObject();
-			this.elev = (int[]) ois.readObject();
-			this.source = (int[]) ois.readObject();
-			this.target = (int[]) ois.readObject();
-			this.dist = (int[]) ois.readObject();
-			this.offset = (int[]) ois.readObject();
-			this.type = (int[]) ois.readObject();
-			this.types = (double[]) ois.readObject();
-			
-			this.grid = (int[]) ois.readObject();
-			this.grid_offset = (int[]) ois.readObject();
-			
-			this.minLat = ois.readDouble();
-			this.maxLat = ois.readDouble();
-			this.minLon = ois.readDouble();
-			this.maxLon = ois.readDouble();
-
-			this.GRID_LAT_CELLS = ois.readInt();
-			this.GRID_LON_CELLS = ois.readInt();
-			
-			ois.close();
-			
-			LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
-			LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
-			
-			return;
-		}
-		catch (StreamCorruptedException e1) {
-			// do nothing
-		}
-		catch (ClassNotFoundException e) {
-			throw new InvalidGraphFormatException("Invalid serialized graph format");
-		}
-		
-		
-		
-		try {
-			final BufferedReader b = new BufferedReader(new InputStreamReader(new FileInputStream(f)), 8192);
 			System.out.println("Found graph text file, parsing...");
 			
 			final int node_num = Integer.parseInt(b.readLine());
@@ -186,9 +144,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 					last = offset[i];
 				}
 			}
-
-			b.close();
-			this.buildGrid();
 		} 
 		catch (NumberFormatException e) {
 			e.printStackTrace();
@@ -197,15 +152,79 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	}
 	
 	
+	public void loadFromBinary(ObjectInputStream ois) throws IOException, InvalidGraphFormatException
+	{
+		try {
+			System.out.println("Found serialized graph, reading...");
+			
+			this.lat = (double[]) ois.readObject();
+			this.lon = (double[]) ois.readObject();
+			this.elev = (int[]) ois.readObject();
+			this.source = (int[]) ois.readObject();
+			this.target = (int[]) ois.readObject();
+			this.dist = (int[]) ois.readObject();
+			this.offset = (int[]) ois.readObject();
+			this.type = (int[]) ois.readObject();
+			this.types = (double[]) ois.readObject();
+			
+			this.minLat = ois.readDouble();
+			this.maxLat = ois.readDouble();
+			this.minLon = ois.readDouble();
+			this.maxLon = ois.readDouble();
+			
+			/*
+			this.grid = (int[]) ois.readObject();
+			this.grid_offset = (int[]) ois.readObject();
+
+			this.GRID_LAT_CELLS = ois.readInt();
+			this.GRID_LON_CELLS = ois.readInt();
+			*/
+			
+			LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
+			LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
+		}
+		catch (ClassNotFoundException e) {
+			throw new InvalidGraphFormatException("Invalid serialized graph format");
+		}
+
+	}
+	
+	
+	public void load(String f) throws InvalidGraphFormatException, IOException
+	{
+		System.out.println("Probing file header");
+		
+		try {
+			final ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+			loadFromBinary(ois);
+			ois.close();
+		}
+		catch (StreamCorruptedException e1) {
+			final BufferedReader b = new BufferedReader(new InputStreamReader(new FileInputStream(f)), 8192);
+			loadFromText(b);
+			b.close();
+		}
+			
+		this.buildGrid();
+	}
+	
+	
 	public void buildGrid()
 	{
+		long t = System.nanoTime();
+		
+		int m = (int) Math.ceil(this.lat.length * GRID_FACTOR);
+		GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * 1.1);
+		GRID_LON_CELLS =  m < 1 ? 1 : m;
+		System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
+		System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
+		
 		LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
 		LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
 
-		grid = new int[this.lon.length];
-		grid_offset = new int[GRID_LAT_CELLS * GRID_LON_CELLS + 1];
+		this.grid = new int[this.lon.length];
+		this.grid_offset = new int[GRID_LAT_CELLS * GRID_LON_CELLS + 1];
 		int[] count = new int[GRID_LAT_CELLS * GRID_LON_CELLS];
-		Arrays.fill(grid, -1);
 		
 		// first pass
 		for (int i = 0; i < this.lon.length; ++i)
@@ -215,11 +234,11 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			count[lat_cell * GRID_LON_CELLS + lon_cell] += 1;
 		}
 		
-		
+		// build offset array
 		for (int i = 0; i < count.length; ++i)
 		{
-			int lat = i / (GRID_LAT_CELLS-1);
-			int lon = i % GRID_LON_CELLS;
+			//int lat = i / (GRID_LAT_CELLS-1);
+			//int lon = i % GRID_LON_CELLS;
 			grid_offset[i+1] = grid_offset[i] + count[i];
 			//System.out.println("Offsets: cell " + lat + "," + lon + " from " + grid_offset[i] + " to " + grid_offset[i+1] + " containing " + count[i] + " nodes");
 			//System.out.println(lat + ", " + lon + " = " + count[i] + " \tnodes" + " \toffset = " + grid_offset[i]);
@@ -235,17 +254,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			grid[pos] = i;
 		}
 		
-		for (int i = 0; i < count.length; ++i)
-		{
-			//System.out.println("Remaining count for " + i + " = " + count[i]);
-		}
-		
-		for (int i = 0; i < this.grid.length; ++i)
-		{
-			if (this.grid[i] == -1)
-				System.out.println("Unset positions");
-		}
-
+		System.out.println(String.format("Building grid took %.6f seconds", (System.nanoTime() - t) / 1000000000.0));
 	}
 		
 	
@@ -261,7 +270,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		
 		int min_id = -1;
 		double min_dist = Double.MAX_VALUE;
-		OverlayAggregate oa = new OverlayAggregate();
+		//OverlayAggregate oa = new OverlayAggregate();
 		
 		// suche in "start zelle"
 		//System.out.println("Searching cell " + lat_cell + "," + lon_cell + " with " + (grid_offset[index + 1] - grid_offset[index]) + " nodes");
@@ -275,19 +284,19 @@ final public class ArrayRepresentation implements Graph, Serializable {
 				min_dist = dist;
 				min_id = pos;
 			}
-			oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], Color.MAGENTA, 3));
+			//oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], Color.MAGENTA, 3));
 		}
 		
 		
 		// ring-suche
 		// mindestens 1 level, neben der suche in der start zelle
 		// abbruch-kriterium: nachdem etwas gefunden wurde (im ring, start zelle zählt nicht) noch 1 ring
-		int ring = 1; // 4**ring kästchen, pro ring werden es auf jeder kante 2 kästchen mehr
-		boolean expandAgain = true; 
+		//int ring = 1; // 4**ring kästchen, pro ring werden es auf jeder kante 2 kästchen mehr
+		//boolean expandAgain = true; 
 		
 		
 		
-		MainWindow.overlayLines.add(oa);
+		//MainWindow.overlayLines.add(oa);
 		return min_id;
 	}
 	
@@ -295,28 +304,31 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	public void drawCells()
 	{
 		Color[] c = {Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY};
+		OverlayAggregate oa = new OverlayAggregate();
+		
+		/*
 		int curr_c = 0;
-		
-		
-		/*for (int i = 0; i < this.lat.length; ++i) {
+		for (int i = 0; i < this.lat.length; ++i) {
 			int lat_cell = this.lat[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[i] - this.minLat) / LAT_CELL_SIZE);
 			int lon_cell = this.lon[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[i] - this.minLon) / LON_CELL_SIZE);
 			GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
 			MainWindow.persistentOverlayLines.add(new OverlayLine(g, g, c[(lat_cell + lon_cell) % c.length], 2));
-		}*/
+		}
+		*/
 		
 		for (int base = 0; base < this.grid_offset.length-1; ++base)
 		{
 			for (int i = this.grid_offset[base]; i < this.grid_offset[base+1]; ++i)
 			{
 				int pos = this.grid[i];
-				int lat_cell = this.lat[pos] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[pos] - this.minLat) / LAT_CELL_SIZE);
-				int lon_cell = this.lon[pos] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[pos] - this.minLon) / LON_CELL_SIZE);
+				//int lat_cell = this.lat[pos] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[pos] - this.minLat) / LAT_CELL_SIZE);
+				//int lon_cell = this.lon[pos] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[pos] - this.minLon) / LON_CELL_SIZE);
 				//System.out.println("Searching node in cell " + lat_cell + "," + lon_cell);
 				GeoPosition g = new GeoPosition(this.lat[pos], this.lon[pos]);
-				MainWindow.persistentOverlayLines.add(new OverlayElement(g, c[base % c.length], 3));
+				oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
 			}
 		}
+		MainWindow.overlayLines.add(oa);
 	}
 	
 	
