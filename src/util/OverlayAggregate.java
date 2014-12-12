@@ -73,14 +73,14 @@ public class OverlayAggregate
 	}
 	
 	/**
-	 * Red source, medium<br>
+	 * Yellow source, medium<br>
 	 * Green line, thin<br>
-	 * Blue target, medium<br>
+	 * Red target, medium<br>
 	 */
 	public static OverlayAggregate route_var3(GeoPosition source, GeoPosition target) {
 		OverlayAggregate oa = new OverlayAggregate();
-		oa.addPoint(OverlayElement.pointRedMedium(source));
-		oa.addPoint(OverlayElement.pointBlueMedium(target));
+		oa.addPoint(OverlayElement.pointYellowMedium(source));
+		oa.addPoint(OverlayElement.pointRedMedium(target));
 		oa.addLine(OverlayElement.lineGreenThin(source, target));
 		return oa;
 	}
@@ -130,14 +130,14 @@ public class OverlayAggregate
 	}
 	
 	/**
-	 * Blue source, medium<br>
+	 * Red source, medium<br>
 	 * Black line, medium<br>
 	 * Blue target, medium<br>
 	 */
 	public static OverlayAggregate route_multi_var2(LinkedList<GeoPosition> l) {
 		OverlayAggregate oa = new OverlayAggregate();
 		GeoPosition last = l.removeFirst();
-		oa.addPoint(OverlayElement.pointBlueMedium(last));
+		oa.addPoint(OverlayElement.pointRedMedium(last));
 		for (GeoPosition p : l) {
 			oa.addLine(OverlayElement.lineBlackMedium(last, p));
 			last = p;
