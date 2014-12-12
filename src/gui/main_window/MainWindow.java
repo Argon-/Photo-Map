@@ -8,7 +8,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -40,7 +39,7 @@ import java.awt.geom.Point2D;
 import javax.swing.JTextArea;
 
 import java.awt.Font;
-import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 
 
@@ -50,18 +49,22 @@ public class MainWindow extends JFrame
 	
 	private ArrayRepresentation g = null;
 	private Dijkstra d = null;
-	static public LinkedList<OverlayAggregate> overlayLines = new LinkedList<OverlayAggregate>();
-	static public LinkedList<OverlayElement> persistentOverlayLines = new LinkedList<OverlayElement>();
+	static public LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+	static public LinkedBlockingDeque<OverlayElement> persistentOverlayLines = new LinkedBlockingDeque<OverlayElement>();
 
 	private GeoPosition currSource = null;
 	private GeoPosition currTarget = null;
 	
+	final int maxLines = 1000;
+	int currLines = 0;
 	
 	private JPanel		contentPane;
-	private JButton		btnNewButton;
 	private JXMapKit	mapKit;
 	private JScrollPane scrollPane;
-	private JTextArea textArea;
+	private JTextArea   textArea;
+	private JButton		btnNewButton;
+	private JButton 	btnClearLast;
+	private JButton 	btnClearAll;
 
 
 
@@ -74,7 +77,7 @@ public class MainWindow extends JFrame
 		myInitComponents();
 		this.g = g;
 		this.d = new Dijkstra(this.g);
-		g.drawCells();
+		//g.drawCells();
 	}
 
 
@@ -87,11 +90,11 @@ public class MainWindow extends JFrame
 		setContentPane(this.contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0 };
+		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		this.contentPane.setLayout(gbl_contentPane);
 
 		this.mapKit = new JXMapKit();
@@ -110,12 +113,26 @@ public class MainWindow extends JFrame
 		gbc_mapKit.gridy = 0;
 		this.contentPane.add(this.mapKit, gbc_mapKit);
 		
+		this.btnClearLast = new JButton("Clear last");
+		this.btnClearLast.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnClearLast(e);
+			}
+		});
+		this.btnClearLast.setActionCommand("Clear last");
+		GridBagConstraints gbc_btnClearLast = new GridBagConstraints();
+		gbc_btnClearLast.anchor = GridBagConstraints.WEST;
+		gbc_btnClearLast.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearLast.gridx = 0;
+		gbc_btnClearLast.gridy = 13;
+		this.contentPane.add(this.btnClearLast, gbc_btnClearLast);
+		
 		this.scrollPane = new JScrollPane();
 		this.scrollPane.setMinimumSize(new Dimension(200, 100));
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.gridheight = 4;
-		gbc_scrollPane.gridwidth = 19;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
+		gbc_scrollPane.gridheight = 5;
+		gbc_scrollPane.gridwidth = 19;
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 1;
 		gbc_scrollPane.gridy = 13;
@@ -124,6 +141,19 @@ public class MainWindow extends JFrame
 		this.textArea = new JTextArea();
 		textArea.setFont(new Font("Hasklig", Font.PLAIN, 11));
 		this.scrollPane.setViewportView(this.textArea);
+		
+		this.btnClearAll = new JButton("Clear all");
+		this.btnClearAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnClearAll(e);
+			}
+		});
+		GridBagConstraints gbc_btnClearAll = new GridBagConstraints();
+		gbc_btnClearAll.anchor = GridBagConstraints.WEST;
+		gbc_btnClearAll.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearAll.gridx = 0;
+		gbc_btnClearAll.gridy = 14;
+		this.contentPane.add(this.btnClearAll, gbc_btnClearAll);
 		
 		this.btnNewButton = new JButton("Load Graph");
 		this.btnNewButton.addActionListener(new ActionListener() {
@@ -135,7 +165,7 @@ public class MainWindow extends JFrame
 		gbc_btnNewButton.anchor = GridBagConstraints.WEST;
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
 		gbc_btnNewButton.gridx = 0;
-		gbc_btnNewButton.gridy = 14;
+		gbc_btnNewButton.gridy = 17;
 		this.contentPane.add(this.btnNewButton, gbc_btnNewButton);
 	}
 
@@ -214,8 +244,27 @@ public class MainWindow extends JFrame
 	}
 	
 	
+	public void btnClearAll(ActionEvent e)
+	{
+		this.overlayLines.clear();
+		this.mapKit.repaint();
+		this.currSource = null;
+		this.currTarget = null;
+	}
+	
+	
+	public void btnClearLast(ActionEvent e)
+	{
+		this.overlayLines.pollLast();
+		this.mapKit.repaint();
+		this.currSource = null;
+		this.currTarget = null;
+	}
+	
+	
 	public void mapMouseClicked(MouseEvent e)
 	{
+		System.out.println();
 		if (SwingUtilities.isMiddleMouseButton(e))
 		{
 			this.overlayLines.clear();
@@ -224,12 +273,18 @@ public class MainWindow extends JFrame
 			this.currTarget = null;
 			return;
 		}
+		else if (SwingUtilities.isRightMouseButton(e) && this.currSource == null)
+		{
+			System.out.println("Plese set a source first");
+			return;
+		}
 		
 		GeoPosition clickPos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
 		System.out.println("Clicked at:      " + clickPos.getLatitude() + ", " + clickPos.getLongitude());
 		
 		StopWatch.lap();
 		int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
+		System.out.println("n = " + n);
 		StopWatch.lap();
 		if (n == -1)
 		{
@@ -251,12 +306,15 @@ public class MainWindow extends JFrame
 			this.currTarget = this.g.getPosition(n);
 			d.setTarget(n);
 			if (this.currSource != null && this.currTarget != null) {
-				System.out.println("Calculating route...");
-				if (d.pathFromTo())
+				StopWatch.lap();
+				boolean r = d.pathFromTo();
+				StopWatch.lap();
+				if (r) {
 					this.overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
+				}
+				System.out.println("Calculated route in " + String.format("%.9f", StopWatch.getLastLapSec()) + " sec");
 			}
 		}
-		
 		
 		this.mapKit.repaint();
 	}
@@ -264,6 +322,10 @@ public class MainWindow extends JFrame
 	
 	public void log(String s)
 	{
+		if (currLines++ > maxLines) {
+			currLines = 1;
+			this.textArea.setText("");
+		}
 		this.textArea.append(s);
 	}
 

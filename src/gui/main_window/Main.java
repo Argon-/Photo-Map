@@ -15,7 +15,7 @@ public class Main
 			{
 				try {
 					//final MainWindow frame = new MainWindow(GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Dropbox/_Semester 9/Fapra OSM/1/15000.txt"));
-					final MainWindow frame = new MainWindow(GraphFactory.loadArrayRepresentation("./150K.txt"));
+					final MainWindow frame = new MainWindow(GraphFactory.loadArrayRepresentation("./15000K.bin"));
 					
 					final PrintStream original = System.out;
 
