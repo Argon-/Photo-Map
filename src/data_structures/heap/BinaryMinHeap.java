@@ -58,6 +58,12 @@ public final class BinaryMinHeap
 	{
 		return this.size >= this.heap_nid.length;
 	}
+	
+	
+	public int size()
+	{
+		return this.size;
+	}
 
 
 	public void insert(int node_id, int value)
