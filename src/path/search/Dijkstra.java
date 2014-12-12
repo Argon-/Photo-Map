@@ -21,9 +21,8 @@ public final class Dijkstra implements Runnable
 	private int[] state = null;
 	private int[] pred  = null;
 	
-	private int source = 0;
-	private int last_source = -1;
-	private int target = -1;		// magic number: explore whole graph
+	private int source = -1;
+	private int target = -1;
 	
 	
 	public Dijkstra(Graph graph)
@@ -45,12 +44,11 @@ public final class Dijkstra implements Runnable
 	
 	public void buildNewHeap(int source, boolean cleanup)
 	{
-		this.last_source = source;
 		Arrays.fill(this.state, UNSETTLED);
-		//Arrays.fill(this.pred, -1);
 		
 		if (!cleanup) {
 			this.heap = new BinaryMinHeap(this.g.size() / 10);
+			this.heap.insert(source, 0);
 		}
 		else {
 			// was wird schneller durch touched?
@@ -75,8 +73,7 @@ public final class Dijkstra implements Runnable
 			System.out.println("Dist from " + this.source + " to " + this.target + " = (already settled)");
 			return true;
 		}
-				
-		this.heap.insert(this.source, 0);
+		
 		loop : while (!this.heap.isEmpty()) 
 		{
 			int u_id = this.heap.getMinID();
@@ -87,13 +84,19 @@ public final class Dijkstra implements Runnable
 			int i = 0;
 			int neighbor = -1;
 			
+			if (this.target == u_id) {
+				System.out.println("Dist from " + this.source + " to " + this.target + " = " + u_dist + " (1)");
+				break loop;
+			}
+			
 			while ((neighbor = this.g.getIthNeighbor(u_id, i++)) != -1)
 			{
+
 				if (this.state[neighbor] == SETTLED) {
 					continue;
 				}
 				
-				int new_dist = u_dist + g.getIthEdgeDistFor(u_id, i-1);
+				final int new_dist = u_dist + g.getIthEdgeDistFor(u_id, i-1);
 				
 				if (this.state[neighbor] > new_dist) {
 					this.heap.insert(neighbor, new_dist);
@@ -101,7 +104,7 @@ public final class Dijkstra implements Runnable
 					this.pred[neighbor] = u_id;
 				}
 				
-				if (this.target != -1 && this.target == neighbor) {
+				if (this.target == neighbor) {
 					System.out.println("Dist from " + this.source + " to " + this.target + " = " + this.state[neighbor]);
 					this.state[neighbor] = SETTLED;
 					this.pred[neighbor] = u_id;
@@ -121,11 +124,10 @@ public final class Dijkstra implements Runnable
 	
 	public void setSource(int from)
 	{
-		if (this.last_source != from) {
+		if (this.source != from) {
+			this.source = from;
 			this.buildNewHeap(from, false);
 		}
-		this.last_source = this.source;
-		this.source = from;
 	}
 	
 	
