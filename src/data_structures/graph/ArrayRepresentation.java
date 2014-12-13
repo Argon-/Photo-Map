@@ -437,17 +437,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	/**
 	 * This returns no clone but the internally used array reference.
 	 * 
-	 * @return dist array
-	 */
-	public int[] getDistArray()
-	{
-		return this.dist;
-	}
-	
-	
-	/**
-	 * This returns no clone but the internally used array reference.
-	 * 
 	 * @return latitude array
 	 */
 	public double[] getLatArray()

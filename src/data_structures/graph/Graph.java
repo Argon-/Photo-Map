@@ -19,4 +19,6 @@ public interface Graph {
 	public double getLat(int n);
 	public double getLon(int n);
 	public GeoPosition getPosition(int n);
+	public int getNearestNode(double lat, double lon);
+	public int getOffset(int n);
 }
