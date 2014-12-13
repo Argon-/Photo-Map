@@ -7,6 +7,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 import javax.swing.JButton;
 
 import java.awt.BasicStroke;
@@ -55,14 +56,15 @@ public class MainWindow extends JFrame
 	
 	private ArrayRepresentation g = null;
 	private Dijkstra d = null;
-	static public LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-	static public LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+	
+	static public final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+	static public final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
 
 	private GeoPosition currSource = null;
 	private GeoPosition currTarget = null;
 	
-	final int maxLines = 1000;
-	int currLines = 0;
+	private final int maxLines = 1000;
+	private int currLines = 0;
 	
 	private JPanel		contentPane;
 	private JXMapKit	mapKit;
@@ -203,6 +205,8 @@ public class MainWindow extends JFrame
             }
         });
 		
+		this.textArea.setEditable(false);
+		((DefaultCaret) this.textArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
 		this.mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
 		// set the initial view on the map
