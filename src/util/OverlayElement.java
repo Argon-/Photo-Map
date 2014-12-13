@@ -6,12 +6,12 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 
 
-public class OverlayElement
+public final class OverlayElement
 {
-	private GeoPosition	source;
-	private GeoPosition	target;
-	private Color		color		= Color.BLACK;
-	private int			strokeWidth	= 6;
+	private final GeoPosition	source;
+	private final GeoPosition	target;
+	private Color				color		= Color.BLACK;
+	private int					strokeWidth	= 6;
 	
 
 

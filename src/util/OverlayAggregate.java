@@ -6,10 +6,10 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 
 
-public class OverlayAggregate
+public final class OverlayAggregate
 {
-	LinkedList<OverlayElement> points = null;
-	LinkedList<OverlayElement> lines = null;
+	private final LinkedList<OverlayElement> points;
+	private final LinkedList<OverlayElement> lines;
 
 	
 	public OverlayAggregate()
