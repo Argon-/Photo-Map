@@ -50,7 +50,7 @@ public class MainWindow extends JFrame
 	private ArrayRepresentation g = null;
 	private Dijkstra d = null;
 	static public LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-	static public LinkedBlockingDeque<OverlayElement> persistentOverlayLines = new LinkedBlockingDeque<OverlayElement>();
+	static public LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
 
 	private GeoPosition currSource = null;
 	private GeoPosition currTarget = null;
@@ -197,14 +197,26 @@ public class MainWindow extends JFrame
 				g.translate(-rect.x, -rect.y);
 				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				
-				for (OverlayElement l : persistentOverlayLines)
+				for (OverlayAggregate oa : persistentOverlayLines)
 				{
-					Point2D s = mapKit.getMainMap().getTileFactory().geoToPixel(l.getSource(), mapKit.getMainMap().getZoom());
-					Point2D t = mapKit.getMainMap().getTileFactory().geoToPixel(l.getTarget(), mapKit.getMainMap().getZoom());
-					
-					g.setColor(l.getColor());
-					g.setStroke(new BasicStroke(l.getWidth()));
-					g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
+					for (OverlayElement oe : oa.getLines())
+					{
+						Point2D s = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getSource(), mapKit.getMainMap().getZoom());
+						Point2D t = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getTarget(), mapKit.getMainMap().getZoom());
+							
+						g.setColor(oe.getColor());
+						g.setStroke(new BasicStroke(oe.getWidth()));
+						g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
+					}
+					for (OverlayElement oe : oa.getPoints())
+					{
+						Point2D s = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getSource(), mapKit.getMainMap().getZoom());
+						Point2D t = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getTarget(), mapKit.getMainMap().getZoom());
+							
+						g.setColor(oe.getColor());
+						g.setStroke(new BasicStroke(oe.getWidth()));
+						g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
+					}
 				}
 				
 				for (OverlayAggregate oa : overlayLines)
@@ -284,7 +296,6 @@ public class MainWindow extends JFrame
 		
 		StopWatch.lap();
 		int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
-		System.out.println("n = " + n);
 		StopWatch.lap();
 		if (n == -1)
 		{
