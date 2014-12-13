@@ -36,7 +36,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private int     type[] = null;
 	private double types[] = null;
 	
-	private final double GRID_FACTOR = 0.0000076;
+	private final double GRID_FACTOR = 0.000005;
 	private int GRID_LAT_CELLS;
 	private int GRID_LON_CELLS;
 	
@@ -82,7 +82,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	}
 	
 	
-	public void loadFromText(BufferedReader b) throws IOException, InvalidGraphFormatException
+	private void loadFromText(BufferedReader b) throws IOException, InvalidGraphFormatException
 	{
 		try {
 			System.out.println("Found graph text file, parsing...");
@@ -145,7 +145,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	}
 	
 	
-	public void loadFromBinary(ObjectInputStream ois) throws IOException, InvalidGraphFormatException
+	private void loadFromBinary(ObjectInputStream ois) throws IOException, InvalidGraphFormatException
 	{
 		try {
 			System.out.println("Found serialized graph, reading...");
@@ -187,8 +187,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			b.close();
 		}
 		
-		int m = (int) Math.ceil(this.lat.length * GRID_FACTOR);
-		GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * 1.1);
+		final int m = (int) Math.ceil(this.lat.length * GRID_FACTOR);
+		GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * (this.maxLon - this.minLon) / (this.maxLat - this.minLat));
 		GRID_LON_CELLS =  m < 1 ? 1 : m;
 		
 		LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
@@ -201,7 +201,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	}
 	
 	
-	public void buildGrid()
+	private void buildGrid()
 	{
 		long t = System.nanoTime();
 				
@@ -236,7 +236,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	}
 	
 	
-	public int searchMinInCell(double lat, double lon, int lat_cell, int lon_cell, int last_min_id)
+	//int yyyy = 0;
+	private int searchMinInCell(double lat, double lon, int lat_cell, int lon_cell, int last_min_id)
 	{
 		if (lat_cell < 0 || lon_cell < 0 || lat_cell >= GRID_LAT_CELLS || lon_cell >= GRID_LON_CELLS) {
 			//System.out.println("Searching cell (" + lat_cell + "," + lon_cell + ")  (skipping)");
@@ -258,7 +259,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 				min_dist = dist;
 				min_id = pos;
 			}
-			//oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], Color.MAGENTA, 3));
+			//oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], yyyy % 2 == 0 ? Color.MAGENTA : new Color(255, 0, 144), 3));
 		}
 
 		//MainWindow.overlayLines.add(oa);
@@ -275,13 +276,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		final int lat_center = lat == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat - this.minLat) / LAT_CELL_SIZE);
 		final int lon_center = lon == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((lon - this.minLon) / LON_CELL_SIZE);
 		
-		
-		// search in start cell, ring = 0
-		int min_id = searchMinInCell(lat, lon, lat_center, lon_center, -1);
-		
 		/*
 		 * search in expanding rings, originating from (lat_center, lon_center)
-		 * the ring expands by one per iteration, starting with 1 (0 is a special case handeled above)
+		 * the ring expands by one per iteration, starting with 0 ( = the cell containing the clicked position)
 		 * after a node was found (mid_id != -1) we expand the ring one more time
 		 * —————————————————————————————
 		 * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
@@ -294,7 +291,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		 * —————————————————————————————
 		 */
 		
-		int ring = 1;
+		int min_id = -1;
+		int ring = 0;
 		boolean expandAgain = true;
 		
 		do
@@ -307,8 +305,10 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			int lat_curr = lat_center + ring;
 			int lon_curr = lon_center;
 			
+			min_id = searchMinInCell(lat, lon, lat_curr, lon_curr, min_id);
+			
 			// iterate right
-			for (int i = 0; i < ring; ++i) {
+			for (int i = 1; i < ring; ++i) {
 				min_id = searchMinInCell(lat, lon, lat_curr, lon_curr + i, min_id);
 			}
 			lon_curr = lon_curr + ring;
@@ -337,9 +337,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			}
 			lon_curr = lon_curr + ring;
 			
-			++ring;
+			++ring; //++yyyy;
 		} while (expandAgain);
-		
+		System.out.println("Searched " + (ring-1) + " rings");
 		
 		return min_id;
 	}
