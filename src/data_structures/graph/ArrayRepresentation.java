@@ -37,8 +37,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private double types[] = null;
 	
 	private final double GRID_FACTOR = 0.0000076;
-	private int GRID_LAT_CELLS = 10;
-	private int GRID_LON_CELLS = 10;
+	private int GRID_LAT_CELLS;
+	private int GRID_LON_CELLS;
 	
 	private double LAT_CELL_SIZE;
 	private double LON_CELL_SIZE;
@@ -80,6 +80,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		
 		oos.close();
 	}
+	
 	
 	public void loadFromText(BufferedReader b) throws IOException, InvalidGraphFormatException
 	{
@@ -149,23 +150,20 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		try {
 			System.out.println("Found serialized graph, reading...");
 			
-			this.lat = (double[]) ois.readObject();
-			this.lon = (double[]) ois.readObject();
-			this.elev = (int[]) ois.readObject();
-			this.source = (int[]) ois.readObject();
-			this.target = (int[]) ois.readObject();
-			this.dist = (int[]) ois.readObject();
-			this.offset = (int[]) ois.readObject();
-			this.type = (int[]) ois.readObject();
-			this.types = (double[]) ois.readObject();
+			this.lat    = (double[]) ois.readObject();
+			this.lon    = (double[]) ois.readObject();
+			this.elev   = (int[])    ois.readObject();
+			this.source = (int[])    ois.readObject();
+			this.target = (int[])    ois.readObject();
+			this.dist   = (int[])    ois.readObject();
+			this.offset = (int[])    ois.readObject();
+			this.type   = (int[])    ois.readObject();
+			this.types  = (double[]) ois.readObject();
 			
 			this.minLat = ois.readDouble();
 			this.maxLat = ois.readDouble();
 			this.minLon = ois.readDouble();
 			this.maxLon = ois.readDouble();
-						
-			LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
-			LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
 		}
 		catch (ClassNotFoundException e) {
 			throw new InvalidGraphFormatException("Invalid serialized graph format");
@@ -188,6 +186,16 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			loadFromText(b);
 			b.close();
 		}
+		
+		int m = (int) Math.ceil(this.lat.length * GRID_FACTOR);
+		GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * 1.1);
+		GRID_LON_CELLS =  m < 1 ? 1 : m;
+		
+		LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
+		LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
+		
+		System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
+		System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
 			
 		this.buildGrid();
 	}
@@ -196,16 +204,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	public void buildGrid()
 	{
 		long t = System.nanoTime();
-		
-		int m = (int) Math.ceil(this.lat.length * GRID_FACTOR);
-		GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * 1.1);
-		GRID_LON_CELLS =  m < 1 ? 1 : m;
-		System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
-		System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
-		
-		LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
-		LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
-
+				
 		this.grid = new int[this.lon.length];
 		this.grid_offset = new int[GRID_LAT_CELLS * GRID_LON_CELLS + 1];
 		int[] count = new int[GRID_LAT_CELLS * GRID_LON_CELLS];
@@ -279,7 +278,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		
 		// search in start cell, ring = 0
 		int min_id = searchMinInCell(lat, lon, lat_center, lon_center, -1);
-		
 		
 		/*
 		 * search in expanding rings, originating from (lat_center, lon_center)
