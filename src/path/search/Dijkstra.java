@@ -15,11 +15,11 @@ public final class Dijkstra implements Runnable
 	private final int UNSETTLED = Integer.MAX_VALUE;
 	private final int   SETTLED = Integer.MAX_VALUE - 1;
 	
-	private Graph g = null;
+	private final Graph g;
+	private final int[] state;
+	private final int[] pred;
 	
 	private BinaryMinHeap heap = null;
-	private int[] state = null;
-	private int[] pred  = null;
 	
 	private int source = -1;
 	private int target = -1;

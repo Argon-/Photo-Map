@@ -24,13 +24,14 @@ public class Main {
 		Dijkstra_Old d_old = new Dijkstra_Old(g);
 		Dijkstra_PrioQ d_pq = new Dijkstra_PrioQ(g);
 		Dijkstra d_2h = new Dijkstra(g);
-		exec(g, d_old, d_pq, d_2h, 0, 333333);
+		//exec(g, d_old, d_pq, d_2h, 0, 333333);
 		exec(g, d_old, d_pq, d_2h, 0, 666666);
-		exec(g, d_old, d_pq, d_2h, 0, 999999);
-		exec(g, d_old, d_pq, d_2h, 15, 31);
-		exec(g, d_old, d_pq, d_2h, 15, 32);
-		exec(g, d_old, d_pq, d_2h, 1339670, 9686873);
-		exec(g, d_old, d_pq, d_2h, 1339670, 10180216);
+		//exec(g, d_old, d_pq, d_2h, 0, 999999);
+		//exec(g, d_old, d_pq, d_2h, 15, 31);
+		//exec(g, d_old, d_pq, d_2h, 15, 32);
+		//exec(g, d_old, d_pq, d_2h, 1339670, 9686873);
+		//exec(g, d_old, d_pq, d_2h, 1339670, 10180216);
+		//exec(g, d_old, d_pq, d_2h, 0, 2109);
 	}
 
 	
