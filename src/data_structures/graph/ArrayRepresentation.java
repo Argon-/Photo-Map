@@ -78,14 +78,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		oos.writeDouble(minLon);
 		oos.writeDouble(maxLon);
 		
-		/*
-		oos.writeObject(this.grid);
-		oos.writeObject(this.grid_offset);
-		
-		oos.writeInt(GRID_LAT_CELLS);
-		oos.writeInt(GRID_LON_CELLS);
-		*/
-		
 		oos.close();
 	}
 	
@@ -171,15 +163,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			this.maxLat = ois.readDouble();
 			this.minLon = ois.readDouble();
 			this.maxLon = ois.readDouble();
-			
-			/*
-			this.grid = (int[]) ois.readObject();
-			this.grid_offset = (int[]) ois.readObject();
-
-			this.GRID_LAT_CELLS = ois.readInt();
-			this.GRID_LON_CELLS = ois.readInt();
-			*/
-			
+						
 			LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
 			LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
 		}
@@ -237,11 +221,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		// build offset array
 		for (int i = 0; i < count.length; ++i)
 		{
-			//int lat = i / (GRID_LAT_CELLS-1);
-			//int lon = i % GRID_LON_CELLS;
 			grid_offset[i+1] = grid_offset[i] + count[i];
-			//System.out.println("Offsets: cell " + lat + "," + lon + " from " + grid_offset[i] + " to " + grid_offset[i+1] + " containing " + count[i] + " nodes");
-			//System.out.println(lat + ", " + lon + " = " + count[i] + " \tnodes" + " \toffset = " + grid_offset[i]);
 		}
 		
 		// second pass
@@ -250,35 +230,30 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			int lat_cell = this.lat[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[i] - this.minLat) / LAT_CELL_SIZE);
 			int lon_cell = this.lon[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[i] - this.minLon) / LON_CELL_SIZE);
 			int pos = grid_offset[lat_cell * GRID_LON_CELLS + lon_cell] + (count[lat_cell * GRID_LON_CELLS + lon_cell]-- - 1);
-			//System.out.println("Node in cell " + lat_cell + "," + lon_cell + " has position " + pos);
 			grid[pos] = i;
 		}
 		
 		System.out.println(String.format("Building grid took %.6f seconds", (System.nanoTime() - t) / 1000000000.0));
 	}
-		
 	
-	public int getNearestNode(double lat, double lon)
+	
+	public int searchMinInCell(double lat, double lon, int lat_cell, int lon_cell, int last_min_id)
 	{
-		if (lat < this.minLat || lat > this.maxLat || lon < this.minLon || lon > this.maxLon) {
-			return -1;
+		if (lat_cell < 0 || lon_cell < 0 || lat_cell >= GRID_LAT_CELLS || lon_cell >= GRID_LON_CELLS) {
+			//System.out.println("Searching cell (" + lat_cell + "," + lon_cell + ")  (skipping)");
+			return last_min_id;
 		}
-		
-		int lat_cell = lat == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat - this.minLat) / LAT_CELL_SIZE);
-		int lon_cell = lon == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((lon - this.minLon) / LON_CELL_SIZE);
-		int index = lat_cell * GRID_LON_CELLS + lon_cell;
-		
-		int min_id = -1;
-		double min_dist = Double.MAX_VALUE;
+		//System.out.println("Searching cell (" + lat_cell + "," + lon_cell + ")");
 		//OverlayAggregate oa = new OverlayAggregate();
+
+		int min_id = last_min_id < 0 ? -1 : last_min_id;
+		double min_dist = last_min_id > -1 ? Distance.haversine(lat, lon, this.lat[last_min_id], this.lon[last_min_id]) : Double.MAX_VALUE;
 		
-		// suche in "start zelle"
-		//System.out.println("Searching cell " + lat_cell + "," + lon_cell + " with " + (grid_offset[index + 1] - grid_offset[index]) + " nodes");
-		
+		int index = lat_cell * GRID_LON_CELLS + lon_cell;
 		for (int i = 0; i < grid_offset[index + 1] - grid_offset[index]; ++i)
 		{
-			int pos = this.grid[grid_offset[index] + i];
-			double dist = Distance.haversine(lat, lon, this.lat[pos], this.lon[pos]);
+			final int pos = this.grid[grid_offset[index] + i];
+			final double dist = Distance.haversine(lat, lon, this.lat[pos], this.lon[pos]);
 			
 			if (dist < min_dist) {
 				min_dist = dist;
@@ -286,17 +261,88 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			}
 			//oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], Color.MAGENTA, 3));
 		}
-		
-		
-		// ring-suche
-		// mindestens 1 level, neben der suche in der start zelle
-		// abbruch-kriterium: nachdem etwas gefunden wurde (im ring, start zelle zählt nicht) noch 1 ring
-		//int ring = 1; // 4**ring kästchen, pro ring werden es auf jeder kante 2 kästchen mehr
-		//boolean expandAgain = true; 
-		
-		
-		
+
 		//MainWindow.overlayLines.add(oa);
+		return min_id;
+	}
+	
+	
+	public int getNearestNode(double lat, double lon)
+	{
+		if (lat < this.minLat || lat > this.maxLat || lon < this.minLon || lon > this.maxLon) {
+			return -1;
+		}
+		
+		final int lat_center = lat == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat - this.minLat) / LAT_CELL_SIZE);
+		final int lon_center = lon == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((lon - this.minLon) / LON_CELL_SIZE);
+		
+		
+		// search in start cell, ring = 0
+		int min_id = searchMinInCell(lat, lon, lat_center, lon_center, -1);
+		
+		
+		/*
+		 * search in expanding rings, originating from (lat_center, lon_center)
+		 * the ring expands by one per iteration, starting with 1 (0 is a special case handeled above)
+		 * after a node was found (mid_id != -1) we expand the ring one more time
+		 * —————————————————————————————
+		 * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+		 * | 3 | 2 | 2 | 2 | 2 | 2 | 3 |
+		 * | 3 | 2 | 1 | 1 | 1 | 2 | 3 |
+		 * | 3 | 2 | 1 | 0 | 1 | 2 | 3 | 
+		 * | 3 | 2 | 1 | 1 | 1 | 2 | 3 |
+		 * | 3 | 2 | 2 | 2 | 2 | 2 | 3 |
+		 * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+		 * —————————————————————————————
+		 */
+		
+		int ring = 1;
+		boolean expandAgain = true;
+		
+		do
+		{
+			if (min_id > -1 || (ring > GRID_LAT_CELLS && ring > GRID_LON_CELLS)) {
+				expandAgain = false;
+			}
+			
+			// seek upwards to this ring's starting position
+			int lat_curr = lat_center + ring;
+			int lon_curr = lon_center;
+			
+			// iterate right
+			for (int i = 0; i < ring; ++i) {
+				min_id = searchMinInCell(lat, lon, lat_curr, lon_curr + i, min_id);
+			}
+			lon_curr = lon_curr + ring;
+			
+			// iterate downwards
+			for (int i = 0; i < ring * 2; ++i) {
+				min_id = searchMinInCell(lat, lon, lat_curr - i, lon_curr, min_id);
+			}
+			lat_curr = lat_curr - (ring * 2);
+			
+			// iterate left
+			for (int i = 0; i < ring * 2; ++i) {
+				min_id = searchMinInCell(lat, lon, lat_curr, lon_curr - i, min_id);
+			}
+			lon_curr = lon_curr - (ring * 2);
+			
+			// iterate upwards
+			for (int i = 0; i < ring * 2; ++i) {
+				min_id = searchMinInCell(lat, lon, lat_curr + i, lon_curr, min_id);
+			}
+			lat_curr = lat_curr + (ring * 2);
+			
+			// iterate right
+			for (int i = 0; i < ring; ++i) {
+				min_id = searchMinInCell(lat, lon, lat_curr, lon_curr + i, min_id);
+			}
+			lon_curr = lon_curr + ring;
+			
+			++ring;
+		} while (expandAgain);
+		
+		
 		return min_id;
 	}
 	
@@ -328,7 +374,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 				oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
 			}
 		}
-		MainWindow.overlayLines.add(oa);
+		MainWindow.persistentOverlayLines.add(oa);
 	}
 	
 	
