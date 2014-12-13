@@ -4,10 +4,13 @@ package gui.main_window;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 
 import java.awt.BasicStroke;
+import java.awt.FileDialog;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -25,6 +28,8 @@ import util.OverlayAggregate;
 import util.OverlayElement;
 import util.StopWatch;
 import data_structures.graph.ArrayRepresentation;
+import data_structures.graph.GraphFactory;
+import data_structures.graph.InvalidGraphFormatException;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -39,6 +44,7 @@ import java.awt.geom.Point2D;
 import javax.swing.JTextArea;
 
 import java.awt.Font;
+import java.io.IOException;
 import java.util.concurrent.LinkedBlockingDeque;
 
 
@@ -71,13 +77,32 @@ public class MainWindow extends JFrame
 	/**
 	 * Create the frame.
 	 */
-	public MainWindow(ArrayRepresentation g)
+	public MainWindow()
 	{
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e1) {
+			System.out.println("Unable to set native look & feel");
+			e1.printStackTrace();
+		}
+		
 		initComponents();
 		myInitComponents();
-		this.g = g;
-		this.d = new Dijkstra(this.g);
-		//g.drawCells();
+		
+		try {
+			//this.g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Dropbox/_Semester 9/Fapra OSM/1/15000.txt");
+			this.g = GraphFactory.loadArrayRepresentation("./15000K.bin");
+			this.d = new Dijkstra(this.g);
+			//g.drawCells();
+		}
+		catch (InvalidGraphFormatException e) {
+			System.out.println("Supplied graph has invalid format");
+		}
+		catch (IOException e) {
+			System.out.println("Error reading graph");
+		}
 	}
 
 
@@ -250,18 +275,41 @@ public class MainWindow extends JFrame
 	}
 	
 	
-	public void btnLoadGraph(ActionEvent e)
-	{
-		
-	}
-	
-	
-	public void btnClearAll(ActionEvent e)
+	public void clearMap()
 	{
 		this.overlayLines.clear();
 		this.mapKit.repaint();
 		this.currSource = null;
 		this.currTarget = null;
+	}
+	
+	
+	public void btnLoadGraph(ActionEvent e)
+	{
+		FileDialog fd = new FileDialog(this, "Choose a graph", FileDialog.LOAD);
+		fd.setDirectory("");
+		fd.setVisible(true);
+		String f = fd.getFile();
+		
+		if (f != null) {
+			try {
+				this.g = GraphFactory.loadArrayRepresentation(f);
+				this.d = new Dijkstra(this.g);
+				this.clearMap();
+			}
+			catch (InvalidGraphFormatException ex) {
+				System.out.println("Supplied graph has invalid format");
+			}
+			catch (IOException ex) {
+				System.out.println("Error reading graph");
+			}
+		}
+	}
+	
+	
+	public void btnClearAll(ActionEvent e)
+	{
+		this.clearMap();
 	}
 	
 	
@@ -276,13 +324,9 @@ public class MainWindow extends JFrame
 	
 	public void mapMouseClicked(MouseEvent e)
 	{
-		System.out.println();
 		if (SwingUtilities.isMiddleMouseButton(e))
 		{
-			this.overlayLines.clear();
-			this.mapKit.repaint();
-			this.currSource = null;
-			this.currTarget = null;
+			this.clearMap();
 			return;
 		}
 		else if (SwingUtilities.isRightMouseButton(e) && this.currSource == null)
@@ -327,6 +371,7 @@ public class MainWindow extends JFrame
 			}
 		}
 		
+		System.out.println();
 		this.mapKit.repaint();
 	}
 	

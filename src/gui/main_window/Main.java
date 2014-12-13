@@ -3,7 +3,6 @@ package gui.main_window;
 import java.awt.EventQueue;
 import java.io.PrintStream;
 
-import data_structures.graph.GraphFactory;
 
 public class Main
 {
@@ -14,28 +13,21 @@ public class Main
 			public void run()
 			{
 				try {
-					//final MainWindow frame = new MainWindow(GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Dropbox/_Semester 9/Fapra OSM/1/15000.txt"));
-					final MainWindow frame = new MainWindow(GraphFactory.loadArrayRepresentation("./15000K.bin"));
-					
+					final MainWindow frame = new MainWindow();
 					final PrintStream original = System.out;
 
 			        System.setOut(new PrintStream(original) {
-			            public void println(String s) {
-			                process(s + "\n");
-			            }
-
-			            public void print(String s) {
-			                process(s);
-			            }
+			        	public void println()         { process(System.getProperty("line.separator")); }
+			            public void println(String s) { process(s + System.getProperty("line.separator")); }
+			            public void print(String s)   { process(s); }
 
 			            private void process(String s) {
-			                // Fill some JEditorPane
 			                original.print(s);
-			                frame.log(s);
+			                if (frame != null)
+			                	frame.log(s);
 			            }
 			        });
 
-					
 					frame.setVisible(true);
 				}
 				catch (Exception e) {
