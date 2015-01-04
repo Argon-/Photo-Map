@@ -4,7 +4,7 @@ import java.awt.EventQueue;
 import java.io.PrintStream;
 
 
-public class Main
+public class GUIMain
 {
 
 	public static void main(String[] args)

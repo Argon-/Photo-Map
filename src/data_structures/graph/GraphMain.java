@@ -3,7 +3,7 @@ package data_structures.graph;
 import java.io.IOException;
 
 
-public class Main
+public class GraphMain
 {
 
 	public static void main(String[] args) throws InvalidGraphFormatException, IOException

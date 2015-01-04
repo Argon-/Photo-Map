@@ -236,7 +236,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	}
 	
 	
-	//int yyyy = 0;
 	private int searchMinInCell(double lat, double lon, int lat_cell, int lon_cell, int last_min_id)
 	{
 		if (lat_cell < 0 || lon_cell < 0 || lat_cell >= GRID_LAT_CELLS || lon_cell >= GRID_LON_CELLS) {

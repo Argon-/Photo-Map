@@ -6,7 +6,7 @@ import util.StopWatch;
 
 
 
-public class Main {
+public class DijkstraMain {
 	
 	public static void main(String[] args) throws Exception {
 		//String f = "./150K.txt";
