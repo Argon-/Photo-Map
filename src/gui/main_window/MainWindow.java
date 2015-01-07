@@ -46,6 +46,7 @@ import javax.swing.JTextArea;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingDeque;
 
 
@@ -104,6 +105,14 @@ public class MainWindow extends JFrame
 		}
 		catch (IOException e) {
 			System.out.println("Error reading graph");
+		}
+		
+		double[] lat = this.g.getBoundingRectLat();
+		double[] lon = this.g.getBoundingRectLon();
+		for (int i = 0; i < lat.length; ++i) {
+			GeoPosition s = new GeoPosition(lat[i], lon[i]);
+			GeoPosition t = new GeoPosition(lat[(i + 1) % lat.length],   lon[(i + 1) % lat.length]);
+			persistentOverlayLines.add(OverlayAggregate.line(OverlayElement.lineBlackMedium(s, t)));
 		}
 	}
 
@@ -213,8 +222,7 @@ public class MainWindow extends JFrame
 		this.mapKit.setAddressLocationShown(false); // don't show center
 		this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
 		this.mapKit.setZoom(1); // set zoom level
-		
-		
+				
 		
 		Painter<JXMapViewer> lineOverlay = new Painter<JXMapViewer>() {
 
