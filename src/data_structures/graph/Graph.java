@@ -21,4 +21,6 @@ public interface Graph {
 	public GeoPosition getPosition(int n);
 	public int getNearestNode(double lat, double lon);
 	public int getOffset(int n);
+	public double[] getBoundingRectLat();
+	public double[] getBoundingRectLon();
 }

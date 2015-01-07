@@ -36,7 +36,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private int     type[] = null;
 	private double types[] = null;
 	
-	private final double GRID_FACTOR = 0.000005;
+	private final double GRID_FACTOR = 0.00002;
 	private int GRID_LAT_CELLS;
 	private int GRID_LON_CELLS;
 	
@@ -50,7 +50,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private double maxLat = -Double.MAX_VALUE;
 	private double minLon =  Double.MAX_VALUE; 
 	private double maxLon = -Double.MAX_VALUE;
-
+	
 	
 	
 	public ArrayRepresentation()
@@ -235,7 +235,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		System.out.println(String.format("Building grid took %.6f seconds", (System.nanoTime() - t) / 1000000000.0));
 	}
 	
-	
 	private int searchMinInCell(double lat, double lon, int lat_cell, int lon_cell, int last_min_id)
 	{
 		if (lat_cell < 0 || lon_cell < 0 || lat_cell >= GRID_LAT_CELLS || lon_cell >= GRID_LON_CELLS) {
@@ -292,12 +291,12 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		
 		int min_id = -1;
 		int ring = 0;
-		boolean expandAgain = true;
+		int additional_rings = 2;
 		
 		do
 		{
 			if (min_id > -1 || (ring > GRID_LAT_CELLS && ring > GRID_LON_CELLS)) {
-				expandAgain = false;
+				--additional_rings;
 			}
 			
 			// seek upwards to this ring's starting position
@@ -337,7 +336,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			lon_curr = lon_curr + ring;
 			
 			++ring; //++yyyy;
-		} while (expandAgain);
+		} while (additional_rings > 0);
 		System.out.println("Searched " + (ring-1) + " rings");
 		
 		return min_id;
@@ -489,4 +488,17 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	{
 		return this.dist[this.offset[n]+i];
 	}
+	
+	
+	public double[] getBoundingRectLat()
+	{
+		return new double[] {this.maxLat, this.maxLat, this.minLat, this.minLat};
+	}
+	
+	
+	public double[] getBoundingRectLon()
+	{
+		return new double[] {this.maxLon, this.minLon, this.minLon, this.maxLon};
+	}
+
 }
