@@ -13,7 +13,7 @@
  *
  * Created on 08.06.2012, 16:12:56
  */
-package gui.main_window;
+package gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
