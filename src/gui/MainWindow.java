@@ -93,7 +93,11 @@ public class MainWindow extends JFrame
 		
 		initComponents();
 		myInitComponents();
-		
+	}
+	
+	
+	public void init() 
+	{
 		try {
 			//this.g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Dropbox/_Semester 9/Fapra OSM/1/15000.txt");
 			this.g = GraphFactory.loadArrayRepresentation("./15000K.bin");
@@ -283,7 +287,6 @@ public class MainWindow extends JFrame
 			}
 		};
 		mapKit.getMainMap().setOverlayPainter(lineOverlay);
-
 	}
 	
 	

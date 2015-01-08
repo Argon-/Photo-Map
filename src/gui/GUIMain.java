@@ -13,7 +13,7 @@ public class GUIMain
 			public void run()
 			{
 				try {
-					final MainWindow frame = new MainWindow();
+					MainWindow frame = new MainWindow();
 					final PrintStream original = System.out;
 
 					System.out.println("Mirroring stdout to GUI");
@@ -22,7 +22,8 @@ public class GUIMain
 			            public void println(String s) { original.print(s + System.getProperty("line.separator")); if (frame != null) frame.log(s + System.getProperty("line.separator")); }
 			            public void print(String s)   { original.print(s); if (frame != null) frame.log(s); }
 			        });
-
+			        
+			        frame.init();
 					frame.setVisible(true);
 				}
 				catch (Exception e) {
