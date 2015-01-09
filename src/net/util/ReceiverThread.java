@@ -3,7 +3,8 @@ package net.util;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.util.LinkedList;
+import java.net.SocketException;
+import java.util.List;
 
 import net.protocol.BaseMessage;
 
@@ -12,9 +13,9 @@ import net.protocol.BaseMessage;
 public class ReceiverThread extends Thread
 {
 	private Socket socket;
-	private LinkedList<BaseMessage> messages = null;
+	private List<BaseMessage> messages = null;
 	
-	public ReceiverThread(Socket socket, LinkedList<BaseMessage> in)
+	public ReceiverThread(Socket socket, List<BaseMessage> in)
 	{
 		this.socket = socket;
 		this.messages = in;
@@ -37,6 +38,11 @@ public class ReceiverThread extends Thread
 					Thread.sleep(10);
 					}
 				}
+				catch (SocketException e) {
+					System.out.println("[ReceiverThread] Broken pipe, shutting down");
+					return;
+				}
+
 				catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}

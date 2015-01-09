@@ -3,7 +3,8 @@ package net.util;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.LinkedList;
+import java.net.SocketException;
+import java.util.List;
 
 import net.protocol.BaseMessage;
 
@@ -12,9 +13,9 @@ import net.protocol.BaseMessage;
 public class SenderThread extends Thread
 {
 	private Socket socket;
-	private LinkedList<BaseMessage> messages = null;
+	private List<BaseMessage> messages = null;
 	
-	public SenderThread(Socket socket, LinkedList<BaseMessage> out)
+	public SenderThread(Socket socket, List<BaseMessage> out)
 	{
 		this.socket = socket;
 		this.messages = out;
@@ -31,10 +32,14 @@ public class SenderThread extends Thread
 			{
 				try {
 					if (!messages.isEmpty()) {
-						oos.writeObject(messages.pop());
+						oos.writeObject(messages.remove(0));
 					}
 
 					Thread.sleep(10);	
+				}
+				catch (SocketException e) {
+					System.out.println("[SenderThread] Broken pipe, shutting down");
+					return;
 				}
 				catch (InterruptedException e) {
 					e.printStackTrace();

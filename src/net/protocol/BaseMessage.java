@@ -21,6 +21,6 @@ public abstract class BaseMessage implements Serializable
 	
 	public String toString()
 	{
-		return "Protocol " + MAJOR + "." + MINOR + " ";
+		return "[PROTOCOL " + MAJOR + "." + MINOR + "] ";
 	}
 }

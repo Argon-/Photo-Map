@@ -1,6 +1,6 @@
 package net.protocol;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
@@ -26,6 +26,6 @@ public class ChatEvent extends BaseMessage
 	
 	public String toString()
 	{
-		return super.toString() + "[" + DateFormat.getDateInstance().format(timestamp) + "] " + msg;
+		return super.toString() + "[" + new SimpleDateFormat("HH:mm:ss").format(timestamp) + "] " + msg;
 	}
 }

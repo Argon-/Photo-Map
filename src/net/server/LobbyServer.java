@@ -25,6 +25,7 @@ public class LobbyServer extends Thread
 		ServerSocket s;
 		
 		try {
+			System.out.println("[LobbyServer] now listening on port " + port);
 			s = new ServerSocket(this.port);
 		}
 		catch (IOException e) 
@@ -38,7 +39,9 @@ public class LobbyServer extends Thread
 		{
 			try {
 				Socket p = s.accept();
-				System.out.println("[DispatchServer] ");
+				System.out.println("[LobbyServer] Client connected");
+				ClientThread c = new ClientThread(p, id.getAndIncrement());
+				c.start();
 			}
 			catch (IOException e) 
 			{
