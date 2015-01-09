@@ -1,6 +1,6 @@
 package data_structures.graph;
 
-import gui.main_window.MainWindow;
+import gui.MainWindow;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -31,10 +31,10 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	private int     elev[] = null;
 	private int   source[] = null;
 	private int   target[] = null;
-	private int     dist[] = null;
 	private int   offset[] = null;
-	private int     type[] = null;
-	private double types[] = null;
+	private int     dist[] = null;
+	private double dist_w[] = null;
+	private final double types[] = new double[] {-1.0, 1.3, 1.2, 0.8, 0.7, -1, 1.3, 0.5, 0.45, 0.3, 0.5, 0.3, 0.5};
 	
 	private final double GRID_FACTOR = 0.00002;
 	private int GRID_LAT_CELLS;
@@ -55,7 +55,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	
 	public ArrayRepresentation()
 	{
-		this.types = new  double[] {-1.0, 1.3, 1.2, 0.8, 0.7, -1, 1.3, 0.5, 0.45, 0.3, 0.5, 0.3, 0.5};
+		super();
 	}
 	
 	
@@ -68,10 +68,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		oos.writeObject(this.elev);
 		oos.writeObject(this.source);
 		oos.writeObject(this.target);
-		oos.writeObject(this.dist);
 		oos.writeObject(this.offset);
-		oos.writeObject(this.type);
-		oos.writeObject(this.types);
+		oos.writeObject(this.dist);
+		oos.writeObject(this.dist_w);
 		
 		oos.writeDouble(minLat);
 		oos.writeDouble(maxLat);
@@ -109,9 +108,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			
 			this.source = new int[edge_num];
 			this.target = new int[edge_num];
-			this.dist   = new int[edge_num];
 			this.offset = new int[node_num + 1];	// +1 because of getNeighbor()
-			this.type   = new int[/*edge_num*/1];	// dummy
+			this.dist   = new int[edge_num];
+			this.dist_w = new double[edge_num];
 			Arrays.fill(this.offset, -1);
 			
 			for (int i = 0; i < edge_num; ++i)
@@ -120,7 +119,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 				this.source[i] = Integer.parseInt(s[0]);
 				this.target[i] = Integer.parseInt(s[1]);
 				this.dist[i]   = Integer.parseInt(s[2]);
-				//int type = Integer.parseInt(s[3]);
+				this.dist_w[i] = this.dist[i] / this.types[Integer.parseInt(s[3])];
 				
 				if (offset[this.source[i]] < 0) {
 					offset[this.source[i]] = i;
@@ -155,10 +154,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			this.elev   = (int[])    ois.readObject();
 			this.source = (int[])    ois.readObject();
 			this.target = (int[])    ois.readObject();
-			this.dist   = (int[])    ois.readObject();
 			this.offset = (int[])    ois.readObject();
-			this.type   = (int[])    ois.readObject();
-			this.types  = (double[]) ois.readObject();
+			this.dist   = (int[])    ois.readObject();
+			this.dist_w = (double[]) ois.readObject();
 			
 			this.minLat = ois.readDouble();
 			this.maxLat = ois.readDouble();
@@ -235,6 +233,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 		System.out.println(String.format("Building grid took %.6f seconds", (System.nanoTime() - t) / 1000000000.0));
 	}
 	
+	int yyyy = 0;
 	private int searchMinInCell(double lat, double lon, int lat_cell, int lon_cell, int last_min_id)
 	{
 		if (lat_cell < 0 || lon_cell < 0 || lat_cell >= GRID_LAT_CELLS || lon_cell >= GRID_LON_CELLS) {
@@ -242,7 +241,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			return last_min_id;
 		}
 		//System.out.println("Searching cell (" + lat_cell + "," + lon_cell + ")");
-		//OverlayAggregate oa = new OverlayAggregate();
+		OverlayAggregate oa = new OverlayAggregate();
 
 		int min_id = last_min_id < 0 ? -1 : last_min_id;
 		double min_dist = last_min_id > -1 ? Distance.haversine(lat, lon, this.lat[last_min_id], this.lon[last_min_id]) : Double.MAX_VALUE;
@@ -257,10 +256,10 @@ final public class ArrayRepresentation implements Graph, Serializable {
 				min_dist = dist;
 				min_id = pos;
 			}
-			//oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], yyyy % 2 == 0 ? Color.MAGENTA : new Color(255, 0, 144), 3));
+			oa.addPoint(new OverlayElement(this.lat[pos], this.lon[pos], yyyy % 2 == 0 ? Color.MAGENTA : new Color(255, 0, 144), 3));
 		}
 
-		//MainWindow.overlayLines.add(oa);
+		MainWindow.overlayLines.add(oa);
 		return min_id;
 	}
 	
@@ -335,7 +334,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 			}
 			lon_curr = lon_curr + ring;
 			
-			++ring; //++yyyy;
+			++ring; ++yyyy;
 		} while (additional_rings > 0);
 		System.out.println("Searched " + (ring-1) + " rings");
 		
@@ -486,7 +485,16 @@ final public class ArrayRepresentation implements Graph, Serializable {
 	
 	public int getIthEdgeDistFor(int n, int i)
 	{
-		return this.dist[this.offset[n]+i];
+		return this.getIthEdgeDistFor(n, i, false);
+	}
+	
+	
+	public int getIthEdgeDistFor(int n, int i, boolean weighted)
+	{
+		if (weighted)
+			return (int) Math.round(this.dist_w[this.offset[n]+i]);
+		else
+			return this.dist[this.offset[n]+i];
 	}
 	
 	
