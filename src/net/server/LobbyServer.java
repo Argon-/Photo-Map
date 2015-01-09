@@ -1,18 +1,16 @@
-package server;
-
-import game.Player;
+package net.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 
 public class LobbyServer extends Thread
 {
 	private int port = 0;
-	private HashMap<String, ReceiverThread> potentialPlayerConnections = new HashMap<String, ReceiverThread>();
+	private AtomicInteger id = new AtomicInteger(0);
 	
 	
 	public LobbyServer(int port)
@@ -21,7 +19,6 @@ public class LobbyServer extends Thread
 	}
 	
 
-	
 	@Override
 	public void run()
 	{
@@ -41,6 +38,7 @@ public class LobbyServer extends Thread
 		{
 			try {
 				Socket p = s.accept();
+				System.out.println("[DispatchServer] ");
 			}
 			catch (IOException e) 
 			{
