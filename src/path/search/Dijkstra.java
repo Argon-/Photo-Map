@@ -14,6 +14,7 @@ public final class Dijkstra implements Runnable
 {
 	private final int UNSETTLED = Integer.MAX_VALUE;
 	private final int   SETTLED = Integer.MAX_VALUE - 1;
+	private final boolean weighted;
 	
 	private final Graph g;
 	private final int[] state;
@@ -25,20 +26,33 @@ public final class Dijkstra implements Runnable
 	private int target = -1;
 	
 	
-	public Dijkstra(Graph graph)
+	public Dijkstra(Graph graph, boolean weighted)
 	{
 		this.g = graph;
+		this.weighted = weighted;
 		this.state = new int[this.g.size()];
 		this.pred  = new int[this.g.size()];
 		Arrays.fill(this.pred, -1);
 	}
 	
 	
-	public Dijkstra(Graph graph, int from, int to)
+	public Dijkstra(Graph graph)
 	{
-		this(graph);
+		this(graph, true);
+	}
+	
+	
+	public Dijkstra(Graph graph, boolean weighted, int from, int to)
+	{
+		this(graph, weighted);
 		this.setSource(from);
 		this.setTarget(to);
+	}
+	
+	
+	public Dijkstra(Graph graph, int from, int to)
+	{
+		this(graph, true, from, to);
 	}
 	
 	
@@ -96,7 +110,7 @@ public final class Dijkstra implements Runnable
 					continue;
 				}
 				
-				final int new_dist = u_dist + g.getIthEdgeDistFor(u_id, i-1);
+				final int new_dist = u_dist + g.getIthEdgeDistFor(u_id, i-1, weighted);
 				
 				if (this.state[neighbor] > new_dist) {
 					this.heap.insert(neighbor, new_dist);

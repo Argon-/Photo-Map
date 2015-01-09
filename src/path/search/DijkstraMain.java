@@ -23,7 +23,7 @@ public class DijkstraMain {
 		
 		Dijkstra_Old d_old = new Dijkstra_Old(g);
 		Dijkstra_PrioQ d_pq = new Dijkstra_PrioQ(g);
-		Dijkstra d_2h = new Dijkstra(g);
+		Dijkstra d_2h = new Dijkstra(g, false);
 		//exec(g, d_old, d_pq, d_2h, 0, 333333);
 		exec(g, d_old, d_pq, d_2h, 0, 666666);
 		//exec(g, d_old, d_pq, d_2h, 0, 999999);
