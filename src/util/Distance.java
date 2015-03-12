@@ -1,13 +1,5 @@
 package util;
 
-import java.io.IOException;
-
-import org.apache.commons.math3.util.FastMath;
-
-import data_structures.graph.Graph;
-import data_structures.graph.GraphFactory;
-import data_structures.graph.InvalidGraphFormatException;
-
 
 
 public final class Distance
@@ -16,6 +8,7 @@ public final class Distance
 	static final double EARTH_RADIUS = 6371;
 	
 	
+	/* This is actually slower on my machine
 	public static double haversine_fm(double lat1, double lon1, double lat2, double lon2)
 	{
 		double dLat = FastMath.toRadians(lat2 - lat1);
@@ -27,6 +20,7 @@ public final class Distance
 
 		return EARTH_RADIUS * c;
 	}
+	*/
 	
 	
 	public static double haversine(double lat1, double lon1, double lat2, double lon2)
@@ -42,7 +36,7 @@ public final class Distance
 	}
 
 
-
+	/*
 	// don't use
 	public static double approx(double lat1, double lon1, double lat2, double lon2) 
 	{
@@ -139,5 +133,5 @@ public final class Distance
 			System.out.println(String.format("%.3f \t %.3f (%.3f)  max change = %.3f  max = %.3f", r1, r2_change, r2, r2_c_max, r2_d_max));
 		}
 	}
-
+    */
 }
