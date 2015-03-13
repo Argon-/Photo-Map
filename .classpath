@@ -12,10 +12,11 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/swingx-ws-2010_10_10-javadoc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="commons-math3-3.3.jar">
+	<classpathentry kind="lib" path="trove-3.0.3/3.0.3/lib/trove-3.0.3.jar" sourcepath="trove-3.0.3/3.0.3/trove-3.0.3-src.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/commons-math3-3.3-javadoc.jar!/"/>
+			<attribute name="javadoc_location" value="file:/Users/Julian/Documents/Code/JavaUni/Fapra%20OSM/trove-3.0.3/3.0.3/javadocs/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="JMapViewer.jar" sourcepath="JMapViewer_src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

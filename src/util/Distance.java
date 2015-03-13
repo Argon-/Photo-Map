@@ -5,7 +5,7 @@ package util;
 public final class Distance
 {
 	static final double EQUATOR_LON_LENGTH = 111.320;
-	static final double EARTH_RADIUS = 6371;
+	static final double EARTH_RADIUS = 6371 * 1000;
 	
 	
 	/* This is actually slower on my machine

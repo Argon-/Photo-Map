@@ -99,8 +99,8 @@ public class MainWindow extends JFrame
 	public void init() 
 	{
 		try {
-			//this.g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Dropbox/_Semester 9/Fapra OSM/1/15000.txt");
-			this.g = GraphFactory.loadArrayRepresentation("./15000K.bin");
+			this.g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/out-stg.txt");
+			//this.g = GraphFactory.loadArrayRepresentation("./15000K.bin");
 			this.d = new Dijkstra(this.g);
 			//g.drawCells();
 		}

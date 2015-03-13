@@ -110,7 +110,10 @@ public final class Dijkstra implements Runnable
 					continue;
 				}
 				
-				final int new_dist = u_dist + g.getIthEdgeDistFor(u_id, i-1, weighted);
+				final int inc = g.getIthEdgeDistFor(u_id, i-1, weighted);
+				if (inc < 0)
+				    continue;
+				final int new_dist = u_dist + inc;
 				
 				if (this.state[neighbor] > new_dist) {
 					this.heap.insert(neighbor, new_dist);
