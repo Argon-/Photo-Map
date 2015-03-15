@@ -1,6 +1,10 @@
 package gui;
 
 
+import gui.overlay.OverlayAggregate;
+import gui.overlay.OverlayElement;
+import gui.overlay.OverlayImage;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -10,7 +14,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 import javax.swing.JButton;
 
-import java.awt.BasicStroke;
 import java.awt.FileDialog;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
@@ -25,8 +28,6 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.painter.Painter;
 
 import path.search.Dijkstra;
-import util.OverlayAggregate;
-import util.OverlayElement;
 import util.StopWatch;
 import data_structures.graph.ArrayRepresentation;
 import data_structures.graph.GraphFactory;
@@ -40,13 +41,11 @@ import javax.swing.JScrollPane;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
 
 import javax.swing.JTextArea;
 
 import java.awt.Font;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingDeque;
 
 
@@ -58,8 +57,9 @@ public class MainWindow extends JFrame
 	private ArrayRepresentation g = null;
 	private Dijkstra d = null;
 	
-	static public final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-	static public final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+	public final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+	public final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+	public final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
 
 	private GeoPosition currSource = null;
 	private GeoPosition currTarget = null;
@@ -79,8 +79,9 @@ public class MainWindow extends JFrame
 
 	/**
 	 * Create the frame.
+	 * @throws IOException 
 	 */
-	public MainWindow()
+	public MainWindow() throws IOException
 	{
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -100,9 +101,8 @@ public class MainWindow extends JFrame
 	{
 		try {
 			this.g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/out-stg.txt");
-			//this.g = GraphFactory.loadArrayRepresentation("./15000K.bin");
 			this.d = new Dijkstra(this.g);
-			//g.drawCells();
+			//g.drawCells(this);
 		}
 		catch (InvalidGraphFormatException e) {
 			System.out.println("Supplied graph has invalid format");
@@ -210,7 +210,7 @@ public class MainWindow extends JFrame
 	}
 
 
-	public void myInitComponents()
+	public void myInitComponents() throws IOException
 	{
 		this.mapKit.getMainMap().addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -226,8 +226,9 @@ public class MainWindow extends JFrame
 		this.mapKit.setAddressLocationShown(false); // don't show center
 		this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
 		this.mapKit.setZoom(1); // set zoom level
-				
 		
+		this.overlayImages.add(new OverlayImage("/Users/Julian/Desktop/aldnoah3.png").resizeH(150).setFixedPos(OverlayImage.TOP_RIGHT));
+				
 		Painter<JXMapViewer> lineOverlay = new Painter<JXMapViewer>() {
 
 			public void paint(Graphics2D g, JXMapViewer map, int w, int h)
@@ -237,52 +238,22 @@ public class MainWindow extends JFrame
 				Rectangle rect = mapKit.getMainMap().getViewportBounds();
 				g.translate(-rect.x, -rect.y);
 				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+								
+                for (OverlayImage oi : overlayImages)
+                {
+                    oi.draw(g, map);
+                }
+				
+                for (OverlayAggregate oa : overlayLines)
+                {
+                    oa.draw(g, map);
+                }
 				
 				for (OverlayAggregate oa : persistentOverlayLines)
 				{
-					for (OverlayElement oe : oa.getLines())
-					{
-						Point2D s = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getSource(), mapKit.getMainMap().getZoom());
-						Point2D t = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getTarget(), mapKit.getMainMap().getZoom());
-							
-						g.setColor(oe.getColor());
-						g.setStroke(new BasicStroke(oe.getWidth()));
-						g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
-					}
-					for (OverlayElement oe : oa.getPoints())
-					{
-						Point2D s = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getSource(), mapKit.getMainMap().getZoom());
-						Point2D t = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getTarget(), mapKit.getMainMap().getZoom());
-							
-						g.setColor(oe.getColor());
-						g.setStroke(new BasicStroke(oe.getWidth()));
-						g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
-					}
+				    oa.draw(g, map);
 				}
 				
-				for (OverlayAggregate oa : overlayLines)
-				{
-					for (OverlayElement oe : oa.getLines())
-					{
-						Point2D s = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getSource(), mapKit.getMainMap().getZoom());
-						Point2D t = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getTarget(), mapKit.getMainMap().getZoom());
-							
-						g.setColor(oe.getColor());
-						g.setStroke(new BasicStroke(oe.getWidth()));
-						g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
-					}
-					for (OverlayElement oe : oa.getPoints())
-					{
-						Point2D s = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getSource(), mapKit.getMainMap().getZoom());
-						Point2D t = mapKit.getMainMap().getTileFactory().geoToPixel(oe.getTarget(), mapKit.getMainMap().getZoom());
-							
-						g.setColor(oe.getColor());
-						g.setStroke(new BasicStroke(oe.getWidth()));
-						g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
-					}
-				}
-
-
 				g.dispose();
 			}
 		};
@@ -361,7 +332,7 @@ public class MainWindow extends JFrame
 			System.out.println("Found no node!");
 			return;
 		}
-		System.out.println("Nearest node at: " + g.getLat(n) + ", " + g.getLon(n) + "                              in " + String.format("%.9f", StopWatch.getLastLapSec()) + " sec");
+		System.out.println("Nearest node at: " + g.getLat(n) + ", " + g.getLon(n) + "  (found in " + String.format("%.6f", StopWatch.getLastLapSec()) + " sec)");
 		
 		
 		if (SwingUtilities.isLeftMouseButton(e)) 
@@ -382,7 +353,7 @@ public class MainWindow extends JFrame
 				if (r) {
 					this.overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
 				}
-				System.out.println("Calculated route in " + String.format("%.9f", StopWatch.getLastLapSec()) + " sec");
+				System.out.println("Calculated route in " + String.format("%.6f", StopWatch.getLastLapSec()) + " sec");
 			}
 		}
 		

@@ -1,6 +1,8 @@
 package data_structures.graph;
 
 import gui.MainWindow;
+import gui.overlay.OverlayAggregate;
+import gui.overlay.OverlayElement;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -17,8 +19,6 @@ import java.util.Arrays;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 import util.Distance;
-import util.OverlayAggregate;
-import util.OverlayElement;
 
 
 
@@ -377,20 +377,10 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
-    public void drawCells()
+    public void drawCells(MainWindow win)
     {
         Color[] c = {Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY};
         OverlayAggregate oa = new OverlayAggregate();
-        
-        /*
-        int curr_c = 0;
-        for (int i = 0; i < this.lat.length; ++i) {
-            int lat_cell = this.lat[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[i] - this.minLat) / LAT_CELL_SIZE);
-            int lon_cell = this.lon[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[i] - this.minLon) / LON_CELL_SIZE);
-            GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
-            MainWindow.persistentOverlayLines.add(new OverlayLine(g, g, c[(lat_cell + lon_cell) % c.length], 2));
-        }
-        */
         
         for (int base = 0; base < this.grid_offset.length-1; ++base)
         {
@@ -399,12 +389,12 @@ final public class ArrayRepresentation implements Graph, Serializable {
                 int pos = this.grid[i];
                 //int lat_cell = this.lat[pos] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[pos] - this.minLat) / LAT_CELL_SIZE);
                 //int lon_cell = this.lon[pos] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[pos] - this.minLon) / LON_CELL_SIZE);
-                //System.out.println("Searching node in cell " + lat_cell + "," + lon_cell);
+                //System.out.println("cell " + lat_cell + "," + lon_cell);
                 GeoPosition g = new GeoPosition(this.lat[pos], this.lon[pos]);
                 oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
             }
         }
-        MainWindow.persistentOverlayLines.add(oa);
+        win.persistentOverlayLines.add(oa);
     }
     
     

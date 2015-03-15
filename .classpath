@@ -2,21 +2,26 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="swingx-1.6.1-combined.jar">
+	<classpathentry kind="lib" path="lib/xmpcore-5.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/swingx-ws-2010_10_10.jar" sourcepath="lib/swingx-ws-2010_10_10-src.zip">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/swingx-1.6.1-javadoc.zip!/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/lib/swingx-ws-2010_10_10-javadoc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="swingx-ws-2010_10_10.jar">
+	<classpathentry kind="lib" path="lib/swingx-1.6.1-combined.jar" sourcepath="lib/swingx-ws-2010_10_10-src.zip">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/swingx-ws-2010_10_10-javadoc.zip!/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/lib/swingx-1.6.1-javadoc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="trove-3.0.3/3.0.3/lib/trove-3.0.3.jar" sourcepath="trove-3.0.3/3.0.3/trove-3.0.3-src.jar">
+	<classpathentry kind="lib" path="lib/metadata-extractor-2.7.2.jar" sourcepath="lib/metadata-extractor-2.7.2-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="file:/Users/Julian/Documents/Code/JavaUni/Fapra%20OSM/trove-3.0.3/3.0.3/javadocs/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Fapra%20OSM/lib/metadata-extractor-2.7.2-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="JMapViewer.jar" sourcepath="JMapViewer_src.jar"/>
+	<classpathentry kind="lib" path="lib/trove-3.0.3/3.0.3/lib/trove-3.0.3.jar" sourcepath="lib/trove-3.0.3/3.0.3/trove-3.0.3-src.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/Julian/Documents/Code/JavaUni/Fapra%20OSM/lib/trove-3.0.3/3.0.3/javadocs/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

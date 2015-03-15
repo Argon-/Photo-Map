@@ -1,6 +1,8 @@
 package data_structures.graph;
 
 import gui.MainWindow;
+import gui.overlay.OverlayAggregate;
+import gui.overlay.OverlayElement;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -17,8 +19,6 @@ import java.util.Arrays;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 import util.Distance;
-import util.OverlayAggregate;
-import util.OverlayElement;
 
 
 
@@ -341,7 +341,7 @@ final public class ArrayRepresentation_Legacy implements Graph, Serializable {
 	}
 	
 	
-	public void drawCells()
+	public void drawCells(MainWindow win)
 	{
 		Color[] c = {Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY};
 		OverlayAggregate oa = new OverlayAggregate();
@@ -368,7 +368,7 @@ final public class ArrayRepresentation_Legacy implements Graph, Serializable {
 				oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
 			}
 		}
-		MainWindow.persistentOverlayLines.add(oa);
+		win.persistentOverlayLines.add(oa);
 	}
 	
 	
