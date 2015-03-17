@@ -1,8 +1,8 @@
 package gui.overlay;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,9 +13,13 @@ import javax.imageio.ImageIO;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
-import com.drew.imaging.ImageMetadataReader;
-
 import util.ImageUtil;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.lang.GeoLocation;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.GpsDirectory;
 
 
 
@@ -27,38 +31,87 @@ public final class OverlayImage
     public static final int BOT_LEFT  = 3;
     
     private BufferedImage   img;
+    private BufferedImage   cachedImg;
+    private boolean dynamicResize = true;
+    private int mapZoom = -1;
+    
+    private int targetWidth;
+    private int targetHeight;
+
     private boolean         fixedPosition = true;
     private int             positionHint  = TOP_LEFT;
-    private GeoPosition     mapPos;
-
+    private GeoPosition     mapPos = null;
+    
 
     public OverlayImage(String file) throws IOException
     {
-        img = ImageIO.read(new File(file));
-        ImageMetadataReader r;
+        File f = new File(file);
+        img = ImageIO.read(f);
+        cachedImg = ImageIO.read(f);
+        targetWidth = img.getWidth();
+        targetHeight = img.getHeight();
+        
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(f);
+            GpsDirectory directory = metadata.getDirectory(GpsDirectory.class);
+            GeoLocation loc = directory.getGeoLocation();
+            System.out.println("Extracted geolocation: " + loc.getLatitude() + " " + loc.getLongitude());
+            mapPos = new GeoPosition(loc.getLatitude(), loc.getLongitude());
+        }
+        catch (ImageProcessingException e) {
+            e.printStackTrace();
+        }
+        catch (NullPointerException e) {
+        }
     }
 
-
+    
     public OverlayImage resize(int w, int h)
     {
-        img = ImageUtil.toBufferedImage(img.getScaledInstance(w, h, Image.SCALE_SMOOTH));
+        targetWidth = w;
+        targetHeight = h;
+        return resizeInternal(w, h);
+    }
+    
+    
+    public OverlayImage resizeInternal(int w, int h)
+    {
+        if ((w > -1 && w != img.getWidth()) || (h > -1 && h != img.getHeight())) {
+            cachedImg = ImageUtil.getScaledInstance(img, w, h, RenderingHints.VALUE_INTERPOLATION_BILINEAR, true);
+        }
+        return this;
+    }
+
+    public OverlayImage maxSize(int m)
+    {
+        return maxSizeInternal(m, true);
+    }
+
+    private OverlayImage maxSizeInternal(int m, boolean update)
+    {
+        float fW = (float) m / img.getWidth();
+        float fH = (float) m / img.getHeight();
+        if (img.getWidth() < img.getHeight()) {
+            fW = fH;
+        }
+
+        if (update) {
+            return resize((int) (img.getWidth() * fW), (int) (img.getHeight() * fW));
+        }
+        else {
+            return resizeInternal((int) (img.getWidth() * fW), (int) (img.getHeight() * fW));
+        }
+    }
+    
+    
+    public OverlayImage dynamicResize(boolean dr)
+    {
+        dynamicResize = dr;
         return this;
     }
 
 
-    public OverlayImage resizeW(int w)
-    {
-        return resize(w, -1);
-    }
-
-
-    public OverlayImage resizeH(int h)
-    {
-        return resize(-1, h);
-    }
-
-
-    public OverlayImage fixedPos(boolean useFixedPos)
+    public OverlayImage useFixedPos(boolean useFixedPos)
     {
         fixedPosition = useFixedPos;
         return this;
@@ -92,27 +145,40 @@ public final class OverlayImage
                 y = rect.y;
                 break;
             case TOP_RIGHT:
-                x = rect.width - img.getWidth() + rect.x;
+                x = rect.width - cachedImg.getWidth() + rect.x;
                 y = rect.y;
                 break;
             case BOT_LEFT:
                 x = rect.x;
-                y = rect.height - img.getHeight() + rect.y;
+                y = rect.height - cachedImg.getHeight() + rect.y;
                 break;
             case BOT_RIGHT:
-                x = rect.width - img.getWidth() + rect.x;
-                y = rect.height - img.getHeight() + rect.y;
+                x = rect.width - cachedImg.getWidth() + rect.x;
+                y = rect.height - cachedImg.getHeight() + rect.y;
                 break;
             }
         }
-        else 
+        else if (mapPos != null)
         {
-            Point2D p = map.getTileFactory().geoToPixel(mapPos, map.getZoom());
-            x = (int) p.getX();
-            y = (int) p.getY();
+            if (map.getZoom() != mapZoom) {
+                mapZoom = map.getZoom();
+                if (dynamicResize) {
+                    double ff = (mapZoom) / (Math.log(mapZoom) + 1);
+                    int w = (int) ((targetWidth / ff) - (targetWidth * 0.01 * (mapZoom-1)));
+                    int h = (int) ((targetHeight / ff) - (targetWidth * 0.01 * (mapZoom-1)));
+                    System.out.println("Current zoom: " + mapZoom);
+                    System.out.println("   new width: " + w + " ");
+                    System.out.println("   new height: " + h);
+                    if (w > 20 && h > 20) // arbitrary minimum
+                        resizeInternal(w, h);
+                }
+            }
+            Point2D p = map.getTileFactory().geoToPixel(mapPos, mapZoom);
+            x = (int) p.getX() - (cachedImg.getWidth() / 2);
+            y = (int) p.getY() - (cachedImg.getHeight() / 2);
         }
-
-        g.drawImage(img, x, y, null);
+        
+        g.drawImage(cachedImg, x, y, null);
     }
 
 }

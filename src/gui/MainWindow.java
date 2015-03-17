@@ -227,7 +227,14 @@ public class MainWindow extends JFrame
 		this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
 		this.mapKit.setZoom(1); // set zoom level
 		
-		this.overlayImages.add(new OverlayImage("/Users/Julian/Desktop/aldnoah3.png").resizeH(150).setFixedPos(OverlayImage.TOP_RIGHT));
+		String f = "/Users/Julian/Desktop/aldnoah3.png";
+	    //String f = "/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg";
+		this.overlayImages.add(new OverlayImage(f)
+		        .maxSize(400)
+		        .setFixedPos(OverlayImage.TOP_RIGHT)
+		        .dynamicResize(true)
+		        .useFixedPos(false)
+		        .setGeoPos(new GeoPosition(48.74670985863194, 9.105284214019775)));
 				
 		Painter<JXMapViewer> lineOverlay = new Painter<JXMapViewer>() {
 
