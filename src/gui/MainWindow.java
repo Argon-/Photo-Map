@@ -222,20 +222,31 @@ public class MainWindow extends JFrame
 		((DefaultCaret) this.textArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
 		this.mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
-		// set the initial view on the map
 		this.mapKit.setAddressLocationShown(false); // don't show center
-		this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
-		this.mapKit.setZoom(1); // set zoom level
+		//this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
+	    this.mapKit.setAddressLocation(new GeoPosition(48.89088888888889, 9.225294444444444)); // Home
+		this.mapKit.setZoom(1);
+        this.mapKit.setMiniMapVisible(false);
 		
-		String f = "/Users/Julian/Desktop/aldnoah3.png";
-	    //String f = "/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg";
-		this.overlayImages.add(new OverlayImage(f)
-		        .maxSize(400)
-		        .setFixedPos(OverlayImage.TOP_RIGHT)
-		        .dynamicResize(true)
-		        .useFixedPos(false)
-		        .setGeoPos(new GeoPosition(48.74670985863194, 9.105284214019775)));
-				
+		//String f = "/Users/Julian/Desktop/aldnoah3.png";
+	    String f = "/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg";
+	    
+	    this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg")
+            .maxSize(200));
+	    this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-16 22.04.51.jpg")
+            .maxSize(200));
+	    
+	    /*
+	    for (int i = 0; i < 5; ++i) {
+    		this.overlayImages.add(new OverlayImage(f)
+    		        .maxSize(400)
+    		        .setFixedPos(OverlayImage.TOP_RIGHT)
+    		        .dynamicResize(false)
+    		        .useFixedPos(false)
+    		        .setGeoPos(new GeoPosition(48.74670985863194, 9.105284214019775 + (0.05 * i))));
+	    }
+	    */
+	    
 		Painter<JXMapViewer> lineOverlay = new Painter<JXMapViewer>() {
 
 			public void paint(Graphics2D g, JXMapViewer map, int w, int h)

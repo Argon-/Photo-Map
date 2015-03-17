@@ -9,6 +9,8 @@ import java.awt.image.BufferedImage;
 
 public final class ImageUtil
 {
+    // Implementation by Chris Campbell
+    // https://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
     /**
      * Convenience method that returns a scaled instance of the
      * provided {@code BufferedImage}.

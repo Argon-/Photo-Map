@@ -29,16 +29,16 @@ public final class OverlayImage
     public static final int TOP_LEFT  = 1;
     public static final int BOT_RIGHT = 2;
     public static final int BOT_LEFT  = 3;
-    
+
     private BufferedImage   img;
     private BufferedImage   cachedImg;
     private boolean dynamicResize = true;
     private int mapZoom = -1;
-    
+
     private int targetWidth;
     private int targetHeight;
 
-    private boolean         fixedPosition = true;
+    private boolean         fixedPosition = false;
     private int             positionHint  = TOP_LEFT;
     private GeoPosition     mapPos = null;
     
@@ -62,6 +62,7 @@ public final class OverlayImage
             e.printStackTrace();
         }
         catch (NullPointerException e) {
+            // no/not enough metadata
         }
     }
 
@@ -91,16 +92,13 @@ public final class OverlayImage
     {
         float fW = (float) m / img.getWidth();
         float fH = (float) m / img.getHeight();
-        if (img.getWidth() < img.getHeight()) {
+        if (img.getWidth() < img.getHeight())
             fW = fH;
-        }
 
-        if (update) {
+        if (update)
             return resize((int) (img.getWidth() * fW), (int) (img.getHeight() * fW));
-        }
-        else {
+        else
             return resizeInternal((int) (img.getWidth() * fW), (int) (img.getHeight() * fW));
-        }
     }
     
     
@@ -166,9 +164,6 @@ public final class OverlayImage
                     double ff = (mapZoom) / (Math.log(mapZoom) + 1);
                     int w = (int) ((targetWidth / ff) - (targetWidth * 0.01 * (mapZoom-1)));
                     int h = (int) ((targetHeight / ff) - (targetWidth * 0.01 * (mapZoom-1)));
-                    System.out.println("Current zoom: " + mapZoom);
-                    System.out.println("   new width: " + w + " ");
-                    System.out.println("   new height: " + h);
                     if (w > 20 && h > 20) // arbitrary minimum
                         resizeInternal(w, h);
                 }
