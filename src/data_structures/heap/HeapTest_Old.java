@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import util.StopWatch;
+import util.StringUtil;
 
 
 
@@ -11,36 +12,6 @@ public class HeapTest_Old
 {
 	public static final int	RND_MAX	= 99;
 	public static final int	RND_MIN	= -99;
-	
-	
-	public static String arrayToString(int[][] n)
-	{
-		String s = "";
-		for (int i = 0; i < n.length; ++i) {
-			s += n[i][1];
-			
-			if (i != n.length - 1)
-				s += ", ";
-			else
-				s += " ";
-		}
-		return s;
-	}
-	
-	
-	public static String arrayToString(int[] n)
-	{
-		String s = "";
-		for (int i = 0; i < n.length; ++i) {
-			s += n[i];
-			
-			if (i != n.length - 1)
-				s += ", ";
-			else
-				s += " ";
-		}
-		return s;
-	}
 	
 	
 	// insert
@@ -72,8 +43,8 @@ public class HeapTest_Old
 		
 		if (error) {
 			System.out.println("Mismatch:");
-			System.out.println("   Input    : " + arrayToString(values));
-			System.out.println("   Extracted: " + arrayToString(ret));
+			System.out.println("   Input    : " + StringUtil.arrayToString(values));
+			System.out.println("   Extracted: " + StringUtil.arrayToString(ret));
 		}
 	}
 	
@@ -108,8 +79,8 @@ public class HeapTest_Old
 		
 		if (error) {
 			System.out.println("Mismatch:");
-			System.out.println("   Input    : " + arrayToString(values));
-			System.out.println("   Extracted: " + arrayToString(ret));
+			System.out.println("   Input    : " + StringUtil.arrayToString(values));
+			System.out.println("   Extracted: " + StringUtil.arrayToString(ret));
 		}
 	}
 	
@@ -139,8 +110,8 @@ public class HeapTest_Old
 		
 		if (error) {
 			System.out.println("Mismatch:");
-			System.out.println("   Input    : " + arrayToString(reference));
-			System.out.println("   Extracted: " + arrayToString(ret));
+			System.out.println("   Input    : " + StringUtil.arrayToString(reference));
+			System.out.println("   Extracted: " + StringUtil.arrayToString(ret));
 		}
 	}
 	
@@ -178,8 +149,8 @@ public class HeapTest_Old
 		
 		if (error) {
 			System.out.println("Mismatch:");
-			System.out.println("   Input    : " + arrayToString(values));
-			System.out.println("   Extracted: " + arrayToString(ret));
+			System.out.println("   Input    : " + StringUtil.arrayToString(values));
+			System.out.println("   Extracted: " + StringUtil.arrayToString(ret));
 		}
 	}
 
@@ -226,8 +197,8 @@ public class HeapTest_Old
 		
 		if (error) {
 			System.out.println("Mismatch:");
-			System.out.println("   Input    : " + arrayToString(ref));
-			System.out.println("   Extracted: " + arrayToString(ret));
+			System.out.println("   Input    : " + StringUtil.arrayToString(ref));
+			System.out.println("   Extracted: " + StringUtil.arrayToString(ret));
 		}
 	}
 	
@@ -246,7 +217,7 @@ public class HeapTest_Old
 		//	h.insert(new int[] {i, v[i]});
 		//}
 		
-		System.out.println("Input                 : " + arrayToString(v));
+		System.out.println("Input                 : " + StringUtil.arrayToString(v));
 		
 		
 		// decrease tests
@@ -257,7 +228,7 @@ public class HeapTest_Old
 		h.decreaseKeyByNodeID(6, 0);
 		v[6] = 0;
 		
-		System.out.println("Input (after decrease): " + arrayToString(v));
+		System.out.println("Input (after decrease): " + StringUtil.arrayToString(v));
 		
 		// extract
 		int[] ret = new int[v.length];
@@ -265,8 +236,8 @@ public class HeapTest_Old
 			ret[i] = h.extractMin()[HeapNode_Old.DIST];
 
 		Arrays.sort(v);
-		System.out.println("Should                : " + arrayToString(v));
-		System.out.println("Output                : " + arrayToString(ret));
+		System.out.println("Should                : " + StringUtil.arrayToString(v));
+		System.out.println("Output                : " + StringUtil.arrayToString(ret));
 	}
 	
 

@@ -19,12 +19,17 @@ import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.jdesktop.swingx.mapviewer.Waypoint;
+import org.jdesktop.swingx.mapviewer.WaypointPainter;
+import org.jdesktop.swingx.mapviewer.WaypointRenderer;
+import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
 import path.search.Dijkstra;
@@ -35,17 +40,22 @@ import data_structures.graph.InvalidGraphFormatException;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.JScrollPane;
 
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 
 import javax.swing.JTextArea;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingDeque;
 
 
@@ -60,6 +70,9 @@ public class MainWindow extends JFrame
 	public final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
 	public final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
 	public final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
+	
+	private WaypointPainter<JXMapViewer> waypointPainter;
+	private Painter<JXMapViewer> overlayPainter;
 
 	private GeoPosition currSource = null;
 	private GeoPosition currTarget = null;
@@ -218,6 +231,13 @@ public class MainWindow extends JFrame
             }
         });
 		
+		this.mapKit.getMainMap().addMouseMotionListener(new MouseAdapter() {
+		    public void mouseMoved(MouseEvent e) {
+		        mapMouseMoved(e);
+		    }
+		});
+		
+		
 		this.textArea.setEditable(false);
 		((DefaultCaret) this.textArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
@@ -227,14 +247,28 @@ public class MainWindow extends JFrame
 	    this.mapKit.setAddressLocation(new GeoPosition(48.89088888888889, 9.225294444444444)); // Home
 		this.mapKit.setZoom(1);
         this.mapKit.setMiniMapVisible(false);
+        
 		
 		//String f = "/Users/Julian/Desktop/aldnoah3.png";
-	    String f = "/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg";
+	    //String f = "/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg";
 	    
-	    this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg")
-            .maxSize(200));
-	    this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-16 22.04.51.jpg")
-            .maxSize(200));
+	    //this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg")
+        //    .maxSize(200));
+	    //this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-16 22.04.51.jpg")
+        //    .maxSize(200));
+	    
+        StopWatch.lap();
+        Files.walk(Paths.get("./res"))
+            .filter(Files::isRegularFile)
+            .forEach(path -> {
+                try {
+                    this.overlayImages.add(new OverlayImage(path.toAbsolutePath().toString()).maxSize(300));
+                }
+                catch (Exception e1) {
+                    System.out.println("Error loading: " + path.toAbsolutePath().toString());
+                }
+        });
+        System.out.println("Loading images: " + StopWatch.lapSecStr());
 	    
 	    /*
 	    for (int i = 0; i < 5; ++i) {
@@ -246,9 +280,11 @@ public class MainWindow extends JFrame
     		        .setGeoPos(new GeoPosition(48.74670985863194, 9.105284214019775 + (0.05 * i))));
 	    }
 	    */
-	    
-		Painter<JXMapViewer> lineOverlay = new Painter<JXMapViewer>() {
 
+	    
+	    waypointPainter = new WaypointPainter<JXMapViewer>();
+		overlayPainter = new Painter<JXMapViewer>() {
+		    @Override
 			public void paint(Graphics2D g, JXMapViewer map, int w, int h)
 			{
 				g = (Graphics2D) g.create();
@@ -256,7 +292,7 @@ public class MainWindow extends JFrame
 				Rectangle rect = mapKit.getMainMap().getViewportBounds();
 				g.translate(-rect.x, -rect.y);
 				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-								
+				
                 for (OverlayImage oi : overlayImages)
                 {
                     oi.draw(g, map);
@@ -275,7 +311,11 @@ public class MainWindow extends JFrame
 				g.dispose();
 			}
 		};
-		mapKit.getMainMap().setOverlayPainter(lineOverlay);
+		
+	    final CompoundPainter<Painter<JXMapViewer>> c = new CompoundPainter<Painter<JXMapViewer>>(waypointPainter, overlayPainter);
+	    c.setCacheable(false);
+		mapKit.getMainMap().setOverlayPainter(c);
+		updateWaypoints();
 	}
 	
 	
@@ -326,58 +366,127 @@ public class MainWindow extends JFrame
 	}
 	
 	
-	public void mapMouseClicked(MouseEvent e)
+	public void mapMouseMoved(MouseEvent e)
 	{
-		if (SwingUtilities.isMiddleMouseButton(e))
-		{
-			this.clearMap();
-			return;
-		}
-		else if (SwingUtilities.isRightMouseButton(e) && this.currSource == null)
-		{
-			System.out.println("Plese set a source first");
-			return;
-		}
-		
-		GeoPosition clickPos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
-		System.out.println("Clicked at:      " + clickPos.getLatitude() + ", " + clickPos.getLongitude());
-		
-		StopWatch.lap();
-		int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
-		StopWatch.lap();
-		if (n == -1)
-		{
-			System.out.println("Found no node!");
-			return;
-		}
-		System.out.println("Nearest node at: " + g.getLat(n) + ", " + g.getLon(n) + "  (found in " + String.format("%.6f", StopWatch.getLastLapSec()) + " sec)");
-		
-		
-		if (SwingUtilities.isLeftMouseButton(e)) 
-		{
-			this.currSource = this.g.getPosition(n);
-			this.currTarget = null;
-			this.overlayLines.add(OverlayAggregate.route_var3(clickPos, this.currSource));
-			d.setSource(n);
-		}
-		else if (SwingUtilities.isRightMouseButton(e)) 
-		{
-			this.currTarget = this.g.getPosition(n);
-			d.setTarget(n);
-			if (this.currSource != null && this.currTarget != null) {
-				StopWatch.lap();
-				boolean r = d.pathFromTo();
-				StopWatch.lap();
-				if (r) {
-					this.overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
-				}
-				System.out.println("Calculated route in " + String.format("%.6f", StopWatch.getLastLapSec()) + " sec");
-			}
-		}
-		
-		System.out.println();
-		this.mapKit.repaint();
+	    JXMapViewer map = this.mapKit.getMainMap();
+	    int zoom = map.getZoom();
+	    GeoPosition pos = null;
+	    boolean change = false;
+	    int visibleNum = 0;
+	    
+        for (OverlayImage oi : overlayImages) 
+        {
+            // there's already one visible image, imply invisibility for the others
+            if (visibleNum >= OverlayImage.MAX_CONCURRENTLY_VISIBLE_IMAGES) {
+                if (oi.isVisible()) {
+                    oi.setVisible(false);
+                    change = true;
+                }
+                continue;
+            }
+            
+            pos = oi.getPosition();
+            if (pos == null) {
+                //System.out.println("null");
+                continue;
+            }
+            
+            Point2D p = map.getTileFactory().geoToPixel(pos, zoom);
+            Rectangle rect = map.getViewportBounds();
+            // move the point "into" the center of the waypoint image
+            p.setLocation(p.getX() - rect.x, p.getY() - rect.y - (OverlayImage.WAYPOINT_Y_OFFSET / 2));
+            
+            // are we close to the oi's Waypoint ?
+            if (p.distance(e.getPoint()) < (OverlayImage.WAYPOINT_Y_OFFSET / 2)) {
+                // we are close enough, but oi was not visible until now
+                if (!oi.isVisible()) {
+                    oi.setVisible(true);
+                    change = true;
+                }
+                ++visibleNum;
+            }
+            else {
+                // this image is not in range but visible
+                if (oi.isVisible()) {
+                    oi.setVisible(false);
+                    change = true;
+                }
+            }
+        }
+
+        if (change) {
+            this.repaint();
+        }
 	}
+	
+	
+    public void mapMouseClicked(MouseEvent e)
+    {
+        // middle mouse button -> clear
+        if (SwingUtilities.isMiddleMouseButton(e)) {
+            this.clearMap();
+            return;
+        }
+        // right mouse button -> select target, but not without a source
+        else if (SwingUtilities.isRightMouseButton(e) && this.currSource == null) {
+            System.out.println("Plese set a source first");
+            return;
+        }
+
+        // from here on it's either a left mouse button click (-> select source)
+        // or a right mouse button click with a previously selected source (-> select target, calculate route)
+        
+        GeoPosition clickPos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
+        System.out.println("Clicked at:      " + clickPos.getLatitude() + ", " + clickPos.getLongitude());
+
+        StopWatch.lap();
+        int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
+        StopWatch.lap();
+        if (n == -1) {
+            System.out.println("Found no node!");
+            return;
+        }
+        System.out.println("Nearest node at: " + g.getLat(n) + ", " + g.getLon(n) + "  (found in "
+                + String.format("%.6f", StopWatch.getLastLapSec()) + " sec)");
+
+        
+        if (SwingUtilities.isLeftMouseButton(e)) 
+        {
+            this.currSource = this.g.getPosition(n);
+            this.currTarget = null;
+            this.overlayLines.add(OverlayAggregate.route_var3(clickPos, this.currSource));
+            d.setSource(n);
+        }
+        else if (SwingUtilities.isRightMouseButton(e)) 
+        {
+            this.currTarget = this.g.getPosition(n);
+            d.setTarget(n);
+            if (this.currSource != null && this.currTarget != null) {
+                StopWatch.lap();
+                boolean r = d.pathFromTo();
+                StopWatch.lap();
+                if (r) {
+                    this.overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
+                }
+                System.out.println("Calculated route in " + String.format("%.6f", StopWatch.getLastLapSec()) + " sec");
+            }
+        }
+
+        System.out.println();
+        this.mapKit.repaint();
+    }
+    
+    
+    public void updateWaypoints()
+    {
+        HashSet<Waypoint> waypointSet = new HashSet<Waypoint>();
+        for (OverlayImage oi : overlayImages) {
+            Waypoint wp = oi.getWaypoint();
+            if (wp != null)
+                waypointSet.add(wp);
+        }
+        waypointPainter.setWaypoints(waypointSet);
+    }
 	
 	
 	public void log(String s)

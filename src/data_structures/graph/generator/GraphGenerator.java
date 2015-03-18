@@ -362,20 +362,5 @@ public class GraphGenerator
         else
             return -1;
     }
-    
-    
-    public static String arrayToString(String[] n)
-    {
-        String s = "";
-        for (int i = 0; i < n.length; ++i) {
-            s += n[i];
-            
-            if (i != n.length - 1)
-                s += ", ";
-            else
-                s += " ";
-        }
-        return s;
-    }
 
 }

@@ -127,13 +127,14 @@ public final class Dijkstra implements Runnable
 					this.pred[neighbor] = u_id;
 					break loop;
 				}
-			} // while
-		} // while
+			}
+		}
 		
 		if (this.state[this.target] == SETTLED)
 		{
 			return true;
 		}
+		
 		System.out.println("Found no route from " + this.source + " to " + this.target);
 		return false;
 	}
