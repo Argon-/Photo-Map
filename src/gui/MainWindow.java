@@ -221,7 +221,6 @@ public class MainWindow extends JFrame
 
 	public void myInitComponents()
 	{
-	    // $hide>>$
 		this.mapKit.getMainMap().addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
             	mapMouseClicked(e);
@@ -244,15 +243,6 @@ public class MainWindow extends JFrame
 	    this.mapKit.setAddressLocation(new GeoPosition(48.89088888888889, 9.225294444444444)); // Home
 		this.mapKit.setZoom(1);
         this.mapKit.setMiniMapVisible(false);
-        
-		
-		//String f = "/Users/Julian/Desktop/aldnoah3.png";
-	    //String f = "/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg";
-	    
-	    //this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-15 20.58.39.jpg")
-        //    .maxSize(200));
-	    //this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-16 22.04.51.jpg")
-        //    .maxSize(200));
 	    
         
         StopWatch.lap();
@@ -292,9 +282,8 @@ public class MainWindow extends JFrame
 		
 	    final CompoundPainter<Painter<JXMapViewer>> c = new CompoundPainter<Painter<JXMapViewer>>(waypointPainter, overlayPainter);
 	    c.setCacheable(false);
-		mapKit.getMainMap().setOverlayPainter(c);
+		mapKit.getMainMap().setOverlayPainter(c);      // $hide$ (WindowBuilder doesn't like this line)
 		updateWaypoints();
-		// $hide<<$
 	}
 	
 	
