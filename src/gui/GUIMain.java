@@ -23,7 +23,7 @@ public class GUIMain
 			            public void print(String s)   { original.print(s); if (w != null) w.log(s); }
 			        });
 			        
-			        w.init();
+			        //w.init();
 					w.setVisible(true);
 				}
 				catch (Exception e) {
