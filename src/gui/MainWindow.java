@@ -19,7 +19,6 @@ import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 
@@ -28,11 +27,11 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.Waypoint;
 import org.jdesktop.swingx.mapviewer.WaypointPainter;
-import org.jdesktop.swingx.mapviewer.WaypointRenderer;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
 import path.search.Dijkstra;
+import util.FileUtil;
 import util.StopWatch;
 import data_structures.graph.ArrayRepresentation;
 import data_structures.graph.GraphFactory;
@@ -40,7 +39,6 @@ import data_structures.graph.InvalidGraphFormatException;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseMotionListener;
 
 import javax.swing.JScrollPane;
 
@@ -53,8 +51,6 @@ import javax.swing.JTextArea;
 
 import java.awt.Font;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -94,7 +90,7 @@ public class MainWindow extends JFrame
 	 * Create the frame.
 	 * @throws IOException 
 	 */
-	public MainWindow() throws IOException
+	public MainWindow()
 	{
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -223,8 +219,9 @@ public class MainWindow extends JFrame
 	}
 
 
-	public void myInitComponents() throws IOException
+	public void myInitComponents()
 	{
+	    // $hide>>$
 		this.mapKit.getMainMap().addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
             	mapMouseClicked(e);
@@ -257,30 +254,11 @@ public class MainWindow extends JFrame
 	    //this.overlayImages.add(new OverlayImage("/Users/Julian/Documents/Dropbox/Kamera-Uploads/2015-03-16 22.04.51.jpg")
         //    .maxSize(200));
 	    
+        
         StopWatch.lap();
-        Files.walk(Paths.get("./res"))
-            .filter(Files::isRegularFile)
-            .forEach(path -> {
-                try {
-                    this.overlayImages.add(new OverlayImage(path.toAbsolutePath().toString()).maxSize(300));
-                }
-                catch (Exception e1) {
-                    System.out.println("Error loading: " + path.toAbsolutePath().toString());
-                }
-        });
+        FileUtil.loadOverlayImagesFrom("./res", this.overlayImages, 300, false);
         System.out.println("Loading images: " + StopWatch.lapSecStr());
 	    
-	    /*
-	    for (int i = 0; i < 5; ++i) {
-    		this.overlayImages.add(new OverlayImage(f)
-    		        .maxSize(400)
-    		        .setFixedPos(OverlayImage.TOP_RIGHT)
-    		        .dynamicResize(false)
-    		        .useFixedPos(false)
-    		        .setGeoPos(new GeoPosition(48.74670985863194, 9.105284214019775 + (0.05 * i))));
-	    }
-	    */
-
 	    
 	    waypointPainter = new WaypointPainter<JXMapViewer>();
 		overlayPainter = new Painter<JXMapViewer>() {
@@ -316,6 +294,7 @@ public class MainWindow extends JFrame
 	    c.setCacheable(false);
 		mapKit.getMainMap().setOverlayPainter(c);
 		updateWaypoints();
+		// $hide<<$
 	}
 	
 	

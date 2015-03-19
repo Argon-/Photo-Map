@@ -57,12 +57,14 @@ public final class OverlayImage
     private int             targetHeight;
     
 
-    public OverlayImage(String f) throws IOException
+    public OverlayImage(String f, boolean strict) throws IOException
     {
         File file = new File(f);
         img = ImageIO.read(file);
-        label = StringUtil.basename(f);
         cachedImg = ImageIO.read(file);
+        if (img == null)
+            throw new IOException("not a valid image");
+        label = StringUtil.basename(f);
         targetWidth = img.getWidth();
         targetHeight = img.getHeight();
         
@@ -74,11 +76,20 @@ public final class OverlayImage
             mapPos = new GeoPosition(loc.getLatitude(), loc.getLongitude());
         }
         catch (ImageProcessingException e) {
-            e.printStackTrace();
         }
         catch (NullPointerException e) {
             // no/not enough metadata
         }
+        
+        if (strict && mapPos == null) {
+            throw new RuntimeException("image contains no valid geo location (strict checking)");
+        }
+    }
+    
+    
+    public OverlayImage(String f) throws IOException
+    {
+        this(f, true);
     }
     
     
@@ -103,7 +114,7 @@ public final class OverlayImage
     }
     
     
-    public OverlayImage setHighQUality(boolean q)
+    public OverlayImage setHighQuality(boolean q)
     {
         highQuality = q;
         return this;
