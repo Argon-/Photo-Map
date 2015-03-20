@@ -82,25 +82,25 @@ public class MainWindow extends JFrame
 	private static final int MAX_LOG_LENGTH = 500;
 	private int currLines = 0;
 	
-	private JPanel		contentPane;
-	private JXMapKit	mapKit;
-	private JScrollPane scrollPane_Log;
-	private JTextArea   textArea_Log;
-	private JButton		btn_LoadGraph;
-	private JButton 	btn_ClearLast;
-	private JButton 	btn_ClearAll;
-	private JButton btn_AddImages;
-	private JButton btn_RemoveImage;
-	private JComboBox<String> cb_ResizeMethod;
-	private JComboBox<String> cb_ImageSize;
-	private JLabel lbl_ResizeMethod;
-	private JLabel lbl_ImageSize;
-	private JButton btnCalculateRoute;
-	private JLabel lbl_VisitOrder;
-	private JComboBox<String> cb_VisitOrder;
-	private JLabel lbl_ImageQuality;
-	private JComboBox<String> cb_ImageQuality;
-	private JList list_Images;
+    private JPanel            contentPane;
+    private JXMapKit          mapKit;
+    private JScrollPane       scrollPane_Log;
+    private JTextArea         textArea_Log;
+    private JButton           btn_LoadGraph;
+    private JButton           btn_ClearLast;
+    private JButton           btn_ClearAll;
+    private JButton           btn_AddImages;
+    private JButton           btn_RemoveImage;
+    private JComboBox<String> cb_ResizeMethod;
+    private JComboBox<String> cb_ImageSize;
+    private JLabel            lbl_ResizeMethod;
+    private JLabel            lbl_ImageSize;
+    private JButton           btn_CalculateRoute;
+    private JLabel            lbl_VisitOrder;
+    private JComboBox<String> cb_VisitOrder;
+    private JLabel            lbl_ImageQuality;
+    private JComboBox<String> cb_ImageQuality;
+    private JList             list_Images;
 
 
 
@@ -228,15 +228,25 @@ public class MainWindow extends JFrame
 		gbc_btn_ClearLast.gridy = 13;
 		this.contentPane.add(this.btn_ClearLast, gbc_btn_ClearLast);
 		
-		this.btnCalculateRoute = new JButton("Calculate route");
-		GridBagConstraints gbc_btnCalculateRoute = new GridBagConstraints();
-		gbc_btnCalculateRoute.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnCalculateRoute.insets = new Insets(0, 0, 5, 5);
-		gbc_btnCalculateRoute.gridx = 12;
-		gbc_btnCalculateRoute.gridy = 13;
-		this.contentPane.add(this.btnCalculateRoute, gbc_btnCalculateRoute);
+		this.btn_CalculateRoute = new JButton("Calculate route");
+		this.btn_CalculateRoute.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        btn_CalculateRoute(e);
+		    }
+		});
+		GridBagConstraints gbc_btn_CalculateRoute = new GridBagConstraints();
+		gbc_btn_CalculateRoute.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btn_CalculateRoute.insets = new Insets(0, 0, 5, 5);
+		gbc_btn_CalculateRoute.gridx = 12;
+		gbc_btn_CalculateRoute.gridy = 13;
+		this.contentPane.add(this.btn_CalculateRoute, gbc_btn_CalculateRoute);
 		
 		this.btn_RemoveImage = new JButton("Remove selected image");
+		this.btn_RemoveImage.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        btn_RemoveImage(e);
+		    }
+		});
 		GridBagConstraints gbc_btn_RemoveImage = new GridBagConstraints();
 		gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
@@ -258,6 +268,11 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.btn_ClearAll, gbc_btn_ClearAll);
 		
 		this.btn_AddImages = new JButton("Add images");
+		this.btn_AddImages.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        btn_AddImages(e);
+		    }
+		});
 		GridBagConstraints gbc_btn_AddImages = new GridBagConstraints();
 		gbc_btn_AddImages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btn_AddImages.insets = new Insets(0, 0, 5, 0);
@@ -274,6 +289,11 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_VisitOrder, gbc_lbl_VisitOrder);
 		
 		this.cb_VisitOrder = new JComboBox<String>();
+		this.cb_VisitOrder.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        cb_VisitOrder(e);
+		    }
+		});
 		this.cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"chronological", "shortest route", "selected order"}));
 		GridBagConstraints gbc_cb_VisitOrder = new GridBagConstraints();
 		gbc_cb_VisitOrder.anchor = GridBagConstraints.EAST;
@@ -291,6 +311,11 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_ResizeMethod, gbc_lbl_ResizeMethod);
 		
 		this.cb_ResizeMethod = new JComboBox<String>();
+		this.cb_ResizeMethod.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        cb_ResizeMethod(e);
+		    }
+		});
 		this.cb_ResizeMethod.setModel(new DefaultComboBoxModel<String>(new String[] {"when zooming", "don't resize"}));
 		GridBagConstraints gbc_cb_ResizeMethod = new GridBagConstraints();
 		gbc_cb_ResizeMethod.anchor = GridBagConstraints.WEST;
@@ -308,6 +333,11 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_ImageSize, gbc_lbl_ImageSize);
 		
 		this.cb_ImageSize = new JComboBox<String>();
+		this.cb_ImageSize.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        cb_ImageSize(e);
+		    }
+		});
 		this.cb_ImageSize.setModel(new DefaultComboBoxModel<String>(new String[] {"100 px", "200 px", "400 px", "600 px", "800 px", "original"}));
 		GridBagConstraints gbc_cb_ImageSize = new GridBagConstraints();
 		gbc_cb_ImageSize.insets = new Insets(0, 0, 5, 0);
@@ -331,6 +361,11 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_ImageQuality, gbc_lbl_ImageQuality);
 		
 		this.cb_ImageQuality = new JComboBox<String>();
+		this.cb_ImageQuality.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        cb_ImageQuality(e);
+		    }
+		});
 		this.cb_ImageQuality.setModel(new DefaultComboBoxModel<String>(new String[] {"high", "low"}));
 		GridBagConstraints gbc_cb_ImageQuality = new GridBagConstraints();
 		gbc_cb_ImageQuality.anchor = GridBagConstraints.WEST;
@@ -441,21 +476,6 @@ public class MainWindow extends JFrame
 	}
 	
 	
-	public void btn_ClearAll(ActionEvent e)
-	{
-		this.clearMap();
-	}
-	
-	
-	public void btn_ClearLast(ActionEvent e)
-	{
-		this.overlayLines.pollLast();
-		this.mapKit.repaint();
-		this.currSource = null;
-		this.currTarget = null;
-	}
-	
-	
 	public void mapMouseMoved(MouseEvent e)
 	{
 	    JXMapViewer map = this.mapKit.getMainMap();
@@ -512,8 +532,10 @@ public class MainWindow extends JFrame
 	
     public void mapMouseClicked(MouseEvent e)
     {
-        if (g == null)
+        if (g == null) {
+            System.out.println("Error: must load a graph first!");
             return;
+        }
         
         // middle mouse button -> clear
         if (SwingUtilities.isMiddleMouseButton(e)) {
@@ -570,6 +592,63 @@ public class MainWindow extends JFrame
     }
     
     
+    public void btn_ClearAll(ActionEvent e)
+    {
+        this.clearMap();
+    }
+    
+    
+    public void btn_ClearLast(ActionEvent e)
+    {
+        this.overlayLines.pollLast();
+        this.mapKit.repaint();
+        this.currSource = null;
+        this.currTarget = null;
+    }
+    
+    
+	public void btn_CalculateRoute(ActionEvent e)
+    {
+        System.err.println("btn_CalculateRoute not yet implemented!");
+    }
+    
+	
+    public void cb_VisitOrder(ActionEvent e)
+    {
+        System.err.println("cb_VisitOrder not yet implemented!");
+    }
+    
+    
+    public void btn_RemoveImage(ActionEvent e)
+    {
+        System.err.println("btn_RemoveImage not yet implemented!");
+    }
+    
+    
+    public void btn_AddImages(ActionEvent e)
+    {
+        System.err.println("btn_AddImages not yet implemented!");
+    }
+    
+    
+    public void cb_ResizeMethod(ActionEvent e)
+    {
+        System.err.println("cb_ResizeMethod not yet implemented!");
+    }
+    
+    
+    public void cb_ImageSize(ActionEvent e)
+    {
+        System.err.println("cb_ImageSize not yet implemented!");
+    }
+    
+    
+    public void cb_ImageQuality(ActionEvent e)
+    {
+        System.err.println("cb_ImageQuality not yet implemented!");
+    }
+    
+
     public void updateWaypoints()
     {
         HashSet<Waypoint> waypointSet = new HashSet<Waypoint>();
@@ -580,15 +659,16 @@ public class MainWindow extends JFrame
         }
         waypointPainter.setWaypoints(waypointSet);
     }
-	
-	
-	public void log(String s)
-	{
-		if (currLines++ > MAX_LOG_LENGTH) {
-			currLines = 1;
-			this.textArea_Log.setText("");
-		}
-		this.textArea_Log.append(s);
-	}
+    
+    
+    public void log(String s)
+    {
+        if (currLines++ > MAX_LOG_LENGTH) {
+            currLines = 1;
+            this.textArea_Log.setText("");
+        }
+        this.textArea_Log.append(s);
+    }
+    
 
 }
