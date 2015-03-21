@@ -59,6 +59,15 @@ import javax.swing.JList;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+
+import java.awt.Color;
+import java.awt.Component;
+
+import javax.swing.Box;
 
 
 
@@ -101,6 +110,9 @@ public class MainWindow extends JFrame
     private JLabel            lbl_ImageQuality;
     private JComboBox<String> cb_ImageQuality;
     private JList             list_Images;
+    private JSeparator separator_0;
+    private JSeparator separator_1;
+    private Component verticalStrut;
 
 
 
@@ -155,13 +167,13 @@ public class MainWindow extends JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1300, 900);
 		this.contentPane = new JPanel();
-		this.contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		this.contentPane.setBorder(null);
 		setContentPane(this.contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0,
-				0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		this.contentPane.setLayout(gbl_contentPane);
@@ -175,7 +187,7 @@ public class MainWindow extends JFrame
 		});
 		GridBagConstraints gbc_mapKit = new GridBagConstraints();
 		gbc_mapKit.gridheight = 13;
-		gbc_mapKit.gridwidth = 14;
+		gbc_mapKit.gridwidth = 12;
 		gbc_mapKit.insets = new Insets(0, 0, 5, 5);
 		gbc_mapKit.fill = GridBagConstraints.BOTH;
 		gbc_mapKit.gridx = 0;
@@ -188,7 +200,7 @@ public class MainWindow extends JFrame
 		gbc_list_Images.gridheight = 13;
 		gbc_list_Images.insets = new Insets(0, 0, 5, 0);
 		gbc_list_Images.fill = GridBagConstraints.BOTH;
-		gbc_list_Images.gridx = 14;
+		gbc_list_Images.gridx = 12;
 		gbc_list_Images.gridy = 0;
 		this.contentPane.add(this.list_Images, gbc_list_Images);
 		
@@ -207,12 +219,12 @@ public class MainWindow extends JFrame
 		textArea_Log.setFont(new Font("Hasklig", Font.PLAIN, 11));
 		this.scrollPane_Log.setViewportView(this.textArea_Log);
 		
-		this.btn_LoadGraph = new JButton("Load Graph");
-		this.btn_LoadGraph.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				btn_LoadGraph(e);
-			}
-		} );
+		this.btn_CalculateRoute = new JButton("Calculate route");
+		this.btn_CalculateRoute.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        btn_CalculateRoute(e);
+		    }
+		});
 		
 		this.btn_ClearLast = new JButton("Clear last marker");
 		this.btn_ClearLast.addActionListener(new ActionListener() {
@@ -228,31 +240,51 @@ public class MainWindow extends JFrame
 		gbc_btn_ClearLast.gridy = 13;
 		this.contentPane.add(this.btn_ClearLast, gbc_btn_ClearLast);
 		
-		this.btn_CalculateRoute = new JButton("Calculate route");
-		this.btn_CalculateRoute.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        btn_CalculateRoute(e);
-		    }
-		});
+		this.separator_0 = new JSeparator();
+		this.separator_0.setOrientation(SwingConstants.VERTICAL);
+		GridBagConstraints gbc_separator_0 = new GridBagConstraints();
+		gbc_separator_0.fill = GridBagConstraints.VERTICAL;
+		gbc_separator_0.gridheight = 6;
+		gbc_separator_0.insets = new Insets(0, 0, 0, 5);
+		gbc_separator_0.gridx = 9;
+		gbc_separator_0.gridy = 13;
+		this.contentPane.add(this.separator_0, gbc_separator_0);
 		GridBagConstraints gbc_btn_CalculateRoute = new GridBagConstraints();
 		gbc_btn_CalculateRoute.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btn_CalculateRoute.insets = new Insets(0, 0, 5, 5);
-		gbc_btn_CalculateRoute.gridx = 12;
+		gbc_btn_CalculateRoute.gridx = 11;
 		gbc_btn_CalculateRoute.gridy = 13;
 		this.contentPane.add(this.btn_CalculateRoute, gbc_btn_CalculateRoute);
 		
-		this.btn_RemoveImage = new JButton("Remove selected image");
+		this.btn_RemoveImage = new JButton("Remove image");
 		this.btn_RemoveImage.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        btn_RemoveImage(e);
 		    }
 		});
+		
+		this.separator_1 = new JSeparator();
+		this.separator_1.setOrientation(SwingConstants.VERTICAL);
+		GridBagConstraints gbc_separator_1 = new GridBagConstraints();
+		gbc_separator_1.fill = GridBagConstraints.VERTICAL;
+		gbc_separator_1.gridheight = 6;
+		gbc_separator_1.insets = new Insets(0, 0, 0, 5);
+		gbc_separator_1.gridx = 12;
+		gbc_separator_1.gridy = 13;
+		this.contentPane.add(this.separator_1, gbc_separator_1);
 		GridBagConstraints gbc_btn_RemoveImage = new GridBagConstraints();
 		gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
-		gbc_btn_RemoveImage.gridx = 16;
+		gbc_btn_RemoveImage.gridx = 14;
 		gbc_btn_RemoveImage.gridy = 13;
 		this.contentPane.add(this.btn_RemoveImage, gbc_btn_RemoveImage);
+		
+		this.btn_AddImages = new JButton("Add images");
+		this.btn_AddImages.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        btn_AddImages(e);
+		    }
+		});
 		
 		this.btn_ClearAll = new JButton("Clear all markers");
 		this.btn_ClearAll.addActionListener(new ActionListener() {
@@ -267,16 +299,50 @@ public class MainWindow extends JFrame
 		gbc_btn_ClearAll.gridy = 14;
 		this.contentPane.add(this.btn_ClearAll, gbc_btn_ClearAll);
 		
-		this.btn_AddImages = new JButton("Add images");
-		this.btn_AddImages.addActionListener(new ActionListener() {
+		this.btn_LoadGraph = new JButton("Load Graph");
+		this.btn_LoadGraph.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btn_LoadGraph(e);
+			}
+		} );
+		
+		this.verticalStrut = Box.createVerticalStrut(20);
+		GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
+		gbc_verticalStrut.insets = new Insets(0, 0, 5, 5);
+		gbc_verticalStrut.gridx = 8;
+		gbc_verticalStrut.gridy = 15;
+		this.contentPane.add(this.verticalStrut, gbc_verticalStrut);
+		GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
+		gbc_btn_LoadGraph.anchor = GridBagConstraints.WEST;
+		gbc_btn_LoadGraph.insets = new Insets(0, 0, 0, 5);
+		gbc_btn_LoadGraph.gridx = 8;
+		gbc_btn_LoadGraph.gridy = 18;
+		this.contentPane.add(this.btn_LoadGraph, gbc_btn_LoadGraph);
+		
+		this.lbl_ImageQuality = new JLabel("Image quality:");
+		GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
+		gbc_lbl_ImageQuality.anchor = GridBagConstraints.EAST;
+		gbc_lbl_ImageQuality.insets = new Insets(0, 0, 0, 5);
+		gbc_lbl_ImageQuality.gridx = 13;
+		gbc_lbl_ImageQuality.gridy = 18;
+		this.contentPane.add(this.lbl_ImageQuality, gbc_lbl_ImageQuality);
+		
+		this.cb_ImageQuality = new JComboBox<String>();
+		this.cb_ImageQuality.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-		        btn_AddImages(e);
+		        cb_ImageQuality(e);
 		    }
 		});
+		this.cb_ImageQuality.setModel(new DefaultComboBoxModel<String>(new String[] {"high", "low"}));
+		GridBagConstraints gbc_cb_ImageQuality = new GridBagConstraints();
+		gbc_cb_ImageQuality.anchor = GridBagConstraints.WEST;
+		gbc_cb_ImageQuality.gridx = 14;
+		gbc_cb_ImageQuality.gridy = 18;
+		this.contentPane.add(this.cb_ImageQuality, gbc_cb_ImageQuality);
 		GridBagConstraints gbc_btn_AddImages = new GridBagConstraints();
 		gbc_btn_AddImages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btn_AddImages.insets = new Insets(0, 0, 5, 0);
-		gbc_btn_AddImages.gridx = 16;
+		gbc_btn_AddImages.gridx = 14;
 		gbc_btn_AddImages.gridy = 14;
 		this.contentPane.add(this.btn_AddImages, gbc_btn_AddImages);
 		
@@ -284,7 +350,7 @@ public class MainWindow extends JFrame
 		GridBagConstraints gbc_lbl_VisitOrder = new GridBagConstraints();
 		gbc_lbl_VisitOrder.anchor = GridBagConstraints.EAST;
 		gbc_lbl_VisitOrder.insets = new Insets(0, 0, 5, 5);
-		gbc_lbl_VisitOrder.gridx = 11;
+		gbc_lbl_VisitOrder.gridx = 10;
 		gbc_lbl_VisitOrder.gridy = 16;
 		this.contentPane.add(this.lbl_VisitOrder, gbc_lbl_VisitOrder);
 		
@@ -296,9 +362,9 @@ public class MainWindow extends JFrame
 		});
 		this.cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"chronological", "shortest route", "selected order"}));
 		GridBagConstraints gbc_cb_VisitOrder = new GridBagConstraints();
-		gbc_cb_VisitOrder.anchor = GridBagConstraints.EAST;
+		gbc_cb_VisitOrder.anchor = GridBagConstraints.WEST;
 		gbc_cb_VisitOrder.insets = new Insets(0, 0, 5, 5);
-		gbc_cb_VisitOrder.gridx = 12;
+		gbc_cb_VisitOrder.gridx = 11;
 		gbc_cb_VisitOrder.gridy = 16;
 		this.contentPane.add(this.cb_VisitOrder, gbc_cb_VisitOrder);
 		
@@ -306,7 +372,7 @@ public class MainWindow extends JFrame
 		GridBagConstraints gbc_lbl_ResizeMethod = new GridBagConstraints();
 		gbc_lbl_ResizeMethod.insets = new Insets(0, 0, 5, 5);
 		gbc_lbl_ResizeMethod.anchor = GridBagConstraints.EAST;
-		gbc_lbl_ResizeMethod.gridx = 15;
+		gbc_lbl_ResizeMethod.gridx = 13;
 		gbc_lbl_ResizeMethod.gridy = 16;
 		this.contentPane.add(this.lbl_ResizeMethod, gbc_lbl_ResizeMethod);
 		
@@ -320,7 +386,7 @@ public class MainWindow extends JFrame
 		GridBagConstraints gbc_cb_ResizeMethod = new GridBagConstraints();
 		gbc_cb_ResizeMethod.anchor = GridBagConstraints.WEST;
 		gbc_cb_ResizeMethod.insets = new Insets(0, 0, 5, 0);
-		gbc_cb_ResizeMethod.gridx = 16;
+		gbc_cb_ResizeMethod.gridx = 14;
 		gbc_cb_ResizeMethod.gridy = 16;
 		this.contentPane.add(this.cb_ResizeMethod, gbc_cb_ResizeMethod);
 		
@@ -328,7 +394,7 @@ public class MainWindow extends JFrame
 		GridBagConstraints gbc_lbl_ImageSize = new GridBagConstraints();
 		gbc_lbl_ImageSize.insets = new Insets(0, 0, 5, 5);
 		gbc_lbl_ImageSize.anchor = GridBagConstraints.EAST;
-		gbc_lbl_ImageSize.gridx = 15;
+		gbc_lbl_ImageSize.gridx = 13;
 		gbc_lbl_ImageSize.gridy = 17;
 		this.contentPane.add(this.lbl_ImageSize, gbc_lbl_ImageSize);
 		
@@ -339,39 +405,13 @@ public class MainWindow extends JFrame
 		    }
 		});
 		this.cb_ImageSize.setModel(new DefaultComboBoxModel<String>(new String[] {"100 px", "200 px", "400 px", "600 px", "800 px", "original"}));
+		this.cb_ImageSize.setSelectedIndex(2);
 		GridBagConstraints gbc_cb_ImageSize = new GridBagConstraints();
 		gbc_cb_ImageSize.insets = new Insets(0, 0, 5, 0);
 		gbc_cb_ImageSize.anchor = GridBagConstraints.WEST;
-		gbc_cb_ImageSize.gridx = 16;
+		gbc_cb_ImageSize.gridx = 14;
 		gbc_cb_ImageSize.gridy = 17;
 		this.contentPane.add(this.cb_ImageSize, gbc_cb_ImageSize);
-		GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
-		gbc_btn_LoadGraph.anchor = GridBagConstraints.WEST;
-		gbc_btn_LoadGraph.insets = new Insets(0, 0, 0, 5);
-		gbc_btn_LoadGraph.gridx = 8;
-		gbc_btn_LoadGraph.gridy = 18;
-		this.contentPane.add(this.btn_LoadGraph, gbc_btn_LoadGraph);
-		
-		this.lbl_ImageQuality = new JLabel("Image quality:");
-		GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
-		gbc_lbl_ImageQuality.anchor = GridBagConstraints.EAST;
-		gbc_lbl_ImageQuality.insets = new Insets(0, 0, 0, 5);
-		gbc_lbl_ImageQuality.gridx = 15;
-		gbc_lbl_ImageQuality.gridy = 18;
-		this.contentPane.add(this.lbl_ImageQuality, gbc_lbl_ImageQuality);
-		
-		this.cb_ImageQuality = new JComboBox<String>();
-		this.cb_ImageQuality.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        cb_ImageQuality(e);
-		    }
-		});
-		this.cb_ImageQuality.setModel(new DefaultComboBoxModel<String>(new String[] {"high", "low"}));
-		GridBagConstraints gbc_cb_ImageQuality = new GridBagConstraints();
-		gbc_cb_ImageQuality.anchor = GridBagConstraints.WEST;
-		gbc_cb_ImageQuality.gridx = 16;
-		gbc_cb_ImageQuality.gridy = 18;
-		this.contentPane.add(this.cb_ImageQuality, gbc_cb_ImageQuality);
 	}
 
 
@@ -402,7 +442,7 @@ public class MainWindow extends JFrame
 	    
         
         StopWatch.lap();
-        FileUtil.loadOverlayImagesFrom("./res", this.overlayImages, 300, false);
+        FileUtil.loadOverlayImagesFrom("./res", this.overlayImages, 400, true);
         System.out.println("Loading images: " + StopWatch.lapSecStr());
 	    
 	    
@@ -550,7 +590,8 @@ public class MainWindow extends JFrame
 
         // from here on it's either a left mouse button click (-> select source)
         // or a right mouse button click with a previously selected source (-> select target, calculate route)
-        
+
+        System.out.println();
         GeoPosition clickPos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
         System.out.println("Clicked at: " + clickPos.getLatitude() + ", " + clickPos.getLongitude());
 
@@ -587,7 +628,6 @@ public class MainWindow extends JFrame
             }
         }
 
-        System.out.println();
         this.mapKit.repaint();
     }
     
@@ -633,19 +673,63 @@ public class MainWindow extends JFrame
     
     public void cb_ResizeMethod(ActionEvent e)
     {
-        System.err.println("cb_ResizeMethod not yet implemented!");
+        if (!(e.getSource() instanceof JComboBox<?>)) {
+            System.err.println("cb_ResizeMethod: e.getSource() is no instance of JComboBox");
+            return;
+        }
+        
+        System.out.println("cb_ResizeMethod");
+        @SuppressWarnings("unchecked")
+        JComboBox<String> cb = (JComboBox<String>)e.getSource();
+        String value = (String) cb.getSelectedItem();
+        boolean dr = value == "when zooming";
+        
+        for (OverlayImage oi : overlayImages) {
+            oi.dynamicResize(dr);
+        }
     }
     
     
     public void cb_ImageSize(ActionEvent e)
     {
-        System.err.println("cb_ImageSize not yet implemented!");
+        if (!(e.getSource() instanceof JComboBox<?>)) {
+            System.err.println("cb_ImageSize: e.getSource() is no instance of JComboBox");
+            return;
+        }
+        
+        System.out.println("cb_ImageSize");
+        @SuppressWarnings("unchecked")
+        JComboBox<String> cb = (JComboBox<String>)e.getSource();
+        String value = (String) cb.getSelectedItem();
+        int size = -1;
+        
+        if (value.matches("[0-9]{2,3}0 px")) {
+            value = value.substring(0, value.length() - 3);
+            size = Integer.parseInt(value);
+        }
+        
+        for (OverlayImage oi : overlayImages) {
+            oi.maxSize(size, true);
+        }
     }
     
     
     public void cb_ImageQuality(ActionEvent e)
     {
-        System.err.println("cb_ImageQuality not yet implemented!");
+        if (!(e.getSource() instanceof JComboBox<?>)) {
+            System.err.println("cb_ImageQuality: e.getSource() is no instance of JComboBox");
+            return;
+        }
+        
+        System.out.println("cb_ImageQuality");
+        @SuppressWarnings("unchecked")
+        JComboBox<String> cb = (JComboBox<String>)e.getSource();
+        String value = (String) cb.getSelectedItem();
+        boolean hq = value == "high";
+        
+        for (OverlayImage oi : overlayImages) {
+            oi.setHighQuality(hq);
+        }
     }
     
 

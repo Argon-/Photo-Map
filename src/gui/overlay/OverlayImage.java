@@ -49,9 +49,10 @@ public final class OverlayImage
     private boolean         visible       = false;
     private boolean         dynamicResize = true;
     private boolean         fixedPosition = false;
+    private boolean         forceResize   = false;
     private int             positionHint  = TOP_LEFT;
     private GeoPosition     mapPos        = null;
-    private int             mapZoom       = -1;
+    private int             mapZoom       = 1;
 
     private int             targetWidth;
     private int             targetHeight;
@@ -117,6 +118,7 @@ public final class OverlayImage
     public OverlayImage setHighQuality(boolean q)
     {
         highQuality = q;
+        forceResize = true;
         return this;
     }
     
@@ -139,40 +141,81 @@ public final class OverlayImage
     {
         targetWidth = w;
         targetHeight = h;
-        return resizeInternal(w, h);
-    }
-    
-    
-    public OverlayImage resizeInternal(int w, int h)
-    {
-        if ((w > -1 && w != img.getWidth()) || (h > -1 && h != img.getHeight())) {
-            cachedImg = ImageUtil.getScaledInstance(img, w, h, RenderingHints.VALUE_INTERPOLATION_BILINEAR, highQuality);
-        }
+        resizeInternal(w, h);
         return this;
     }
-
-    public OverlayImage maxSize(int m)
+    
+    
+    private boolean resizeInternal(int width, int height)
     {
-        return maxSizeInternal(m, true);
+        int w, h;
+        
+        if (dynamicResize) {
+            double ff = (mapZoom) / (Math.log(mapZoom) + 1);
+            w = (int) ((targetWidth / ff) - (targetWidth * 0.01 * (mapZoom-1)));
+            h = (int) ((targetHeight / ff) - (targetHeight * 0.01 * (mapZoom-1)));
+            if (w <= 20 || h <= 20) { // arbitrary minimum
+                return false;
+            }
+        }
+        else {
+            w = width;
+            h = height;
+        }
+        
+        if (forceResize || ((w > -1 && w != img.getWidth()) || (h > -1 && h != img.getHeight()))) {
+            //System.out.println("w = " + w + "   h = " + h);
+            cachedImg = ImageUtil.getScaledInstance(img, w, h, RenderingHints.VALUE_INTERPOLATION_BILINEAR, highQuality);
+            forceResize = false;
+        }
+        return true;
     }
 
-    private OverlayImage maxSizeInternal(int m, boolean update)
+    
+    public OverlayImage maxSize(int m, boolean lazy)
     {
+        // special case: original size
+        if (m < 0) {
+            if (lazy) {
+                targetWidth = img.getWidth();
+                targetHeight = img.getHeight();
+                forceResize = true;
+            }
+            else {
+                resize(img.getWidth(), img.getHeight());
+            }
+            return this;
+        }
+        
         float fW = (float) m / img.getWidth();
         float fH = (float) m / img.getHeight();
         if (img.getWidth() < img.getHeight())
             fW = fH;
 
-        if (update)
-            return resize((int) (img.getWidth() * fW), (int) (img.getHeight() * fW));
-        else
-            return resizeInternal((int) (img.getWidth() * fW), (int) (img.getHeight() * fW));
+        if (lazy) {
+            targetWidth = (int) (img.getWidth() * fW);
+            targetHeight = (int) (img.getHeight() * fW);
+            forceResize = true;
+        }
+        else {
+            resize((int) (img.getWidth() * fW), (int) (img.getHeight() * fW));
+        }
+
+        return this;
+    }
+    
+    
+    public OverlayImage maxSize(int m)
+    {
+        return maxSize(m, false);
     }
     
     
     public OverlayImage dynamicResize(boolean dr)
     {
         dynamicResize = dr;
+        forceResize = true;
+        //resizeInternal(targetWidth, targetHeight);
         return this;
     }
 
@@ -229,15 +272,9 @@ public final class OverlayImage
         }
         else if (mapPos != null)
         {
-            if (map.getZoom() != mapZoom) {
+            if (forceResize || map.getZoom() != mapZoom) {
                 mapZoom = map.getZoom();
-                if (dynamicResize) {
-                    double ff = (mapZoom) / (Math.log(mapZoom) + 1);
-                    int w = (int) ((targetWidth / ff) - (targetWidth * 0.01 * (mapZoom-1)));
-                    int h = (int) ((targetHeight / ff) - (targetHeight * 0.01 * (mapZoom-1)));
-                    if (w > 20 && h > 20) // arbitrary minimum
-                        resizeInternal(w, h);
-                }
+                resizeInternal(targetWidth, targetHeight);
             }
             Point2D p = map.getTileFactory().geoToPixel(mapPos, mapZoom);
             // reside centered above the location
