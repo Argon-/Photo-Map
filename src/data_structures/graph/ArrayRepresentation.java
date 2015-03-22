@@ -173,7 +173,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
             }
         } 
         catch (NumberFormatException e) {
-            e.printStackTrace();
             throw new InvalidGraphFormatException("Invalid graph text file format");
         }
     }

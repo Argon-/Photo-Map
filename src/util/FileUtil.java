@@ -44,16 +44,15 @@ public class FileUtil
                                     .dynamicResize(dynamicResize));
                         }
                         catch (IOException e) {
-                            System.out.println("Error loading: " + path.toAbsolutePath().toString());
+                            System.out.println("Error loading: " + path.toAbsolutePath().toString() + " (0)");
                         }
                         catch (RuntimeException e) {
-                            System.out.println("Ignoring invalid image: " + path.toAbsolutePath().toString());
+                            System.out.println("Ignoring image with insufficient tags: " + path.toAbsolutePath().toString() + " (1)");
                         }
-
                 });
             }
             catch (IOException e) {
-                System.out.println("Error loading from: " + f);
+                System.out.println("Error loading from: " + f + " (2)");
             }
         }
         
@@ -66,7 +65,10 @@ public class FileUtil
                         .dynamicResize(dynamicResize));                
             }
             catch (IOException e) {
-                System.out.println("Error loading: " + f);
+                System.out.println("Error loading: " + f + " (3)");
+            }
+            catch (RuntimeException e) {
+                System.out.println("Ignoring image with insufficient tags: " + file.getAbsolutePath() + " (1)");
             }
         }
         

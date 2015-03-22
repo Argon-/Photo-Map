@@ -305,5 +305,11 @@ public final class OverlayImage
     {
         return mapPos;
     }
+    
+    
+    public String toString() 
+    {
+        return label != null ? label : "(null)";
+    }
 
 }
