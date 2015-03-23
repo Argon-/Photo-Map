@@ -51,6 +51,7 @@ import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.swing.DefaultListModel;
@@ -88,12 +89,17 @@ public class MainWindow extends JFrame
 	private GeoPosition currSource = null;
 	private GeoPosition currTarget = null;
 	
+	private boolean imagesHighQuality = true;
+	private boolean imagesDynamicResize = true;
+	private int     imagesSize = 400;
+	
 	private static final int MAX_LOG_LENGTH = 500;
 	private int currLines = 0;
 	private boolean imageSelectedFromList = false;
 	
     private JPanel                                     contentPane;
     private JXMapKit                                   mapKit;
+    private JXMapViewer                                map;
     private JScrollPane                                scrollPane_Log;
     private JTextArea                                  textArea_Log;
     private JButton                                    btn_LoadGraph;
@@ -180,6 +186,7 @@ public class MainWindow extends JFrame
 		this.contentPane.setLayout(gbl_contentPane);
 
 		this.mapKit = new JXMapKit();
+		this.map = mapKit.getMainMap();
 		this.mapKit.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -212,6 +219,7 @@ public class MainWindow extends JFrame
 		this.list_Images.setModel(new DefaultListModel<OverlayImage>());
 		this.list_Images.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.scrollPane_Images.setViewportView(this.list_Images);
+		this.list_Images.setDragEnabled(true);
 		
 		this.scrollPane_Log = new JScrollPane();
 		this.scrollPane_Log.setMinimumSize(new Dimension(200, 100));
@@ -425,13 +433,13 @@ public class MainWindow extends JFrame
 
 	public void myInitComponents()
 	{
-		this.mapKit.getMainMap().addMouseListener(new MouseAdapter() {
+		map.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
             	mapMouseClicked(e);
             }
         });
 		
-		this.mapKit.getMainMap().addMouseMotionListener(new MouseAdapter() {
+		map.addMouseMotionListener(new MouseAdapter() {
 		    public void mouseMoved(MouseEvent e) {
 		        mapMouseMoved(e);
 		    }
@@ -441,7 +449,7 @@ public class MainWindow extends JFrame
 		this.textArea_Log.setEditable(false);
 		((DefaultCaret) this.textArea_Log.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
-		this.mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
+        this.mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
 		this.mapKit.setAddressLocationShown(false); // don't show center
 		//this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
 	    this.mapKit.setAddressLocation(new GeoPosition(48.89088888888889, 9.225294444444444)); // Home
@@ -456,7 +464,7 @@ public class MainWindow extends JFrame
 			{
 				g = (Graphics2D) g.create();
 				// convert from viewport to world bitmap
-				Rectangle rect = mapKit.getMainMap().getViewportBounds();
+				Rectangle rect = map.getViewportBounds();
 				g.translate(-rect.x, -rect.y);
 				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				
@@ -481,7 +489,7 @@ public class MainWindow extends JFrame
 		
 	    final CompoundPainter<Painter<JXMapViewer>> c = new CompoundPainter<Painter<JXMapViewer>>(waypointPainter, overlayPainter);
 	    c.setCacheable(false);
-		mapKit.getMainMap().setOverlayPainter(c);      // $hide$ (WindowBuilder doesn't like this line)
+		map.setOverlayPainter(c);      // $hide$ (WindowBuilder doesn't like this line)
 		updateWaypoints();
 	}
 	
@@ -517,7 +525,7 @@ public class MainWindow extends JFrame
         // or a right mouse button click with a previously selected source (-> select target, calculate route)
 
         System.out.println();
-        GeoPosition clickPos = mapKit.getMainMap().convertPointToGeoPosition(e.getPoint());
+        GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
         System.out.println("Clicked at: " + clickPos.getLatitude() + ", " + clickPos.getLongitude());
 
         StopWatch.lap();
@@ -559,7 +567,6 @@ public class MainWindow extends JFrame
     
     public void mapMouseMoved(MouseEvent e)
     {
-        JXMapViewer map = this.mapKit.getMainMap();
         int zoom = map.getZoom();
         GeoPosition pos = null;
         boolean change = false;
@@ -705,15 +712,17 @@ public class MainWindow extends JFrame
         switch (c) {
             case JFileChooser.APPROVE_OPTION:
                 File[] files = fd.getSelectedFiles();
+                LinkedList<OverlayImage> list = new LinkedList<OverlayImage>();
                 StopWatch.lap();
                 for (File file : files) {
-                    FileUtil.loadOverlayImagesFrom(file.getAbsolutePath(), this.overlayImages, 400, true);
+                    FileUtil.loadOverlayImagesFrom(file.getAbsolutePath(), list, imagesSize, imagesDynamicResize, imagesHighQuality);
                 }
                 System.out.println("Loading images: " + StopWatch.lapSecStr());
                 
                 DefaultListModel<OverlayImage> model = (DefaultListModel<OverlayImage>) list_Images.getModel();
-                for (OverlayImage oi : overlayImages) {
+                for (OverlayImage oi : list) {
                     model.addElement(oi);
+                    overlayImages.add(oi);
                 }
                 
                 updateWaypoints();
@@ -725,7 +734,7 @@ public class MainWindow extends JFrame
                 break;
         }       
     }
-    
+
     
     public void list_Images(ListSelectionEvent e)
     {
@@ -742,6 +751,22 @@ public class MainWindow extends JFrame
         oi.setVisible(true);
         imageSelectedFromList = true;
         repaint();
+
+        if (oi.getPosition() != null) {
+            int h = map.getHeight();
+            mapKit.setAddressLocation(oi.getPosition());
+            Point2D p = map.getCenter();
+            
+            //if (ih > (3 * h / 4)) {
+            //    p.setLocation(p.getX(), p.getY() - (h/2) + OverlayImage.PADDING);
+            //    System.out.println("2");
+            //}
+            if (oi.getHeightFull() > (h / 2)) {
+                p.setLocation(p.getX(), p.getY() - (h/4));
+                System.out.println("4");
+            }
+            map.setCenter(p);
+        }
     }
     
     
@@ -756,10 +781,10 @@ public class MainWindow extends JFrame
         @SuppressWarnings("unchecked")
         JComboBox<String> cb = (JComboBox<String>)e.getSource();
         String value = (String) cb.getSelectedItem();
-        boolean dr = value == "when zooming";
+        imagesDynamicResize = value == "when zooming";
         
         for (OverlayImage oi : overlayImages) {
-            oi.dynamicResize(dr);
+            oi.dynamicResize(imagesDynamicResize);
         }
         repaint();
     }
@@ -776,15 +801,15 @@ public class MainWindow extends JFrame
         @SuppressWarnings("unchecked")
         JComboBox<String> cb = (JComboBox<String>)e.getSource();
         String value = (String) cb.getSelectedItem();
-        int size = -1;
+        imagesSize = -1;
         
         if (value.matches("[0-9]{2,3}0 px")) {
             value = value.substring(0, value.length() - 3);
-            size = Integer.parseInt(value);
+            imagesSize = Integer.parseInt(value);
         }
         
         for (OverlayImage oi : overlayImages) {
-            oi.maxSize(size, true);
+            oi.maxSize(imagesSize, true);
         }
         repaint();
     }
@@ -801,10 +826,10 @@ public class MainWindow extends JFrame
         @SuppressWarnings("unchecked")
         JComboBox<String> cb = (JComboBox<String>)e.getSource();
         String value = (String) cb.getSelectedItem();
-        boolean hq = value == "high";
+        imagesHighQuality = value == "high";
         
         for (OverlayImage oi : overlayImages) {
-            oi.setHighQuality(hq);
+            oi.setHighQuality(imagesHighQuality);
         }
         repaint();
     }

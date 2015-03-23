@@ -41,6 +41,11 @@ public final class OverlayImage
     public static final int LABEL_X_PADDING   = 5;
     public static final int LABEL_Y_PADDING   = 2;
 
+    private int cachedFontHeight = 0;
+    private int cachedFontWidth  = 0;
+    private int cachedFontAscent = 0;
+    
+    
     private BufferedImage   img;
     private BufferedImage   cachedImg;
     private boolean         highQuality   = true;
@@ -85,6 +90,25 @@ public final class OverlayImage
         if (strict && mapPos == null) {
             throw new RuntimeException("image contains no valid geo location (strict checking)");
         }
+    }
+    
+    
+    public int getHeight()
+    {
+        return cachedImg.getHeight();
+    }
+    
+    
+    public int getHeightFull()
+    {
+        int rh = Math.max(targetHeight, cachedImg.getHeight());
+        return rh + WAYPOINT_Y_OFFSET + PADDING * 2 + LABEL_Y_PADDING + cachedFontHeight;
+    }
+    
+    
+    public int getWidth()
+    {
+        return cachedImg.getWidth();
     }
     
     
@@ -243,6 +267,14 @@ public final class OverlayImage
 
     public void draw(Graphics2D g, JXMapViewer map)
     {
+        if (cachedFontHeight == 0 || cachedFontWidth == 0 || cachedFontAscent == 0) {
+            FontMetrics fm = g.getFontMetrics();
+            cachedFontWidth = fm.stringWidth(label);
+            cachedFontHeight = fm.getHeight();
+            cachedFontAscent = fm.getAscent();
+            System.err.println("font cache invalidated");
+        }
+
         if (!visible)
             return;
         
@@ -282,19 +314,15 @@ public final class OverlayImage
             y = (int) p.getY() - (cachedImg.getHeight() + WAYPOINT_Y_OFFSET + PADDING);
             
             if (displayLabel && label != null) {
-                FontMetrics fm = g.getFontMetrics();
-                int font_w = fm.stringWidth(label);
-                int font_h = fm.getHeight();
-                
                 g.setPaint(new Color(0, 0, 0, 150));
                 
-                int box_x = (int) (p.getX() - (font_w / 2));
-                int box_y = (int) (p.getY() - (font_h + WAYPOINT_Y_OFFSET + PADDING));
-                y = y - font_h - LABEL_Y_PADDING * 2;
+                int box_x = (int) (p.getX() - (cachedFontWidth / 2));
+                int box_y = (int) (p.getY() - (cachedFontHeight + WAYPOINT_Y_OFFSET + PADDING));
+                y = y - cachedFontHeight - LABEL_Y_PADDING * 2;
                 
-                g.fillRoundRect(box_x - LABEL_X_PADDING, box_y - LABEL_Y_PADDING, font_w + LABEL_X_PADDING * 2, font_h + LABEL_Y_PADDING * 2, 10, 10);
+                g.fillRoundRect(box_x - LABEL_X_PADDING, box_y - LABEL_Y_PADDING, cachedFontWidth + LABEL_X_PADDING * 2, cachedFontHeight + LABEL_Y_PADDING * 2, 10, 10);
                 g.setPaint(Color.WHITE);
-                g.drawString(label, box_x, box_y + fm.getAscent());
+                g.drawString(label, box_x, box_y + cachedFontAscent);
             }
         }
         g.drawImage(cachedImg, x, y, null);

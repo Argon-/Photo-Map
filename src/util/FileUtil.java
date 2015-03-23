@@ -24,9 +24,10 @@ public class FileUtil
      * @param c collection to add the images
      * @param maxSize maximum size on the lowest zoom level (resizing retains aspect ratio)
      * @param dynamicResize shrink images when zooming out
+     * @param highQuality perform high(er) quality resizing
      * @return {@code true} when at least one image was loaded, {@code false} otherwise.
      */
-    public static boolean loadOverlayImagesFrom(String f, Collection<OverlayImage> c, int maxSize, boolean dynamicResize)
+    public static boolean loadOverlayImagesFrom(String f, Collection<OverlayImage> c, int maxSize, boolean dynamicResize, boolean highQuality)
     {
         File file = new File(f);
         int l = c.size();
@@ -40,8 +41,9 @@ public class FileUtil
                     .forEach(path -> {
                         try {
                             c.add(new OverlayImage(path.toAbsolutePath().toString())
-                                    .maxSize(maxSize)
-                                    .dynamicResize(dynamicResize));
+                                    .setHighQuality(highQuality)
+                                    .dynamicResize(dynamicResize)
+                                    .maxSize(maxSize));
                         }
                         catch (IOException e) {
                             System.out.println("Error loading: " + path.toAbsolutePath().toString() + " (0)");
@@ -61,8 +63,9 @@ public class FileUtil
         {
             try {
                 c.add(new OverlayImage(f)
-                        .maxSize(maxSize)
-                        .dynamicResize(dynamicResize));                
+                        .setHighQuality(highQuality)
+                        .dynamicResize(dynamicResize)
+                        .maxSize(maxSize));                
             }
             catch (IOException e) {
                 System.out.println("Error loading: " + f + " (3)");
@@ -85,7 +88,7 @@ public class FileUtil
      */
     public static boolean loadOverlayImagesFrom(String f, Collection<OverlayImage> c) 
     {
-        return loadOverlayImagesFrom(f, c, 400, true);
+        return loadOverlayImagesFrom(f, c, 400, true, true);
     }
 
 }

@@ -151,7 +151,7 @@ public class GraphGenerator
                         String v = pair[1].endsWith("\"") ? pair[1].substring(0, pair[1].length() - 1) : pair[1];
                         
                         if (k.startsWith("tourism")) {
-                            tourism = tourismType(v);
+                            tourism = tourismType(v, false, false);
                         }
                         else if (k.startsWith("name")) {
                             name = v;
@@ -314,46 +314,46 @@ public class GraphGenerator
     }
     
     
-    public int tourismType(String s)
+    public int tourismType(String s, boolean include_long_term_stay, boolean include_attractions)
     {
         if (s.equals("alpine_hut"))
             return 1;
         else if (s.equals("apartment"))
-            return 2;
+            return include_long_term_stay ? 2 : -2;
         else if (s.equals("attraction"))
-            return 3;
+            return include_attractions ? 3 : -3;
         else if (s.equals("artwork"))
-            return 4;
+            return include_attractions ? 4 : -4;
         else if (s.equals("camp_site"))
-            return 5;
+            return include_attractions ? 5 : -5;
         else if (s.equals("caravan_site"))
-            return 6;
+            return include_attractions ? 6 : -6;
         else if (s.equals("chalet"))
-            return 7;
+            return include_long_term_stay ? 7 : -7;
         else if (s.equals("gallery"))
-            return 8;
+            return include_attractions ? 8 : -8;
         else if (s.equals("guest_house"))
-            return 9;
+            return include_long_term_stay ? 9 : -9;
         else if (s.equals("hostel"))
             return 10;
         else if (s.equals("hotel"))
             return 11;
         else if (s.equals("information"))
-            return 12;
+            return include_attractions ? 12 : -12;
         else if (s.equals("motel"))
             return 13;
         else if (s.equals("museum"))
-            return 14;
+            return include_attractions ? 14 : -14;
         else if (s.equals("picnic_site"))
-            return 15;
+            return include_attractions ? 15 : -15;
         else if (s.equals("theme_park"))
-            return 16;
+            return include_attractions ? 16 : -16;
         else if (s.equals("viewpoint"))
-            return 17;
+            return include_attractions ? 17 : -17;
         else if (s.equals("wilderness_hut"))
-            return 18;
+            return include_long_term_stay ? 18 : -18;
         else if (s.equals("zoo"))
-            return 19;
+            return include_attractions ? 19 : -19;
         // other
         else if (s.equals("yes"))
             return 0;
