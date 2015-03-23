@@ -40,7 +40,7 @@ import com.drew.metadata.exif.GpsDirectory;
  * A resize is only guaranteed to happen when an image is explicitly requested
  * by the user ({@code isVisible(true)} followed by a call to {@code draw()}).
  */
-public final class OverlayImage
+public final class OverlayImage implements OverlayObject
 {
     public static final int MAX_CONCURRENTLY_VISIBLE_IMAGES = 1;
     public static final int IMAGE_MIN_HEIGHT = 20;
