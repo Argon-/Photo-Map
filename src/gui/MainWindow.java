@@ -97,30 +97,32 @@ public class MainWindow extends JFrame
 	private int currLines = 0;
 	private boolean imageSelectedFromList = false;
 	
-    private JPanel                                     contentPane;
-    private JXMapKit                                   mapKit;
-    private JXMapViewer                                map;
-    private JScrollPane                                scrollPane_Log;
-    private JTextArea                                  textArea_Log;
-    private JButton                                    btn_LoadGraph;
-    private JButton                                    btn_ClearLast;
-    private JButton                                    btn_ClearAll;
-    private JButton                                    btn_AddImages;
-    private JButton                                    btn_RemoveImage;
-    private JComboBox<String>                          cb_ResizeMethod;
-    private JComboBox<String>                          cb_ImageSize;
-    private JLabel                                     lbl_ResizeMethod;
-    private JLabel                                     lbl_ImageSize;
-    private JButton                                    btn_CalculateRoute;
-    private JLabel                                     lbl_VisitOrder;
-    private JComboBox<String>                          cb_VisitOrder;
-    private JLabel                                     lbl_ImageQuality;
-    private JComboBox<String>                          cb_ImageQuality;
-    private JList<OverlayImage>                        list_Images;
-    private JSeparator                                 separator_0;
-    private JSeparator                                 separator_1;
-    private Component                                  verticalStrut;
-    private JScrollPane                                scrollPane_Images;
+    private JPanel                contentPane;
+    private JXMapKit              mapKit;
+    private JXMapViewer           map;
+    private JList<OverlayImage>   list_Images;
+    private JScrollPane           scrollPane_Log;
+    private JScrollPane           scrollPane_Images;
+    private JTextArea             textArea_Log;
+    private JButton               btn_LoadGraph;
+    private JButton               btn_ClearLast;
+    private JButton               btn_ClearAll;
+    private JButton               btn_AddImages;
+    private JButton               btn_RemoveImage;
+    private JButton               btn_CalculateRoute;
+    private JButton               btn_SaveOptGraph;
+    private JComboBox<String>     cb_ResizeMethod;
+    private JComboBox<String>     cb_ImageSize;
+    private JComboBox<String>     cb_VisitOrder;
+    private JComboBox<String>     cb_ImageQuality;
+    private JLabel                lbl_ResizeMethod;
+    private JLabel                lbl_ImageSize;
+    private JLabel                lbl_VisitOrder;
+    private JLabel                lbl_ImageQuality;
+    private JSeparator            separator_0;
+    private JSeparator            separator_1;
+    private Component             verticalStrut;
+    private JFileChooser          fd = new JFileChooser();
 
 
 	/**
@@ -211,6 +213,7 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.scrollPane_Images, gbc_scrollPane_Images);
 		
 		this.list_Images = new JList<OverlayImage>();
+		this.list_Images.setToolTipText("Select an image to jump to its location.");
 		this.list_Images.addListSelectionListener(new ListSelectionListener() {
 		    public void valueChanged(ListSelectionEvent e) {
 		        list_Images(e);
@@ -236,6 +239,7 @@ public class MainWindow extends JFrame
 		this.scrollPane_Log.setViewportView(this.textArea_Log);
 		
 		this.btn_CalculateRoute = new JButton("Calculate route");
+		this.btn_CalculateRoute.setToolTipText("Calculate a route visiting all currently existing waypoints on the map.");
 		this.btn_CalculateRoute.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        btn_CalculateRoute(e);
@@ -243,6 +247,7 @@ public class MainWindow extends JFrame
 		});
 		
 		this.btn_ClearLast = new JButton("Clear last marker");
+		this.btn_ClearLast.setToolTipText("Remove the last set position marker from the map.");
 		this.btn_ClearLast.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btn_ClearLast(e);
@@ -273,6 +278,7 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.btn_CalculateRoute, gbc_btn_CalculateRoute);
 		
 		this.btn_RemoveImage = new JButton("Remove image");
+		this.btn_RemoveImage.setToolTipText("Remove the currently selected image from the list.");
 		this.btn_RemoveImage.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        btn_RemoveImage(e);
@@ -296,6 +302,7 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.btn_RemoveImage, gbc_btn_RemoveImage);
 		
 		this.btn_AddImages = new JButton("Add images");
+		this.btn_AddImages.setToolTipText("Add either single images or multiple images from a directory.");
 		this.btn_AddImages.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        btn_AddImages(e);
@@ -303,6 +310,7 @@ public class MainWindow extends JFrame
 		});
 		
 		this.btn_ClearAll = new JButton("Clear all markers");
+		this.btn_ClearAll.setToolTipText("Remove all position markers from the map.");
 		this.btn_ClearAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btn_ClearAll(e);
@@ -315,25 +323,40 @@ public class MainWindow extends JFrame
 		gbc_btn_ClearAll.gridy = 2;
 		this.contentPane.add(this.btn_ClearAll, gbc_btn_ClearAll);
 		
-		this.btn_LoadGraph = new JButton("Load Graph");
-		this.btn_LoadGraph.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				btn_LoadGraph(e);
-			}
-		} );
-		
 		this.verticalStrut = Box.createVerticalStrut(20);
 		GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
 		gbc_verticalStrut.insets = new Insets(0, 0, 5, 5);
 		gbc_verticalStrut.gridx = 1;
 		gbc_verticalStrut.gridy = 3;
 		this.contentPane.add(this.verticalStrut, gbc_verticalStrut);
+		
+		this.btn_LoadGraph = new JButton("Load graph");
+		this.btn_LoadGraph.setToolTipText("Load a graph from either an optimized (binary) or plain text file.");
+		this.btn_LoadGraph.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btn_LoadGraph(e);
+			}
+		} );
 		GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
 		gbc_btn_LoadGraph.anchor = GridBagConstraints.WEST;
-		gbc_btn_LoadGraph.insets = new Insets(0, 0, 0, 5);
+		gbc_btn_LoadGraph.insets = new Insets(0, 0, 5, 5);
 		gbc_btn_LoadGraph.gridx = 1;
-		gbc_btn_LoadGraph.gridy = 6;
+		gbc_btn_LoadGraph.gridy = 5;
 		this.contentPane.add(this.btn_LoadGraph, gbc_btn_LoadGraph);
+		
+		this.btn_SaveOptGraph = new JButton("Save opt graph");
+		this.btn_SaveOptGraph.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        btnNewButton(e);
+		    }
+		});
+		this.btn_SaveOptGraph.setToolTipText("Save the currently loaded graph as optimized (binary) file for faster loading.");
+		GridBagConstraints gbc_btn_SaveOptGraph = new GridBagConstraints();
+		gbc_btn_SaveOptGraph.anchor = GridBagConstraints.WEST;
+		gbc_btn_SaveOptGraph.insets = new Insets(0, 0, 0, 5);
+		gbc_btn_SaveOptGraph.gridx = 1;
+		gbc_btn_SaveOptGraph.gridy = 6;
+		this.contentPane.add(this.btn_SaveOptGraph, gbc_btn_SaveOptGraph);
 		
 		this.lbl_ImageQuality = new JLabel("Image quality:");
 		GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
@@ -344,6 +367,7 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_ImageQuality, gbc_lbl_ImageQuality);
 		
 		this.cb_ImageQuality = new JComboBox<String>();
+		this.cb_ImageQuality.setToolTipText("Specify the quality for image resizing. This greatly affects performance.");
 		this.cb_ImageQuality.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        cb_ImageQuality(e);
@@ -371,6 +395,7 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_VisitOrder, gbc_lbl_VisitOrder);
 		
 		this.cb_VisitOrder = new JComboBox<String>();
+		this.cb_VisitOrder.setToolTipText("Select the order to use for visiting the waypoints on the map.");
 		this.cb_VisitOrder.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        cb_VisitOrder(e);
@@ -393,6 +418,7 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_ResizeMethod, gbc_lbl_ResizeMethod);
 		
 		this.cb_ResizeMethod = new JComboBox<String>();
+		this.cb_ResizeMethod.setToolTipText("Select whether to automatically adjust the size of images when zooming the map.");
 		this.cb_ResizeMethod.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        cb_ResizeMethod(e);
@@ -415,6 +441,7 @@ public class MainWindow extends JFrame
 		this.contentPane.add(this.lbl_ImageSize, gbc_lbl_ImageSize);
 		
 		this.cb_ImageSize = new JComboBox<String>();
+		this.cb_ImageSize.setToolTipText("Set the maximum size for images (on the lowest zoom level).");
 		this.cb_ImageSize.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        cb_ImageSize(e);
@@ -635,7 +662,6 @@ public class MainWindow extends JFrame
     
     public void btn_LoadGraph(ActionEvent e)
     {
-        JFileChooser fd = new JFileChooser();
         fd.setDialogTitle("Select a graph file");
         fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
         fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -699,7 +725,6 @@ public class MainWindow extends JFrame
     
     public void btn_AddImages(ActionEvent e)
     {
-        JFileChooser fd = new JFileChooser();
         fd.setDialogTitle("Select image(s) or a directory containing images");
         fd.setCurrentDirectory(new File("./"));
         fd.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -825,6 +850,38 @@ public class MainWindow extends JFrame
             oi.setHighQuality(imagesHighQuality);
         }
         repaint();
+    }
+    
+    
+    public void btnNewButton(ActionEvent e)
+    {
+        if (g == null) {
+            System.out.println("Error: must load a graph first!");
+            return;
+        }
+        
+        fd.setDialogTitle("Save as");
+        fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
+        fd.setSelectedFile(new File("graph"));
+        fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fd.setMultiSelectionEnabled(false);
+        int c = fd.showSaveDialog(this);
+        
+        switch (c) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = fd.getSelectedFile();
+                try {
+                    g.save(file.getAbsolutePath());
+                }
+                catch (IOException e1) {
+                    System.out.println("Failed to save optimized graph!");
+                }
+                break;
+            case JFileChooser.CANCEL_OPTION:
+                break;
+            case JFileChooser.ERROR_OPTION:
+                break;
+        }       
     }
     
 

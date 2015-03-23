@@ -26,16 +26,33 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.GpsDirectory;
 
 
-
+/**
+ * This class encapsulates an images which is intended as overlay for
+ * the JXMapViewer map.
+ * 
+ * <br>
+ * <br>
+ * <strong>Note</strong>: for performance reasons indirect resizing operations
+ * are usually deferred as long as possible. This leads to several getters
+ * returning potentially outdated imformation (or educated guesses)
+ * because the actual requested resize did not yet happen.
+ * <br>
+ * A resize is only guaranteed to happen when an image is explicitly requested
+ * by the user ({@code isVisible(true)} followed by a call to {@code draw()}).
+ */
 public final class OverlayImage
 {
     public static final int MAX_CONCURRENTLY_VISIBLE_IMAGES = 1;
+    public static final int IMAGE_MIN_HEIGHT = 20;
+    public static final int IMAGE_MIN_WIDTH = 20;
     
+    // positioning constants for fixed position images
     public static final int TOP_RIGHT     = 0;
     public static final int TOP_LEFT      = 1;
     public static final int BOT_RIGHT     = 2;
     public static final int BOT_LEFT      = 3;
     
+    // pixel constants for alignment and padding in draw()
     public static final int WAYPOINT_Y_OFFSET = 35;
     public static final int PADDING           = 3;
     public static final int LABEL_X_PADDING   = 5;
@@ -50,7 +67,7 @@ public final class OverlayImage
     private BufferedImage   cachedImg;
     private boolean         highQuality   = true;
     private String          label         = null;
-    private boolean         displayLabel     = true;
+    private boolean         displayLabel  = true;
     private boolean         visible       = false;
     private boolean         dynamicResize = true;
     private boolean         fixedPosition = false;
@@ -84,7 +101,7 @@ public final class OverlayImage
         catch (ImageProcessingException e) {
         }
         catch (NullPointerException e) {
-            // no/not enough metadata
+            // no or not enough metadata
         }
         
         if (strict && mapPos == null) {
@@ -178,7 +195,7 @@ public final class OverlayImage
             double ff = (mapZoom) / (Math.log(mapZoom) + 1);
             w = (int) ((targetWidth / ff) - (targetWidth * 0.01 * (mapZoom-1)));
             h = (int) ((targetHeight / ff) - (targetHeight * 0.01 * (mapZoom-1)));
-            if (w <= 20 || h <= 20) { // arbitrary minimum
+            if (w <= IMAGE_MIN_WIDTH || h <= IMAGE_MIN_HEIGHT) {
                 return false;
             }
         }
@@ -188,7 +205,6 @@ public final class OverlayImage
         }
         
         if (forceResize || ((w > -1 && w != img.getWidth()) || (h > -1 && h != img.getHeight()))) {
-            //System.out.println("w = " + w + "   h = " + h);
             cachedImg = ImageUtil.getScaledInstance(img, w, h, RenderingHints.VALUE_INTERPOLATION_BILINEAR, highQuality);
             forceResize = false;
         }
