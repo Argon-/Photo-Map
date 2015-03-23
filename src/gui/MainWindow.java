@@ -517,7 +517,7 @@ public class MainWindow extends JFrame
         }
         // right mouse button -> select target, but not without a source
         else if (SwingUtilities.isRightMouseButton(e) && this.currSource == null) {
-            System.out.println("Plese set a source first");
+            System.out.println("Please set a source first");
             return;
         }
 
@@ -635,7 +635,6 @@ public class MainWindow extends JFrame
     
     public void btn_LoadGraph(ActionEvent e)
     {
-        System.out.println("btn_LoadGraph");
         JFileChooser fd = new JFileChooser();
         fd.setDialogTitle("Select a graph file");
         fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
@@ -680,7 +679,6 @@ public class MainWindow extends JFrame
     
     public void btn_RemoveImage(ActionEvent e)
     {
-        System.out.println("btn_RemoveImage");
         OverlayImage oi = list_Images.getSelectedValue();
         if (oi == null) {
             return;
@@ -701,7 +699,6 @@ public class MainWindow extends JFrame
     
     public void btn_AddImages(ActionEvent e)
     {
-        System.out.println("btn_AddImages");
         JFileChooser fd = new JFileChooser();
         fd.setDialogTitle("Select image(s) or a directory containing images");
         fd.setCurrentDirectory(new File("./"));
@@ -763,7 +760,6 @@ public class MainWindow extends JFrame
             //}
             if (oi.getHeightFull() > (h / 2)) {
                 p.setLocation(p.getX(), p.getY() - (h/4));
-                System.out.println("4");
             }
             map.setCenter(p);
         }
@@ -777,7 +773,6 @@ public class MainWindow extends JFrame
             return;
         }
         
-        System.out.println("cb_ResizeMethod");
         @SuppressWarnings("unchecked")
         JComboBox<String> cb = (JComboBox<String>)e.getSource();
         String value = (String) cb.getSelectedItem();
@@ -797,7 +792,6 @@ public class MainWindow extends JFrame
             return;
         }
         
-        System.out.println("cb_ImageSize");
         @SuppressWarnings("unchecked")
         JComboBox<String> cb = (JComboBox<String>)e.getSource();
         String value = (String) cb.getSelectedItem();
@@ -822,7 +816,6 @@ public class MainWindow extends JFrame
             return;
         }
         
-        System.out.println("cb_ImageQuality");
         @SuppressWarnings("unchecked")
         JComboBox<String> cb = (JComboBox<String>)e.getSource();
         String value = (String) cb.getSelectedItem();

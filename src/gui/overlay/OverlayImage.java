@@ -272,7 +272,6 @@ public final class OverlayImage
             cachedFontWidth = fm.stringWidth(label);
             cachedFontHeight = fm.getHeight();
             cachedFontAscent = fm.getAscent();
-            System.err.println("font cache invalidated");
         }
 
         if (!visible)

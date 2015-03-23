@@ -36,7 +36,7 @@ public class FileUtil
         if (file.isDirectory())
         {
             try {
-                Files.walk(file.toPath())
+                Files.walk(file.toPath(), 1)
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
                         try {
