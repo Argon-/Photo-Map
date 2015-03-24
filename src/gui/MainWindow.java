@@ -750,7 +750,7 @@ public class MainWindow extends JFrame
                 for (File file : files) {
                     FileUtil.loadOverlayImagesFrom(file.getAbsolutePath(), list, imagesSize, imagesDynamicResize, imagesHighQuality);
                 }
-                System.out.println("Loading images: " + StopWatch.lapSecStr());
+                System.out.println("Processed images in: " + StopWatch.lapSecStr() + " sec");
                 
                 DefaultListModel<OverlayImage> model = (DefaultListModel<OverlayImage>) list_Images.getModel();
                 for (OverlayImage oi : list) {
@@ -772,10 +772,7 @@ public class MainWindow extends JFrame
     public void list_Images(ListSelectionEvent e)
     {
         OverlayImage oi = list_Images.getSelectedValue();
-        if (oi == null) {
-            return;
-        }
-        else if (list_Images.getValueIsAdjusting()) {
+        if (oi == null || list_Images.getValueIsAdjusting() || oi.isFixedPosition()) {
             return;
         }
 
@@ -790,12 +787,13 @@ public class MainWindow extends JFrame
             mapKit.setAddressLocation(oi.getPosition());
             Point2D p = map.getCenter();
             
-            //if (ih > (3 * h / 4)) {
-            //    p.setLocation(p.getX(), p.getY() - (h/2) + OverlayImage.PADDING);
-            //    System.out.println("2");
-            //}
-            if (oi.getHeightFull() > (h / 2)) {
+            if (oi.getHeight() > (3 * h / 4)) {
+                p.setLocation(p.getX(), p.getY() - (h/2) + OverlayImage.PADDING);
+                System.out.println("2");
+            }
+            else if (oi.getHeight() > (h / 3)) {
                 p.setLocation(p.getX(), p.getY() - (h/4));
+                System.out.println("1");
             }
             map.setCenter(p);
         }

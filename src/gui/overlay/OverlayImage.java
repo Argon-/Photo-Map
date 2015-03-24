@@ -28,29 +28,30 @@ import com.drew.metadata.exif.GpsDirectory;
 
 /**
  * This class encapsulates an images which is intended as overlay for
- * the JXMapViewer map.
- * 
+ * the JXMapViewer map.<br>
  * <br>
- * <br>
- * <strong>Note</strong>: for performance reasons indirect resizing operations
+ * <strong>Note</strong>: for performance reasons (indirect) resizing operations
  * are usually deferred as long as possible. This leads to several getters
- * returning potentially outdated imformation (or educated guesses)
- * because the actual requested resize did not yet happen.
- * <br>
+ * returning potentially outdated imformation because the actual requested 
+ * resize did not yet happen.
+ * Therefore various variables and methods are used to cache or
+ * pre-calculate values. For this reason methods like {@code getHeight} are
+ * not just returning member variables, but actually involve calculations.
+ * <br><br>
  * A resize is only guaranteed to happen when an image is explicitly requested
  * by the user ({@code isVisible(true)} followed by a call to {@code draw()}).
  */
 public final class OverlayImage implements OverlayObject
 {
     public static final int MAX_CONCURRENTLY_VISIBLE_IMAGES = 1;
-    public static final int IMAGE_MIN_HEIGHT = 20;
-    public static final int IMAGE_MIN_WIDTH = 20;
+    public static final int IMAGE_MIN_HEIGHT = 50;
+    public static final int IMAGE_MIN_WIDTH  = 50;
     
     // positioning constants for fixed position images
-    public static final int TOP_RIGHT     = 0;
-    public static final int TOP_LEFT      = 1;
-    public static final int BOT_RIGHT     = 2;
-    public static final int BOT_LEFT      = 3;
+    public static final int TOP_RIGHT = 0;
+    public static final int TOP_LEFT  = 1;
+    public static final int BOT_RIGHT = 2;
+    public static final int BOT_LEFT  = 3;
     
     // pixel constants for alignment and padding in draw()
     public static final int WAYPOINT_Y_OFFSET = 35;
@@ -61,7 +62,7 @@ public final class OverlayImage implements OverlayObject
     private int cachedFontHeight = 0;
     private int cachedFontWidth  = 0;
     private int cachedFontAscent = 0;
-    
+    private double cachedMapZoomFactor = 1;
     
     private BufferedImage   img;
     private BufferedImage   cachedImg;
@@ -108,24 +109,22 @@ public final class OverlayImage implements OverlayObject
             throw new RuntimeException("image contains no valid geo location (strict checking)");
         }
     }
-    
+        
     
     public int getHeight()
     {
-        return cachedImg.getHeight();
-    }
-    
-    
-    public int getHeightFull()
-    {
-        int rh = Math.max(targetHeight, cachedImg.getHeight());
-        return rh + WAYPOINT_Y_OFFSET + PADDING * 2 + LABEL_Y_PADDING + cachedFontHeight;
+        int r = 0;
+        if (dynamicResize)
+            r = dynamicHeight();
+        else
+            r = targetHeight;
+        return r + WAYPOINT_Y_OFFSET + PADDING * 2 + LABEL_Y_PADDING + cachedFontHeight;
     }
     
     
     public int getWidth()
     {
-        return cachedImg.getWidth();
+        return dynamicResize ? Math.max(dynamicWidth(), cachedFontWidth) : targetWidth;
     }
     
     
@@ -187,24 +186,36 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    private int dynamicHeight()
+    {
+        return (int) ((targetHeight / cachedMapZoomFactor) - (targetHeight * 0.01 * (mapZoom-1)));
+    }
+    
+    
+    private int dynamicWidth()
+    {
+        return (int) ((targetWidth / cachedMapZoomFactor) - (targetWidth * 0.01 * (mapZoom-1)));
+    }
+    
+    
     private boolean resizeInternal(int width, int height)
     {
-        int w, h;
         
-        if (dynamicResize) {
-            double ff = (mapZoom) / (Math.log(mapZoom) + 1);
-            w = (int) ((targetWidth / ff) - (targetWidth * 0.01 * (mapZoom-1)));
-            h = (int) ((targetHeight / ff) - (targetHeight * 0.01 * (mapZoom-1)));
-            if (w <= IMAGE_MIN_WIDTH || h <= IMAGE_MIN_HEIGHT) {
-                return false;
+        int w = dynamicResize ? dynamicWidth() : width;
+        int h = dynamicResize ? dynamicHeight() : height;
+
+        if (w < IMAGE_MIN_WIDTH || h < IMAGE_MIN_HEIGHT) {
+            if (img.getWidth() < img.getHeight()) {
+                w = (int) (img.getWidth() * IMAGE_MIN_WIDTH / img.getHeight());
+                h = IMAGE_MIN_HEIGHT;
+            }
+            else {
+                w = IMAGE_MIN_WIDTH;
+                h = (int) (img.getHeight() * IMAGE_MIN_HEIGHT / img.getWidth());
             }
         }
-        else {
-            w = width;
-            h = height;
-        }
-        
-        if (forceResize || ((w > -1 && w != img.getWidth()) || (h > -1 && h != img.getHeight()))) {
+
+        if (forceResize || ((w > -1 && w != cachedImg.getWidth()) || (h > -1 && h != cachedImg.getHeight()))) {
             cachedImg = ImageUtil.getScaledInstance(img, w, h, RenderingHints.VALUE_INTERPOLATION_BILINEAR, highQuality);
             forceResize = false;
         }
@@ -255,7 +266,6 @@ public final class OverlayImage implements OverlayObject
     {
         dynamicResize = dr;
         forceResize = true;
-        //resizeInternal(targetWidth, targetHeight);
         return this;
     }
 
@@ -264,6 +274,12 @@ public final class OverlayImage implements OverlayObject
     {
         fixedPosition = useFixedPos;
         return this;
+    }
+    
+    
+    public boolean isFixedPosition()
+    {
+        return fixedPosition;
     }
 
 
@@ -289,9 +305,16 @@ public final class OverlayImage implements OverlayObject
             cachedFontHeight = fm.getHeight();
             cachedFontAscent = fm.getAscent();
         }
+        
+        if (map.getZoom() != mapZoom) {
+            mapZoom = map.getZoom();
+            cachedMapZoomFactor = (mapZoom) / (Math.log(mapZoom) + 1);
+            forceResize = true;
+        }
 
-        if (!visible)
+        if (!visible) {
             return;
+        }
         
         int x = 0, y = 0;
         
@@ -319,10 +342,10 @@ public final class OverlayImage implements OverlayObject
         }
         else if (mapPos != null)
         {
-            if (forceResize || map.getZoom() != mapZoom) {
-                mapZoom = map.getZoom();
+            if (forceResize) {
                 resizeInternal(targetWidth, targetHeight);
             }
+            
             Point2D p = map.getTileFactory().geoToPixel(mapPos, mapZoom);
             // reside centered above the location
             x = (int) p.getX() - (cachedImg.getWidth() / 2);
