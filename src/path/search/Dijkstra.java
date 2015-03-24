@@ -84,7 +84,7 @@ public final class Dijkstra implements Runnable
 	public boolean pathFromTo()
 	{
 		if (this.state[this.target] == SETTLED) {
-			System.out.println("Dist from " + this.source + " to " + this.target + " = (already settled)");
+			//System.out.println("Dist from " + this.source + " to " + this.target + " = (already settled)");
 			return true;
 		}
 		
@@ -99,7 +99,7 @@ public final class Dijkstra implements Runnable
 			int neighbor = -1;
 			
 			if (this.target == u_id) {
-				System.out.println("Dist from " + this.source + " to " + this.target + " = " + u_dist + " (1)");
+				//System.out.println("Dist from " + this.source + " to " + this.target + " = " + u_dist + " (1)");
 				break loop;
 			}
 			
@@ -122,7 +122,7 @@ public final class Dijkstra implements Runnable
 				}
 				
 				if (this.target == neighbor) {
-					System.out.println("Dist from " + this.source + " to " + this.target + " = " + this.state[neighbor]);
+					//System.out.println("Dist from " + this.source + " to " + this.target + " = " + this.state[neighbor]);
 					this.state[neighbor] = SETTLED;
 					this.pred[neighbor] = u_id;
 					break loop;

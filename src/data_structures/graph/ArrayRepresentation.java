@@ -28,14 +28,14 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     private double    lat[] = null;
     private double    lon[] = null;
-    private int   tourism[] = null;
-    private String   name[] = null;
+    private int   tourism[] = null;     // TODO: vlt. andere Datenstruktur da nur sehr sparse besetzt? (3580 bei 22164098 knoten)
+    private String   name[] = null;     // TODO: wenn das kaum genutzt wird einfach entfernen
     private int    source[] = null;
     private int    target[] = null;
     private int    offset[] = null;
     private int      dist[] = null;
     private int    dist_w[] = null;
-    private final double types[]; // = new double[] {-1.0, 1.3, 1.2, 0.8, 0.7, -1, 1.3, 0.5, 0.45, 0.3, 0.5, 0.3, 0.5};
+    private final double types[];
 
     private final double GRID_FACTOR = 0.00002;
     private int GRID_LAT_CELLS;
@@ -109,6 +109,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     {
         try {
             System.out.println("Found graph text file, parsing...");
+            int t = 0, n = 0;
             
             final int node_num = Integer.parseInt(b.readLine());
             final int edge_num = Integer.parseInt(b.readLine());
@@ -125,12 +126,19 @@ final public class ArrayRepresentation implements Graph, Serializable {
                 this.lon[i]  = Double.parseDouble(s[2]);
                 this.tourism[i] = s.length > 3 ? Integer.parseInt(s[3]) : -1;
                 this.name[i] = s.length > 4 ? s[4] : null;
+                if (tourism[i] > -1)
+                    ++t;
+                if (name[i] != null)
+                    ++n;
 
                 this.minLat = Math.min(minLat, this.lat[i]);
                 this.maxLat = Math.max(maxLat, this.lat[i]);
                 this.minLon = Math.min(minLon, this.lon[i]);
                 this.maxLon = Math.max(maxLon, this.lon[i]);
             }
+            //System.out.println("nodes  : " + node_num);
+            //System.out.println("tourism: " + t + " (" + (t/node_num * 100) + "%)");
+            //System.out.println("name   : " + t + " (" + (n/node_num * 100) + "%)");
             
             this.source = new int[edge_num];
             this.target = new int[edge_num];
@@ -207,8 +215,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     public void load(String f) throws InvalidGraphFormatException, IOException
     {
-        System.out.println("Probing file header");
-        
         try {
             final ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
             loadFromBinary(ois);
@@ -227,8 +233,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
         LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
         LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
         
-        System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
-        System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
+        //System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
+        //System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
             
         this.buildGrid();
     }
@@ -265,8 +271,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
             grid[pos] = i;
         }
         
-        System.out.println(String.format("Building grid took %.6f seconds", (System.nanoTime() - t) / 1000000000.0));
+        //System.out.println(String.format("Building grid took %.6f seconds", (System.nanoTime() - t) / 1000000000.0));
     }
+    
     
     private int searchMinInCell(double lat, double lon, int lat_cell, int lon_cell, int last_min_id)
     {
@@ -298,6 +305,29 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Search for a node closest to {@code (lat, lon)} in a grid with an expanding ring, 
+     * originating from the cell {@code (lat, lon)} lies into.<br>
+     * The ring expands by one per iteration, starting with 0 (= the cell containing {@code (lat, lon)}).
+     * <pre>
+     * {@code
+     * —————————————————————————————
+     * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+     * | 3 | 2 | 2 | 2 | 2 | 2 | 3 |
+     * | 3 | 2 | 1 | 1 | 1 | 2 | 3 |
+     * | 3 | 2 | 1 | 0 | 1 | 2 | 3 | 
+     * | 3 | 2 | 1 | 1 | 1 | 2 | 3 |
+     * | 3 | 2 | 2 | 2 | 2 | 2 | 3 |
+     * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+     * —————————————————————————————
+     * }
+     * </pre>
+     * After a node was found we expand the ring {@code additional_rings} more times.
+     * <br>
+     * <br>
+     * @return ID of the node closest to {@code (lat, lon)}
+     * 
+     */
     public int getNearestNode(double lat, double lon)
     {
         if (lat < this.minLat || lat > this.maxLat || lon < this.minLon || lon > this.maxLon) {
@@ -309,8 +339,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
         
         /*
          * search in expanding rings, originating from (lat_center, lon_center)
-         * the ring expands by one per iteration, starting with 0 ( = the cell containing the clicked position)
-         * after a node was found (mid_id != -1) we expand the ring one more time
+         * the ring expands by one per iteration, starting with 0 (= the cell containing the clicked position)
+         * after a node was found (mid_id != -1) we expand the ring additional_rings more time
          * —————————————————————————————
          * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
          * | 3 | 2 | 2 | 2 | 2 | 2 | 3 |
@@ -328,6 +358,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
         
         do
         {
+            // (mid_id != -1) == found a node
             if (min_id > -1 || (ring > GRID_LAT_CELLS && ring > GRID_LON_CELLS)) {
                 --additional_rings;
             }
@@ -370,7 +401,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
             
             ++ring; //++yyyy;
         } while (additional_rings > 0);
-        System.out.println("Searched " + (ring-1) + " rings");
+        //System.out.println("Searched " + (ring-1) + " rings");
         
         return min_id;
     }

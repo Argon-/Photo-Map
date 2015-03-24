@@ -4,6 +4,7 @@ package gui;
 import gui.overlay.OverlayAggregate;
 import gui.overlay.OverlayElement;
 import gui.overlay.OverlayImage;
+import gui.overlay.OverlayObject;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -74,29 +75,29 @@ import javax.swing.event.ListSelectionEvent;
 
 public class MainWindow extends JFrame
 {
-	private static final long	serialVersionUID	= -590468540732816556L;
-	
-	private ArrayRepresentation g = null;
-	private Dijkstra d = null;
-	
-	public final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-	public final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-	public final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
-	
-	private WaypointPainter<JXMapViewer> waypointPainter;
-	private Painter<JXMapViewer> overlayPainter;
+    private static final long serialVersionUID = -590468540732816556L;
+    
+    private ArrayRepresentation g = null;
+    private Dijkstra d = null;
+    
+    public final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+    public final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+    public final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
+    
+    private WaypointPainter<JXMapViewer> waypointPainter;
+    private Painter<JXMapViewer> overlayPainter;
 
-	private GeoPosition currSource = null;
-	private GeoPosition currTarget = null;
-	
-	private boolean imagesHighQuality = true;
-	private boolean imagesDynamicResize = true;
-	private int     imagesSize = 400;
-	
-	private static final int MAX_LOG_LENGTH = 500;
-	private int currLines = 0;
-	private boolean imageSelectedFromList = false;
-	
+    private GeoPosition currSource = null;
+    private GeoPosition currTarget = null;
+    
+    private boolean imagesHighQuality = true;
+    private boolean imagesDynamicResize = true;
+    private int     imagesSize = 400;
+    
+    private static final int MAX_LOG_LENGTH = 200;
+    private int currLines = 0;
+    private boolean imageSelectedFromList = false;
+    
     private JPanel                contentPane;
     private JXMapKit              mapKit;
     private JXMapViewer           map;
@@ -122,414 +123,421 @@ public class MainWindow extends JFrame
     private JSeparator            separator_0;
     private JSeparator            separator_1;
     private Component             verticalStrut;
-    private JFileChooser          fd = new JFileChooser();
+    private JFileChooser          fd;
 
 
-	/**
-	 * Create the frame.
-	 * @throws IOException 
-	 */
-	public MainWindow()
-	{
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-				| UnsupportedLookAndFeelException e1) {
-			System.out.println("Unable to set native look & feel");
-			e1.printStackTrace();
-		}
-		
-		initComponents();
-		myInitComponents();
-	}
-	
-	
-	public void init() 
-	{
-	    if (g == null) {
-    		try {
-    			this.g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/out-stg.txt");
-    			this.d = new Dijkstra(this.g);
-    			//g.drawCells(this);
-    		}
-    		catch (InvalidGraphFormatException e) {
-    			System.out.println("Supplied graph has invalid format");
-    		}
-    		catch (IOException e) {
-    			System.out.println("Error reading graph");
-    		}
-	    }
-		
-		double[] lat = this.g.getBoundingRectLat();
-		double[] lon = this.g.getBoundingRectLon();
-		for (int i = 0; i < lat.length; ++i) {
-			GeoPosition s = new GeoPosition(lat[i], lon[i]);
-			GeoPosition t = new GeoPosition(lat[(i + 1) % lat.length],   lon[(i + 1) % lat.length]);
-			persistentOverlayLines.add(OverlayAggregate.line(OverlayElement.lineBlackMedium(s, t)));
-		}
-	}
+    /**
+     * Create the frame.
+     * @throws IOException 
+     */
+    public MainWindow()
+    {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
+        catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                | UnsupportedLookAndFeelException e1) {
+            System.out.println("Unable to set native look & feel");
+            e1.printStackTrace();
+        }
+        
+        initGUIComponents();
+        configureMap();
+        
+        log("Welcome! Load a graph file and or images to get started." + System.getProperty("line.separator"));
+        log("Left mouse click places a starting position, right mouse click a destination." + System.getProperty("line.separator") + System.getProperty("line.separator"));
+    }
+    
+    
+    public void testInit() 
+    {
+        if (g == null) {
+            try {
+                g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/out-stg.txt");
+                d = new Dijkstra(g);
+                //g.drawCells(this);
+            }
+            catch (InvalidGraphFormatException e) {
+                System.out.println("Supplied graph has invalid format");
+            }
+            catch (IOException e) {
+                System.out.println("Error reading graph");
+            }
+        }
+        drawGraphRect();
+    }
+    
+    
+    public void drawGraphRect()
+    {
+        if (g == null)
+            return;
+        
+        persistentOverlayLines.clear();
+        overlayLines.clear();
+        
+        double[] lat = g.getBoundingRectLat();
+        double[] lon = g.getBoundingRectLon();
+        for (int i = 0; i < lat.length; ++i) {
+            GeoPosition s = new GeoPosition(lat[i], lon[i]);
+            GeoPosition t = new GeoPosition(lat[(i + 1) % lat.length],   lon[(i + 1) % lat.length]);
+            persistentOverlayLines.add(OverlayAggregate.line(OverlayElement.lineBlackMedium(s, t)));
+        }
+    }
 
 
-	private void initComponents()
-	{
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1300, 900);
-		this.contentPane = new JPanel();
-		this.contentPane.setBorder(null);
-		setContentPane(this.contentPane);
-		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.rowHeights = new int[] { 0, 20, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0,
-				0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 1.0,
-				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		this.contentPane.setLayout(gbl_contentPane);
+    private void initGUIComponents()
+    {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 1300, 900);
+        contentPane = new JPanel();
+        contentPane.setBorder(null);
+        setContentPane(contentPane);
+        GridBagLayout gbl_contentPane = new GridBagLayout();
+        gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        gbl_contentPane.rowHeights = new int[] { 0, 20, 0, 0, 0, 0, 0, 0 };
+        gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_contentPane.rowWeights = new double[] { 1.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        contentPane.setLayout(gbl_contentPane);
 
-		this.mapKit = new JXMapKit();
-		this.map = mapKit.getMainMap();
-		this.mapKit.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				mapMouseClicked(e);
-			}
-		});
-		GridBagConstraints gbc_mapKit = new GridBagConstraints();
-		gbc_mapKit.gridwidth = 5;
-		gbc_mapKit.insets = new Insets(0, 0, 5, 5);
-		gbc_mapKit.fill = GridBagConstraints.BOTH;
-		gbc_mapKit.gridx = 0;
-		gbc_mapKit.gridy = 0;
-		this.contentPane.add(this.mapKit, gbc_mapKit);
-		
-		this.scrollPane_Images = new JScrollPane();
-		GridBagConstraints gbc_scrollPane_Images = new GridBagConstraints();
-		gbc_scrollPane_Images.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_Images.gridwidth = 3;
-		gbc_scrollPane_Images.insets = new Insets(0, 0, 5, 0);
-		gbc_scrollPane_Images.gridx = 5;
-		gbc_scrollPane_Images.gridy = 0;
-		this.contentPane.add(this.scrollPane_Images, gbc_scrollPane_Images);
-		
-		this.list_Images = new JList<OverlayImage>();
-		this.list_Images.setToolTipText("Select an image to jump to its location.");
-		this.list_Images.addListSelectionListener(new ListSelectionListener() {
-		    public void valueChanged(ListSelectionEvent e) {
-		        list_Images(e);
-		    }
-		});
-		this.list_Images.setModel(new DefaultListModel<OverlayImage>());
-		this.list_Images.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		this.scrollPane_Images.setViewportView(this.list_Images);
-		this.list_Images.setDragEnabled(true);
-		
-		this.scrollPane_Log = new JScrollPane();
-		this.scrollPane_Log.setMinimumSize(new Dimension(200, 100));
-		GridBagConstraints gbc_scrollPane_Log = new GridBagConstraints();
-		gbc_scrollPane_Log.insets = new Insets(0, 0, 0, 5);
-		gbc_scrollPane_Log.gridheight = 6;
-		gbc_scrollPane_Log.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_Log.gridx = 0;
-		gbc_scrollPane_Log.gridy = 1;
-		this.contentPane.add(this.scrollPane_Log, gbc_scrollPane_Log);
-		
-		this.textArea_Log = new JTextArea();
-		textArea_Log.setFont(new Font("Hasklig", Font.PLAIN, 11));
-		this.scrollPane_Log.setViewportView(this.textArea_Log);
-		
-		this.btn_CalculateRoute = new JButton("Calculate route");
-		this.btn_CalculateRoute.setToolTipText("Calculate a route visiting all currently existing waypoints on the map.");
-		this.btn_CalculateRoute.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        btn_CalculateRoute(e);
-		    }
-		});
-		
-		this.btn_ClearLast = new JButton("Clear last marker");
-		this.btn_ClearLast.setToolTipText("Remove the last set position marker from the map.");
-		this.btn_ClearLast.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				btn_ClearLast(e);
-			}
-		});
-		this.btn_ClearLast.setActionCommand("Clear last");
-		GridBagConstraints gbc_btn_ClearLast = new GridBagConstraints();
-		gbc_btn_ClearLast.anchor = GridBagConstraints.WEST;
-		gbc_btn_ClearLast.insets = new Insets(0, 0, 5, 5);
-		gbc_btn_ClearLast.gridx = 1;
-		gbc_btn_ClearLast.gridy = 1;
-		this.contentPane.add(this.btn_ClearLast, gbc_btn_ClearLast);
-		
-		this.separator_0 = new JSeparator();
-		this.separator_0.setOrientation(SwingConstants.VERTICAL);
-		GridBagConstraints gbc_separator_0 = new GridBagConstraints();
-		gbc_separator_0.fill = GridBagConstraints.VERTICAL;
-		gbc_separator_0.gridheight = 6;
-		gbc_separator_0.insets = new Insets(0, 0, 0, 5);
-		gbc_separator_0.gridx = 2;
-		gbc_separator_0.gridy = 1;
-		this.contentPane.add(this.separator_0, gbc_separator_0);
-		GridBagConstraints gbc_btn_CalculateRoute = new GridBagConstraints();
-		gbc_btn_CalculateRoute.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btn_CalculateRoute.insets = new Insets(0, 0, 5, 5);
-		gbc_btn_CalculateRoute.gridx = 4;
-		gbc_btn_CalculateRoute.gridy = 1;
-		this.contentPane.add(this.btn_CalculateRoute, gbc_btn_CalculateRoute);
-		
-		this.btn_RemoveImage = new JButton("Remove image");
-		this.btn_RemoveImage.setToolTipText("Remove the currently selected image from the list.");
-		this.btn_RemoveImage.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        btn_RemoveImage(e);
-		    }
-		});
-		
-		this.separator_1 = new JSeparator();
-		this.separator_1.setOrientation(SwingConstants.VERTICAL);
-		GridBagConstraints gbc_separator_1 = new GridBagConstraints();
-		gbc_separator_1.fill = GridBagConstraints.VERTICAL;
-		gbc_separator_1.gridheight = 6;
-		gbc_separator_1.insets = new Insets(0, 0, 0, 5);
-		gbc_separator_1.gridx = 5;
-		gbc_separator_1.gridy = 1;
-		this.contentPane.add(this.separator_1, gbc_separator_1);
-		GridBagConstraints gbc_btn_RemoveImage = new GridBagConstraints();
-		gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
-		gbc_btn_RemoveImage.gridx = 7;
-		gbc_btn_RemoveImage.gridy = 1;
-		this.contentPane.add(this.btn_RemoveImage, gbc_btn_RemoveImage);
-		
-		this.btn_AddImages = new JButton("Add images");
-		this.btn_AddImages.setToolTipText("Add either single images or multiple images from a directory.");
-		this.btn_AddImages.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        btn_AddImages(e);
-		    }
-		});
-		
-		this.btn_ClearAll = new JButton("Clear all markers");
-		this.btn_ClearAll.setToolTipText("Remove all position markers from the map.");
-		this.btn_ClearAll.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				btn_ClearAll(e);
-			}
-		});
-		GridBagConstraints gbc_btn_ClearAll = new GridBagConstraints();
-		gbc_btn_ClearAll.anchor = GridBagConstraints.WEST;
-		gbc_btn_ClearAll.insets = new Insets(0, 0, 5, 5);
-		gbc_btn_ClearAll.gridx = 1;
-		gbc_btn_ClearAll.gridy = 2;
-		this.contentPane.add(this.btn_ClearAll, gbc_btn_ClearAll);
-		
-		this.verticalStrut = Box.createVerticalStrut(20);
-		GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
-		gbc_verticalStrut.insets = new Insets(0, 0, 5, 5);
-		gbc_verticalStrut.gridx = 1;
-		gbc_verticalStrut.gridy = 3;
-		this.contentPane.add(this.verticalStrut, gbc_verticalStrut);
-		
-		this.btn_LoadGraph = new JButton("Load graph");
-		this.btn_LoadGraph.setToolTipText("Load a graph from either an optimized (binary) or plain text file.");
-		this.btn_LoadGraph.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				btn_LoadGraph(e);
-			}
-		} );
-		GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
-		gbc_btn_LoadGraph.anchor = GridBagConstraints.WEST;
-		gbc_btn_LoadGraph.insets = new Insets(0, 0, 5, 5);
-		gbc_btn_LoadGraph.gridx = 1;
-		gbc_btn_LoadGraph.gridy = 5;
-		this.contentPane.add(this.btn_LoadGraph, gbc_btn_LoadGraph);
-		
-		this.btn_SaveOptGraph = new JButton("Save opt graph");
-		this.btn_SaveOptGraph.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        btnNewButton(e);
-		    }
-		});
-		this.btn_SaveOptGraph.setToolTipText("Save the currently loaded graph as optimized (binary) file for faster loading.");
-		GridBagConstraints gbc_btn_SaveOptGraph = new GridBagConstraints();
-		gbc_btn_SaveOptGraph.anchor = GridBagConstraints.WEST;
-		gbc_btn_SaveOptGraph.insets = new Insets(0, 0, 0, 5);
-		gbc_btn_SaveOptGraph.gridx = 1;
-		gbc_btn_SaveOptGraph.gridy = 6;
-		this.contentPane.add(this.btn_SaveOptGraph, gbc_btn_SaveOptGraph);
-		
-		this.lbl_ImageQuality = new JLabel("Image quality:");
-		GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
-		gbc_lbl_ImageQuality.anchor = GridBagConstraints.EAST;
-		gbc_lbl_ImageQuality.insets = new Insets(0, 0, 0, 5);
-		gbc_lbl_ImageQuality.gridx = 6;
-		gbc_lbl_ImageQuality.gridy = 6;
-		this.contentPane.add(this.lbl_ImageQuality, gbc_lbl_ImageQuality);
-		
-		this.cb_ImageQuality = new JComboBox<String>();
-		this.cb_ImageQuality.setToolTipText("Specify the quality for image resizing. This greatly affects performance.");
-		this.cb_ImageQuality.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        cb_ImageQuality(e);
-		    }
-		});
-		this.cb_ImageQuality.setModel(new DefaultComboBoxModel<String>(new String[] {"high", "low"}));
-		GridBagConstraints gbc_cb_ImageQuality = new GridBagConstraints();
-		gbc_cb_ImageQuality.anchor = GridBagConstraints.WEST;
-		gbc_cb_ImageQuality.gridx = 7;
-		gbc_cb_ImageQuality.gridy = 6;
-		this.contentPane.add(this.cb_ImageQuality, gbc_cb_ImageQuality);
-		GridBagConstraints gbc_btn_AddImages = new GridBagConstraints();
-		gbc_btn_AddImages.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btn_AddImages.insets = new Insets(0, 0, 5, 0);
-		gbc_btn_AddImages.gridx = 7;
-		gbc_btn_AddImages.gridy = 2;
-		this.contentPane.add(this.btn_AddImages, gbc_btn_AddImages);
-		
-		this.lbl_VisitOrder = new JLabel("Visit in order:");
-		GridBagConstraints gbc_lbl_VisitOrder = new GridBagConstraints();
-		gbc_lbl_VisitOrder.anchor = GridBagConstraints.EAST;
-		gbc_lbl_VisitOrder.insets = new Insets(0, 0, 5, 5);
-		gbc_lbl_VisitOrder.gridx = 3;
-		gbc_lbl_VisitOrder.gridy = 4;
-		this.contentPane.add(this.lbl_VisitOrder, gbc_lbl_VisitOrder);
-		
-		this.cb_VisitOrder = new JComboBox<String>();
-		this.cb_VisitOrder.setToolTipText("Select the order to use for visiting the waypoints on the map.");
-		this.cb_VisitOrder.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        cb_VisitOrder(e);
-		    }
-		});
-		this.cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"chronological", "shortest route", "selected order"}));
-		GridBagConstraints gbc_cb_VisitOrder = new GridBagConstraints();
-		gbc_cb_VisitOrder.anchor = GridBagConstraints.WEST;
-		gbc_cb_VisitOrder.insets = new Insets(0, 0, 5, 5);
-		gbc_cb_VisitOrder.gridx = 4;
-		gbc_cb_VisitOrder.gridy = 4;
-		this.contentPane.add(this.cb_VisitOrder, gbc_cb_VisitOrder);
-		
-		this.lbl_ResizeMethod = new JLabel("Resize images:");
-		GridBagConstraints gbc_lbl_ResizeMethod = new GridBagConstraints();
-		gbc_lbl_ResizeMethod.insets = new Insets(0, 0, 5, 5);
-		gbc_lbl_ResizeMethod.anchor = GridBagConstraints.EAST;
-		gbc_lbl_ResizeMethod.gridx = 6;
-		gbc_lbl_ResizeMethod.gridy = 4;
-		this.contentPane.add(this.lbl_ResizeMethod, gbc_lbl_ResizeMethod);
-		
-		this.cb_ResizeMethod = new JComboBox<String>();
-		this.cb_ResizeMethod.setToolTipText("Select whether to automatically adjust the size of images when zooming the map.");
-		this.cb_ResizeMethod.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        cb_ResizeMethod(e);
-		    }
-		});
-		this.cb_ResizeMethod.setModel(new DefaultComboBoxModel<String>(new String[] {"when zooming", "don't resize"}));
-		GridBagConstraints gbc_cb_ResizeMethod = new GridBagConstraints();
-		gbc_cb_ResizeMethod.anchor = GridBagConstraints.WEST;
-		gbc_cb_ResizeMethod.insets = new Insets(0, 0, 5, 0);
-		gbc_cb_ResizeMethod.gridx = 7;
-		gbc_cb_ResizeMethod.gridy = 4;
-		this.contentPane.add(this.cb_ResizeMethod, gbc_cb_ResizeMethod);
-		
-		this.lbl_ImageSize = new JLabel("Limit image size:");
-		GridBagConstraints gbc_lbl_ImageSize = new GridBagConstraints();
-		gbc_lbl_ImageSize.insets = new Insets(0, 0, 5, 5);
-		gbc_lbl_ImageSize.anchor = GridBagConstraints.EAST;
-		gbc_lbl_ImageSize.gridx = 6;
-		gbc_lbl_ImageSize.gridy = 5;
-		this.contentPane.add(this.lbl_ImageSize, gbc_lbl_ImageSize);
-		
-		this.cb_ImageSize = new JComboBox<String>();
-		this.cb_ImageSize.setToolTipText("Set the maximum size for images (on the lowest zoom level).");
-		this.cb_ImageSize.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        cb_ImageSize(e);
-		    }
-		});
-		this.cb_ImageSize.setModel(new DefaultComboBoxModel<String>(new String[] {"100 px", "200 px", "400 px", "600 px", "800 px", "original"}));
-		this.cb_ImageSize.setSelectedIndex(2);
-		GridBagConstraints gbc_cb_ImageSize = new GridBagConstraints();
-		gbc_cb_ImageSize.insets = new Insets(0, 0, 5, 0);
-		gbc_cb_ImageSize.anchor = GridBagConstraints.WEST;
-		gbc_cb_ImageSize.gridx = 7;
-		gbc_cb_ImageSize.gridy = 5;
-		this.contentPane.add(this.cb_ImageSize, gbc_cb_ImageSize);
-	}
-
-
-	public void myInitComponents()
-	{
-		map.addMouseListener(new MouseAdapter() {
+        mapKit = new JXMapKit();
+        map = mapKit.getMainMap();
+        mapKit.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent e) {
-            	mapMouseClicked(e);
+                mapMouseClicked(e);
             }
         });
-		
-		map.addMouseMotionListener(new MouseAdapter() {
-		    public void mouseMoved(MouseEvent e) {
-		        mapMouseMoved(e);
-		    }
-		});
-		
-		
-		this.textArea_Log.setEditable(false);
-		((DefaultCaret) this.textArea_Log.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		
-        this.mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
-		this.mapKit.setAddressLocationShown(false); // don't show center
-		//this.mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
-	    this.mapKit.setAddressLocation(new GeoPosition(48.89088888888889, 9.225294444444444)); // Home
-		this.mapKit.setZoom(1);
-        this.mapKit.setMiniMapVisible(false);
-	    
+        GridBagConstraints gbc_mapKit = new GridBagConstraints();
+        gbc_mapKit.gridwidth = 5;
+        gbc_mapKit.insets = new Insets(0, 0, 5, 5);
+        gbc_mapKit.fill = GridBagConstraints.BOTH;
+        gbc_mapKit.gridx = 0;
+        gbc_mapKit.gridy = 0;
+        contentPane.add(mapKit, gbc_mapKit);
         
-	    waypointPainter = new WaypointPainter<JXMapViewer>();
-		overlayPainter = new Painter<JXMapViewer>() {
-		    @Override
-			public void paint(Graphics2D g, JXMapViewer map, int w, int h)
-			{
-				g = (Graphics2D) g.create();
-				// convert from viewport to world bitmap
-				Rectangle rect = map.getViewportBounds();
-				g.translate(-rect.x, -rect.y);
-				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				
-                for (OverlayImage oi : overlayImages)
-                {
-                    oi.draw(g, map);
-                }
-				
-                for (OverlayAggregate oa : overlayLines)
-                {
-                    oa.draw(g, map);
-                }
-				
-				for (OverlayAggregate oa : persistentOverlayLines)
-				{
-				    oa.draw(g, map);
-				}
-				
-				g.dispose();
-			}
-		};
-		
-	    final CompoundPainter<Painter<JXMapViewer>> c = new CompoundPainter<Painter<JXMapViewer>>(waypointPainter, overlayPainter);
-	    c.setCacheable(false);
-		map.setOverlayPainter(c);      // $hide$ (WindowBuilder doesn't like this line)
-		updateWaypoints();
-	}
-	
-	
-	public void clearMap()
-	{
-		this.overlayLines.clear();
-		this.mapKit.repaint();
-		this.currSource = null;
-		this.currTarget = null;
-	}
-		
-	
+        scrollPane_Images = new JScrollPane();
+        GridBagConstraints gbc_scrollPane_Images = new GridBagConstraints();
+        gbc_scrollPane_Images.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane_Images.gridwidth = 3;
+        gbc_scrollPane_Images.insets = new Insets(0, 0, 5, 0);
+        gbc_scrollPane_Images.gridx = 5;
+        gbc_scrollPane_Images.gridy = 0;
+        contentPane.add(scrollPane_Images, gbc_scrollPane_Images);
+        
+        list_Images = new JList<OverlayImage>();
+        list_Images.setModel(new DefaultListModel<OverlayImage>());
+        MouseAdapter lma = new JListDragNDropReorder<OverlayImage>(list_Images);
+        list_Images.addMouseListener(lma);
+        list_Images.addMouseMotionListener(lma);
+        list_Images.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                list_Images(e);
+            }
+        });
+        list_Images.setToolTipText("Select an image to jump to its location. Use drag and drop to reorder images.");
+        list_Images.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        //list_Images.setDragEnabled(true);
+        scrollPane_Images.setViewportView(list_Images);
+        
+        scrollPane_Log = new JScrollPane();
+        scrollPane_Log.setMinimumSize(new Dimension(200, 100));
+        GridBagConstraints gbc_scrollPane_Log = new GridBagConstraints();
+        gbc_scrollPane_Log.insets = new Insets(0, 0, 0, 5);
+        gbc_scrollPane_Log.gridheight = 6;
+        gbc_scrollPane_Log.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane_Log.gridx = 0;
+        gbc_scrollPane_Log.gridy = 1;
+        contentPane.add(scrollPane_Log, gbc_scrollPane_Log);
+        
+        textArea_Log = new JTextArea();
+        textArea_Log.setFont(new Font("Hasklig", Font.PLAIN, 11));
+        scrollPane_Log.setViewportView(textArea_Log);
+        
+        btn_CalculateRoute = new JButton("Calculate route");
+        btn_CalculateRoute.setToolTipText("Calculate a route visiting all currently existing waypoints on the map.");
+        btn_CalculateRoute.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_CalculateRoute(e);
+            }
+        });
+        
+        btn_ClearLast = new JButton("Clear last marker");
+        btn_ClearLast.setToolTipText("Remove the last set position marker from the map.");
+        btn_ClearLast.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_ClearLast(e);
+            }
+        });
+        btn_ClearLast.setActionCommand("Clear last");
+        GridBagConstraints gbc_btn_ClearLast = new GridBagConstraints();
+        gbc_btn_ClearLast.anchor = GridBagConstraints.WEST;
+        gbc_btn_ClearLast.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ClearLast.gridx = 1;
+        gbc_btn_ClearLast.gridy = 1;
+        contentPane.add(btn_ClearLast, gbc_btn_ClearLast);
+        
+        separator_0 = new JSeparator();
+        separator_0.setOrientation(SwingConstants.VERTICAL);
+        GridBagConstraints gbc_separator_0 = new GridBagConstraints();
+        gbc_separator_0.fill = GridBagConstraints.VERTICAL;
+        gbc_separator_0.gridheight = 6;
+        gbc_separator_0.insets = new Insets(0, 0, 0, 5);
+        gbc_separator_0.gridx = 2;
+        gbc_separator_0.gridy = 1;
+        contentPane.add(separator_0, gbc_separator_0);
+        GridBagConstraints gbc_btn_CalculateRoute = new GridBagConstraints();
+        gbc_btn_CalculateRoute.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_CalculateRoute.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_CalculateRoute.gridx = 4;
+        gbc_btn_CalculateRoute.gridy = 1;
+        contentPane.add(btn_CalculateRoute, gbc_btn_CalculateRoute);
+        
+        btn_RemoveImage = new JButton("Remove image");
+        btn_RemoveImage.setToolTipText("Remove the currently selected image from the list.");
+        btn_RemoveImage.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_RemoveImage(e);
+            }
+        });
+        
+        separator_1 = new JSeparator();
+        separator_1.setOrientation(SwingConstants.VERTICAL);
+        GridBagConstraints gbc_separator_1 = new GridBagConstraints();
+        gbc_separator_1.fill = GridBagConstraints.VERTICAL;
+        gbc_separator_1.gridheight = 6;
+        gbc_separator_1.insets = new Insets(0, 0, 0, 5);
+        gbc_separator_1.gridx = 5;
+        gbc_separator_1.gridy = 1;
+        contentPane.add(separator_1, gbc_separator_1);
+        GridBagConstraints gbc_btn_RemoveImage = new GridBagConstraints();
+        gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
+        gbc_btn_RemoveImage.gridx = 7;
+        gbc_btn_RemoveImage.gridy = 1;
+        contentPane.add(btn_RemoveImage, gbc_btn_RemoveImage);
+        
+        btn_AddImages = new JButton("Add images");
+        btn_AddImages.setToolTipText("Add either single images or multiple images from a directory.");
+        btn_AddImages.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_AddImages(e);
+            }
+        });
+        
+        btn_ClearAll = new JButton("Clear all markers");
+        btn_ClearAll.setToolTipText("Remove all position markers from the map. Shortcut: middle mouse button (scroll wheel click)");
+        btn_ClearAll.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_ClearAll(e);
+            }
+        });
+        GridBagConstraints gbc_btn_ClearAll = new GridBagConstraints();
+        gbc_btn_ClearAll.anchor = GridBagConstraints.WEST;
+        gbc_btn_ClearAll.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ClearAll.gridx = 1;
+        gbc_btn_ClearAll.gridy = 2;
+        contentPane.add(btn_ClearAll, gbc_btn_ClearAll);
+        
+        verticalStrut = Box.createVerticalStrut(20);
+        GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
+        gbc_verticalStrut.insets = new Insets(0, 0, 5, 5);
+        gbc_verticalStrut.gridx = 1;
+        gbc_verticalStrut.gridy = 3;
+        contentPane.add(verticalStrut, gbc_verticalStrut);
+        
+        btn_LoadGraph = new JButton("Load graph");
+        btn_LoadGraph.setToolTipText("Load a graph from either an optimized (binary) or plain text file.");
+        btn_LoadGraph.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_LoadGraph(e);
+            }
+        } );
+        GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
+        gbc_btn_LoadGraph.anchor = GridBagConstraints.WEST;
+        gbc_btn_LoadGraph.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_LoadGraph.gridx = 1;
+        gbc_btn_LoadGraph.gridy = 5;
+        contentPane.add(btn_LoadGraph, gbc_btn_LoadGraph);
+        
+        btn_SaveOptGraph = new JButton("Save opt graph");
+        btn_SaveOptGraph.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_SaveOptGraph(e);
+            }
+        });
+        btn_SaveOptGraph.setToolTipText("Save the currently loaded graph as optimized (binary) file for faster loading.");
+        GridBagConstraints gbc_btn_SaveOptGraph = new GridBagConstraints();
+        gbc_btn_SaveOptGraph.anchor = GridBagConstraints.WEST;
+        gbc_btn_SaveOptGraph.insets = new Insets(0, 0, 0, 5);
+        gbc_btn_SaveOptGraph.gridx = 1;
+        gbc_btn_SaveOptGraph.gridy = 6;
+        contentPane.add(btn_SaveOptGraph, gbc_btn_SaveOptGraph);
+        
+        lbl_ImageQuality = new JLabel("Image quality:");
+        GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
+        gbc_lbl_ImageQuality.anchor = GridBagConstraints.EAST;
+        gbc_lbl_ImageQuality.insets = new Insets(0, 0, 0, 5);
+        gbc_lbl_ImageQuality.gridx = 6;
+        gbc_lbl_ImageQuality.gridy = 6;
+        contentPane.add(lbl_ImageQuality, gbc_lbl_ImageQuality);
+        
+        cb_ImageQuality = new JComboBox<String>();
+        cb_ImageQuality.setToolTipText("Quality for image resizing. This greatly affects performance.");
+        cb_ImageQuality.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cb_ImageQuality(e);
+            }
+        });
+        cb_ImageQuality.setModel(new DefaultComboBoxModel<String>(new String[] {"high", "low"}));
+        GridBagConstraints gbc_cb_ImageQuality = new GridBagConstraints();
+        gbc_cb_ImageQuality.anchor = GridBagConstraints.WEST;
+        gbc_cb_ImageQuality.gridx = 7;
+        gbc_cb_ImageQuality.gridy = 6;
+        contentPane.add(cb_ImageQuality, gbc_cb_ImageQuality);
+        GridBagConstraints gbc_btn_AddImages = new GridBagConstraints();
+        gbc_btn_AddImages.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_AddImages.insets = new Insets(0, 0, 5, 0);
+        gbc_btn_AddImages.gridx = 7;
+        gbc_btn_AddImages.gridy = 2;
+        contentPane.add(btn_AddImages, gbc_btn_AddImages);
+        
+        lbl_VisitOrder = new JLabel("Visit in order:");
+        GridBagConstraints gbc_lbl_VisitOrder = new GridBagConstraints();
+        gbc_lbl_VisitOrder.anchor = GridBagConstraints.EAST;
+        gbc_lbl_VisitOrder.insets = new Insets(0, 0, 5, 5);
+        gbc_lbl_VisitOrder.gridx = 3;
+        gbc_lbl_VisitOrder.gridy = 4;
+        contentPane.add(lbl_VisitOrder, gbc_lbl_VisitOrder);
+        
+        cb_VisitOrder = new JComboBox<String>();
+        cb_VisitOrder.setToolTipText("The order to use for visiting the waypoints on the map.");
+        cb_VisitOrder.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cb_VisitOrder(e);
+            }
+        });
+        cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"chronological", "shortest route", "selected order"}));
+        GridBagConstraints gbc_cb_VisitOrder = new GridBagConstraints();
+        gbc_cb_VisitOrder.anchor = GridBagConstraints.WEST;
+        gbc_cb_VisitOrder.insets = new Insets(0, 0, 5, 5);
+        gbc_cb_VisitOrder.gridx = 4;
+        gbc_cb_VisitOrder.gridy = 4;
+        contentPane.add(cb_VisitOrder, gbc_cb_VisitOrder);
+        
+        lbl_ResizeMethod = new JLabel("Resize images:");
+        GridBagConstraints gbc_lbl_ResizeMethod = new GridBagConstraints();
+        gbc_lbl_ResizeMethod.insets = new Insets(0, 0, 5, 5);
+        gbc_lbl_ResizeMethod.anchor = GridBagConstraints.EAST;
+        gbc_lbl_ResizeMethod.gridx = 6;
+        gbc_lbl_ResizeMethod.gridy = 4;
+        contentPane.add(lbl_ResizeMethod, gbc_lbl_ResizeMethod);
+        
+        cb_ResizeMethod = new JComboBox<String>();
+        cb_ResizeMethod.setToolTipText("Select whether to automatically adjust the size of images when zooming the map.");
+        cb_ResizeMethod.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cb_ResizeMethod(e);
+            }
+        });
+        cb_ResizeMethod.setModel(new DefaultComboBoxModel<String>(new String[] {"when zooming", "don't resize"}));
+        GridBagConstraints gbc_cb_ResizeMethod = new GridBagConstraints();
+        gbc_cb_ResizeMethod.anchor = GridBagConstraints.WEST;
+        gbc_cb_ResizeMethod.insets = new Insets(0, 0, 5, 0);
+        gbc_cb_ResizeMethod.gridx = 7;
+        gbc_cb_ResizeMethod.gridy = 4;
+        contentPane.add(cb_ResizeMethod, gbc_cb_ResizeMethod);
+        
+        lbl_ImageSize = new JLabel("Limit image size:");
+        GridBagConstraints gbc_lbl_ImageSize = new GridBagConstraints();
+        gbc_lbl_ImageSize.insets = new Insets(0, 0, 5, 5);
+        gbc_lbl_ImageSize.anchor = GridBagConstraints.EAST;
+        gbc_lbl_ImageSize.gridx = 6;
+        gbc_lbl_ImageSize.gridy = 5;
+        contentPane.add(lbl_ImageSize, gbc_lbl_ImageSize);
+        
+        cb_ImageSize = new JComboBox<String>();
+        cb_ImageSize.setToolTipText("Maximum size for images (on the lowest zoom level).");
+        cb_ImageSize.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cb_ImageSize(e);
+            }
+        });
+        cb_ImageSize.setModel(new DefaultComboBoxModel<String>(new String[] {"100 px", "200 px", "400 px", "600 px", "800 px", "original"}));
+        cb_ImageSize.setSelectedIndex(2);
+        GridBagConstraints gbc_cb_ImageSize = new GridBagConstraints();
+        gbc_cb_ImageSize.insets = new Insets(0, 0, 5, 0);
+        gbc_cb_ImageSize.anchor = GridBagConstraints.WEST;
+        gbc_cb_ImageSize.gridx = 7;
+        gbc_cb_ImageSize.gridy = 5;
+        contentPane.add(cb_ImageSize, gbc_cb_ImageSize);
+        
+        map.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                mapMouseClicked(e);
+            }
+        });
+        
+        map.addMouseMotionListener(new MouseAdapter() {
+            public void mouseMoved(MouseEvent e) {
+                mapMouseMoved(e);
+            }
+        });
+        
+        fd = new JFileChooser();
+        textArea_Log.setEditable(false);
+        ((DefaultCaret) textArea_Log.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+    }
+
+
+    public void configureMap()
+    {
+        
+        mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
+        mapKit.setAddressLocationShown(false); // don't show center
+        //mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
+        mapKit.setAddressLocation(new GeoPosition(48.89088888888889, 9.225294444444444)); // Home
+        mapKit.setZoom(1);
+        mapKit.setMiniMapVisible(false);
+        
+        
+        waypointPainter = new WaypointPainter<JXMapViewer>();
+        overlayPainter = new Painter<JXMapViewer>() {
+            @Override
+            public void paint(Graphics2D g, JXMapViewer map, int w, int h)
+            {
+                g = (Graphics2D) g.create();
+                // convert from viewport to world bitmap
+                Rectangle rect = map.getViewportBounds();
+                g.translate(-rect.x, -rect.y);
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                for (OverlayObject o : overlayImages)          { o.draw(g, map); }
+                for (OverlayObject o : overlayLines)           { o.draw(g, map); }
+                for (OverlayObject o : persistentOverlayLines) { o.draw(g, map); }
+                
+                g.dispose();
+            }
+        };
+        
+        final CompoundPainter<Painter<JXMapViewer>> c = new CompoundPainter<Painter<JXMapViewer>>(waypointPainter, overlayPainter);
+        c.setCacheable(false);
+        map.setOverlayPainter(c);      // $hide$ (WindowBuilder doesn't like this line)
+        updateWaypoints();
+    }
+    
+    
+    public void clearMap()
+    {
+        overlayLines.clear();
+        mapKit.repaint();
+        currSource = null;
+        currTarget = null;
+    }
+        
+    
     public void mapMouseClicked(MouseEvent e)
     {
         if (g == null) {
@@ -539,11 +547,11 @@ public class MainWindow extends JFrame
         
         // middle mouse button -> clear
         if (SwingUtilities.isMiddleMouseButton(e)) {
-            this.clearMap();
+            clearMap();
             return;
         }
         // right mouse button -> select target, but not without a source
-        else if (SwingUtilities.isRightMouseButton(e) && this.currSource == null) {
+        else if (SwingUtilities.isRightMouseButton(e) && currSource == null) {
             System.out.println("Please set a source first");
             return;
         }
@@ -553,7 +561,7 @@ public class MainWindow extends JFrame
 
         System.out.println();
         GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
-        System.out.println("Clicked at: " + clickPos.getLatitude() + ", " + clickPos.getLongitude());
+        System.out.println("Clicked at  : " + String.format("%.4f", clickPos.getLatitude()) + ", " + String.format("%.4f", clickPos.getLongitude()));
 
         StopWatch.lap();
         int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
@@ -562,33 +570,33 @@ public class MainWindow extends JFrame
             System.out.println("Found no node!");
             return;
         }
-        System.out.println("Closest node at: " + g.getLat(n) + ", " + g.getLon(n) + "  (found in "
+        System.out.println("Closest node: " + String.format("%.4f", g.getLat(n)) + ", " + String.format("%.4f", g.getLon(n)) + "  (found in "
                 + String.format("%.3f", StopWatch.getLastLapSec()) + " sec)");
 
         
         if (SwingUtilities.isLeftMouseButton(e)) 
         {
-            this.currSource = this.g.getPosition(n);
-            this.currTarget = null;
-            this.overlayLines.add(OverlayAggregate.route_var3(clickPos, this.currSource));
+            currSource = g.getPosition(n);
+            currTarget = null;
+            overlayLines.add(OverlayAggregate.route_var3(clickPos, currSource));
             d.setSource(n);
         }
         else if (SwingUtilities.isRightMouseButton(e)) 
         {
-            this.currTarget = this.g.getPosition(n);
+            currTarget = g.getPosition(n);
             d.setTarget(n);
-            if (this.currSource != null && this.currTarget != null) {
+            if (currSource != null && currTarget != null) {
                 StopWatch.lap();
                 boolean r = d.pathFromTo();
                 StopWatch.lap();
                 if (r) {
-                    this.overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
+                    overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
                 }
                 System.out.println("Calculated route in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
             }
         }
 
-        this.mapKit.repaint();
+        mapKit.repaint();
     }
     
     
@@ -647,16 +655,16 @@ public class MainWindow extends JFrame
     
     public void btn_ClearAll(ActionEvent e)
     {
-        this.clearMap();
+        clearMap();
     }
     
     
     public void btn_ClearLast(ActionEvent e)
     {
-        this.overlayLines.pollLast();
-        this.mapKit.repaint();
-        this.currSource = null;
-        this.currTarget = null;
+        overlayLines.pollLast();
+        mapKit.repaint();
+        currSource = null;
+        currTarget = null;
     }
     
     
@@ -671,10 +679,13 @@ public class MainWindow extends JFrame
             case JFileChooser.APPROVE_OPTION:
                 File file = fd.getSelectedFile();
                 try {
-                    this.g = GraphFactory.loadArrayRepresentation(file.getAbsolutePath());
-                    this.d = new Dijkstra(this.g);
-                    this.clearMap();
-                    init();
+                    StopWatch.lap();
+                    g = GraphFactory.loadArrayRepresentation(file.getAbsolutePath());
+                    StopWatch.lap();
+                    d = new Dijkstra(g);
+                    clearMap();
+                    drawGraphRect();
+                    System.out.println("Loaded graph in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
                 }
                 catch (InvalidGraphFormatException ex) {
                     System.out.println("Error: supplied graph has invalid format");
@@ -691,12 +702,12 @@ public class MainWindow extends JFrame
     }
     
     
-	public void btn_CalculateRoute(ActionEvent e)
+    public void btn_CalculateRoute(ActionEvent e)
     {
         System.err.println("btn_CalculateRoute not yet implemented!");
     }
     
-	
+    
     public void cb_VisitOrder(ActionEvent e)
     {
         System.err.println("cb_VisitOrder not yet implemented!");
@@ -853,7 +864,7 @@ public class MainWindow extends JFrame
     }
     
     
-    public void btnNewButton(ActionEvent e)
+    public void btn_SaveOptGraph(ActionEvent e)
     {
         if (g == null) {
             System.out.println("Error: must load a graph first!");
@@ -872,6 +883,7 @@ public class MainWindow extends JFrame
                 File file = fd.getSelectedFile();
                 try {
                     g.save(file.getAbsolutePath());
+                    System.out.println("Successfully saved optimized graph.");
                 }
                 catch (IOException e1) {
                     System.out.println("Failed to save optimized graph!");
@@ -901,9 +913,9 @@ public class MainWindow extends JFrame
     {
         if (currLines++ > MAX_LOG_LENGTH) {
             currLines = 1;
-            this.textArea_Log.setText("");
+            textArea_Log.setText("");
         }
-        this.textArea_Log.append(s);
+        textArea_Log.append(s);
     }
     
 }
