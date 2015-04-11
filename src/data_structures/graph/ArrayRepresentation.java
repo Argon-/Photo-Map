@@ -306,9 +306,11 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Search for a node closest to {@code (lat, lon)} in a grid with an expanding ring, 
-     * originating from the cell {@code (lat, lon)} lies into.<br>
-     * The ring expands by one per iteration, starting with 0 (= the cell containing {@code (lat, lon)}).
+     * Search for the (or rather "a"?) node closest to {@code (lat, lon)} in
+     * a grid with an expanding ring, originating from the cell containing 
+     * {@code (lat, lon)}.<br>
+     * The ring expands by one per iteration, starting with 0 (= the cell
+     * containing {@code (lat, lon)}).
      * <pre>
      * {@code
      * —————————————————————————————
