@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -31,7 +30,7 @@ import com.drew.metadata.exif.GpsDirectory;
  * the JXMapViewer map.<br>
  * <br>
  * <strong>Note</strong>: for performance reasons (indirect) resizing operations
- * are usually deferred as long as possible. This leads to several getters
+ * are usually deferred as long as possible. This would leads to several getters
  * returning potentially outdated imformation because the actual requested 
  * resize did not yet happen.
  * Therefore various variables and methods are used to cache or
@@ -85,7 +84,6 @@ public final class OverlayImage implements OverlayObject
     {
         File file = new File(f);
         img = ImageIO.read(file);
-        cachedImg = ImageIO.read(file);
         if (img == null)
             throw new IOException("not a valid image");
         label = StringUtil.basename(f);
@@ -108,6 +106,8 @@ public final class OverlayImage implements OverlayObject
         if (strict && mapPos == null) {
             throw new RuntimeException("image contains no valid geo location (strict checking)");
         }
+        
+        forceResize = true;
     }
         
     
@@ -216,7 +216,7 @@ public final class OverlayImage implements OverlayObject
         }
 
         if (forceResize || ((w > -1 && w != cachedImg.getWidth()) || (h > -1 && h != cachedImg.getHeight()))) {
-            cachedImg = ImageUtil.getScaledInstance(img, w, h, RenderingHints.VALUE_INTERPOLATION_BILINEAR, highQuality);
+            cachedImg = ImageUtil.getScaledInstance(img, w, h, highQuality);
             forceResize = false;
         }
         return true;
@@ -316,6 +316,11 @@ public final class OverlayImage implements OverlayObject
             return;
         }
         
+        if (forceResize) {
+            resizeInternal(targetWidth, targetHeight);
+        }
+
+        
         int x = 0, y = 0;
         
         if (fixedPosition)
@@ -342,10 +347,6 @@ public final class OverlayImage implements OverlayObject
         }
         else if (mapPos != null)
         {
-            if (forceResize) {
-                resizeInternal(targetWidth, targetHeight);
-            }
-            
             Point2D p = map.getTileFactory().geoToPixel(mapPos, mapZoom);
             // reside centered above the location
             x = (int) p.getX() - (cachedImg.getWidth() / 2);

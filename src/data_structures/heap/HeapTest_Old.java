@@ -210,7 +210,6 @@ public class HeapTest_Old
 		int[] v = new int[] {-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -2};
 		
 				
-		// heap hier mal auch ohne O(n) build bauen
 		//BinaryMinHeap h = new BinaryMinHeap(v.length, true);
 		BinaryMinHeap_Old h = new BinaryMinHeap_Old(v);
 		//for (int i = 0; i < v.length; ++i) {

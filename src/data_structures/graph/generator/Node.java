@@ -2,6 +2,8 @@ package data_structures.graph.generator;
 
 import java.util.Arrays;
 
+import util.StringUtil;
+
 
 
 public final class Node
@@ -14,11 +16,6 @@ public final class Node
     
     public long[] dests = new long[0];
     public int[] highway_types = new int[0];
-    
-    
-    Node()
-    {
-    }
     
     
     public void addEdge(long id, int highwayType)
@@ -39,39 +36,9 @@ public final class Node
         s += "   lon    : " + lon + "\n";
         s += "   t_type : " + tourism_type + "\n";
         s += "   name   : " + name + "\n";
-        s += "   dests  : " + arrayToString(dests) + "\n";
-        s += "   h_types: " + arrayToString(highway_types);
+        s += "   dests  : " + StringUtil.arrayToString(dests) + "\n";
+        s += "   h_types: " + StringUtil.arrayToString(highway_types);
         return s;
     }
-    
-    
-    public static String arrayToString(long[] n)
-    {
-        String s = "";
-        for (int i = 0; i < n.length; ++i) {
-            s += n[i];
             
-            if (i != n.length - 1)
-                s += ", ";
-            else
-                s += " ";
-        }
-        return s;
-    }
-    
-    
-    public static String arrayToString(int[] n)
-    {
-        String s = "";
-        for (int i = 0; i < n.length; ++i) {
-            s += n[i];
-            
-            if (i != n.length - 1)
-                s += ", ";
-            else
-                s += " ";
-        }
-        return s;
-    }
-    
  }

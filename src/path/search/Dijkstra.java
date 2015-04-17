@@ -56,20 +56,11 @@ public final class Dijkstra implements Runnable
 	}
 	
 	
-	public void buildNewHeap(int source, boolean cleanup)
+	public void buildNewHeap(int source)
 	{
 		Arrays.fill(this.state, UNSETTLED);
-		
-		if (!cleanup) {
-			this.heap = new BinaryMinHeap(this.g.size() / 10);
-			this.heap.insert(source, 0);
-		}
-		else {
-			// was wird schneller durch touched?
-			// oder: was ist langsam ohne touched?
-			// beim cleanup müsste man den state/settled array doch mit updaten?
-			this.heap.cleanup();
-		}
+		this.heap = new BinaryMinHeap(this.g.size() / 10);
+		this.heap.insert(source, 0);
 	}
 	
 	
@@ -144,7 +135,7 @@ public final class Dijkstra implements Runnable
 	{
 		if (this.source != from) {
 			this.source = from;
-			this.buildNewHeap(from, false);
+			this.buildNewHeap(from);
 		}
 	}
 	

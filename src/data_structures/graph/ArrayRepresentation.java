@@ -242,7 +242,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     private void buildGrid()
     {
-        long t = System.nanoTime();
+        //long t = System.nanoTime();
                 
         this.grid = new int[this.lon.length];
         this.grid_offset = new int[GRID_LAT_CELLS * GRID_LON_CELLS + 1];

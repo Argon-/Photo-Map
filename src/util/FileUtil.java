@@ -9,14 +9,13 @@ import java.util.Collection;
 
 
 
-public class FileUtil
+public final class FileUtil
 {
-
     /**
-     * Case {@code f} points to a file: load the file as OverlayImage and add 
+     * In case {@code f} points to a file: load the file as OverlayImage and add 
      * it to {@code c}.
      * <br>
-     * Case {@code f} points to a directory: iterate all images in the 
+     * In case {@code f} points to a directory: iterate all images in the 
      * directory (not recursive), load the files as OverlayImage and add 
      * them to {@code c}.
      * 

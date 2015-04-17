@@ -6,6 +6,7 @@ public final class GraphFactory
 {
 	private GraphFactory() {};
 	
+
 	public static Graph load(String s) throws InvalidGraphFormatException, IOException
 	{
 		Graph g = new ArrayRepresentation();

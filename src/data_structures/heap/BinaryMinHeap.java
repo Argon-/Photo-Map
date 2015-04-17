@@ -12,7 +12,6 @@ public final class BinaryMinHeap
 	private int[]		heap_val	= null;
 
 	private int			size		= 0;
-	private boolean[]	touched		= null;
 	
 
 	/**
@@ -26,16 +25,6 @@ public final class BinaryMinHeap
 		this.heap_nid = new int[size];
 		this.heap_val = new int[size];
 		this.size = 0;
-	}
-	
-	
-	public void cleanup()
-	{
-		// touched-Liste mit anschließenden Bereinigung nur dieser
-		for (int i = 0; i < touched.length; ++i)
-		{
-			
-		}
 	}
 	
 	
