@@ -77,6 +77,9 @@ public class MainWindow extends JFrame
 {
     private static final long serialVersionUID = -590468540732816556L;
     
+    private static final int MAX_CONCURRENTLY_VISIBLE_IMAGES = 1;
+    private static final int MAX_LOG_LENGTH = 200;
+
     private ArrayRepresentation g = null;
     private Dijkstra d = null;
     
@@ -94,7 +97,6 @@ public class MainWindow extends JFrame
     private boolean imagesDynamicResize = true;
     private int     imagesSize = 400;
     
-    private static final int MAX_LOG_LENGTH = 200;
     private int currLines = 0;
     private boolean imageSelectedFromList = false;
     
@@ -610,7 +612,7 @@ public class MainWindow extends JFrame
         for (OverlayImage oi : overlayImages) 
         {
             // there's already one visible image, imply invisibility for the others
-            if (visibleNum >= OverlayImage.MAX_CONCURRENTLY_VISIBLE_IMAGES) {
+            if (visibleNum >= MAX_CONCURRENTLY_VISIBLE_IMAGES) {
                 if (oi.isVisible() && !imageSelectedFromList) {
                     oi.setVisible(false);
                     change = true;

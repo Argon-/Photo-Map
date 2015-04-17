@@ -42,7 +42,6 @@ import com.drew.metadata.exif.GpsDirectory;
  */
 public final class OverlayImage implements OverlayObject
 {
-    public static final int MAX_CONCURRENTLY_VISIBLE_IMAGES = 1;
     public static final int IMAGE_MIN_HEIGHT = 50;
     public static final int IMAGE_MIN_WIDTH  = 50;
     
