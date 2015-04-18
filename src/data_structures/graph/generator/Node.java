@@ -20,6 +20,7 @@ public final class Node
     
     public void addEdge(long id, int highwayType)
     {
+        // that's expensive, but ensures not a single byte is unnecessarily allocated
         dests = Arrays.copyOf(dests, dests.length + 1);
         highway_types = Arrays.copyOf(highway_types, highway_types.length + 1);
         
