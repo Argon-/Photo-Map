@@ -59,7 +59,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
     private byte   tour[] = null;
     private String name[] = null;
 
-
+    
+    // factor * num_of_nodes is the amount of cells in y/x
     private final double GRID_FACTOR = 0.00002;
     private int GRID_LAT_CELLS;
     private int GRID_LON_CELLS;
@@ -458,7 +459,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public void drawRoutableNodes(MainWindow win)
     {
-        Color[] c = {Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY};
+        Color[] c = {Color.BLACK, Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY, Color.WHITE};
         OverlayAggregate oa = new OverlayAggregate();
         
         for (int base = 0; base < this.grid_offset.length-1; ++base)
@@ -466,9 +467,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
             for (int i = this.grid_offset[base]; i < this.grid_offset[base+1]; ++i)
             {
                 int pos = this.grid[i];
-                //int lat_cell = this.lat[pos] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat[pos] - this.minLat) / LAT_CELL_SIZE);
-                //int lon_cell = this.lon[pos] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon[pos] - this.minLon) / LON_CELL_SIZE);
-                //System.out.println("cell " + lat_cell + "," + lon_cell);
                 GeoPosition g = new GeoPosition(this.lat[pos], this.lon[pos]);
                 oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
             }
@@ -486,7 +484,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
             GeoPosition g = new GeoPosition(this.nlat[i], this.nlon[i]);
             oa.addPoint(new OverlayElement(g, c[i % c.length], 7)).addLabel(new OverlayLabel(this.name[i], g));
         }
-        
         win.persistentOverlayLines.add(oa);
     }
     
