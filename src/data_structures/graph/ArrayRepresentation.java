@@ -3,6 +3,7 @@ package data_structures.graph;
 import gui.MainWindow;
 import gui.overlay.OverlayAggregate;
 import gui.overlay.OverlayElement;
+import gui.overlay.OverlayLabel;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -478,12 +479,12 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     public void drawNonRoutableNodes(MainWindow win)
     {
-        Color[] c = {Color.MAGENTA};
+        Color[] c = {Color.RED};
         OverlayAggregate oa = new OverlayAggregate();
         
         for (int i = 0; i < nlat.length; ++i) {
             GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
-            oa.addPoint(new OverlayElement(g, c[i % c.length], 5));
+            oa.addPoint(new OverlayElement(g, c[i % c.length], 7)).addLabel(new OverlayLabel(this.name[i], g));
         }
         
         win.persistentOverlayLines.add(oa);
