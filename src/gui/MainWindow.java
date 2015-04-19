@@ -157,7 +157,6 @@ public class MainWindow extends JFrame
             try {
                 g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/out-stg.txt");
                 d = new Dijkstra(g);
-                //g.drawCells(this);
             }
             catch (InvalidGraphFormatException e) {
                 System.out.println("Supplied graph has invalid format");
@@ -239,7 +238,7 @@ public class MainWindow extends JFrame
                 list_Images(e);
             }
         });
-        list_Images.setToolTipText("Select an image to jump to its location. Use drag and drop to reorder images.");
+        list_Images.setToolTipText("Select a photo to jump to its location. Use drag and drop to reorder photos.");
         list_Images.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //list_Images.setDragEnabled(true);
         scrollPane_Images.setViewportView(list_Images);
@@ -297,8 +296,8 @@ public class MainWindow extends JFrame
         gbc_btn_CalculateRoute.gridy = 1;
         contentPane.add(btn_CalculateRoute, gbc_btn_CalculateRoute);
         
-        btn_RemoveImage = new JButton("Remove image");
-        btn_RemoveImage.setToolTipText("Remove the currently selected image from the list.");
+        btn_RemoveImage = new JButton("Remove photo");
+        btn_RemoveImage.setToolTipText("Remove the currently selected photo from the list.");
         btn_RemoveImage.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 btn_RemoveImage(e);
@@ -321,8 +320,8 @@ public class MainWindow extends JFrame
         gbc_btn_RemoveImage.gridy = 1;
         contentPane.add(btn_RemoveImage, gbc_btn_RemoveImage);
         
-        btn_AddImages = new JButton("Add images");
-        btn_AddImages.setToolTipText("Add either single images or multiple images from a directory.");
+        btn_AddImages = new JButton("Add photos");
+        btn_AddImages.setToolTipText("Add either a single photo or multiple photos from a directory.");
         btn_AddImages.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 btn_AddImages(e);
@@ -330,7 +329,7 @@ public class MainWindow extends JFrame
         });
         
         btn_ClearAll = new JButton("Clear all markers");
-        btn_ClearAll.setToolTipText("Remove all position markers from the map. Shortcut: middle mouse button (scroll wheel click)");
+        btn_ClearAll.setToolTipText("Remove all position markers from the map. Shortcut: middle mouse button");
         btn_ClearAll.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 btn_ClearAll(e);
@@ -378,7 +377,7 @@ public class MainWindow extends JFrame
         gbc_btn_SaveOptGraph.gridy = 6;
         contentPane.add(btn_SaveOptGraph, gbc_btn_SaveOptGraph);
         
-        lbl_ImageQuality = new JLabel("Image quality:");
+        lbl_ImageQuality = new JLabel("Photo quality:");
         GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
         gbc_lbl_ImageQuality.anchor = GridBagConstraints.EAST;
         gbc_lbl_ImageQuality.insets = new Insets(0, 0, 0, 5);
@@ -387,7 +386,7 @@ public class MainWindow extends JFrame
         contentPane.add(lbl_ImageQuality, gbc_lbl_ImageQuality);
         
         cb_ImageQuality = new JComboBox<String>();
-        cb_ImageQuality.setToolTipText("Quality for image resizing. This greatly affects performance.");
+        cb_ImageQuality.setToolTipText("Quality for photo resizing. This greatly affects performance.");
         cb_ImageQuality.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 cb_ImageQuality(e);
@@ -429,7 +428,7 @@ public class MainWindow extends JFrame
         gbc_cb_VisitOrder.gridy = 4;
         contentPane.add(cb_VisitOrder, gbc_cb_VisitOrder);
         
-        lbl_ResizeMethod = new JLabel("Resize images:");
+        lbl_ResizeMethod = new JLabel("Resize photos:");
         GridBagConstraints gbc_lbl_ResizeMethod = new GridBagConstraints();
         gbc_lbl_ResizeMethod.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_ResizeMethod.anchor = GridBagConstraints.EAST;
@@ -438,7 +437,7 @@ public class MainWindow extends JFrame
         contentPane.add(lbl_ResizeMethod, gbc_lbl_ResizeMethod);
         
         cb_ResizeMethod = new JComboBox<String>();
-        cb_ResizeMethod.setToolTipText("Select whether to automatically adjust the size of images when zooming the map.");
+        cb_ResizeMethod.setToolTipText("Select whether to automatically adjust the size of photos when zooming the map.");
         cb_ResizeMethod.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 cb_ResizeMethod(e);
@@ -452,7 +451,7 @@ public class MainWindow extends JFrame
         gbc_cb_ResizeMethod.gridy = 4;
         contentPane.add(cb_ResizeMethod, gbc_cb_ResizeMethod);
         
-        lbl_ImageSize = new JLabel("Limit image size:");
+        lbl_ImageSize = new JLabel("Limit photo size:");
         GridBagConstraints gbc_lbl_ImageSize = new GridBagConstraints();
         gbc_lbl_ImageSize.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_ImageSize.anchor = GridBagConstraints.EAST;
@@ -461,7 +460,7 @@ public class MainWindow extends JFrame
         contentPane.add(lbl_ImageSize, gbc_lbl_ImageSize);
         
         cb_ImageSize = new JComboBox<String>();
-        cb_ImageSize.setToolTipText("Maximum size for images (on the lowest zoom level).");
+        cb_ImageSize.setToolTipText("Maximum size for photos (on the lowest zoom level).");
         cb_ImageSize.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 cb_ImageSize(e);
@@ -630,7 +629,7 @@ public class MainWindow extends JFrame
             // move the point "into" the center of the waypoint image
             p.setLocation(p.getX() - rect.x, p.getY() - rect.y - (OverlayImage.WAYPOINT_Y_OFFSET / 2));
             
-            // are we close to the oi's Waypoint ?
+            // are we close to oi's Waypoint ?
             if (p.distance(e.getPoint()) < (OverlayImage.WAYPOINT_Y_OFFSET / 2)) {
                 // we are close enough, but oi was not visible until now
                 if (!oi.isVisible()) {
@@ -688,6 +687,7 @@ public class MainWindow extends JFrame
                     clearMap();
                     drawGraphRect();
                     System.out.println("Graph loaded in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
+                    g.drawNonRoutableNodes(this);
                 }
                 catch (InvalidGraphFormatException ex) {
                     System.out.println("Error: supplied graph has invalid format");
@@ -707,12 +707,10 @@ public class MainWindow extends JFrame
     public void btn_CalculateRoute(ActionEvent e)
     {
         System.err.println("btn_CalculateRoute not yet implemented!");
-    }
-    
-    
-    public void cb_VisitOrder(ActionEvent e)
-    {
-        System.err.println("cb_VisitOrder not yet implemented!");
+        if (list_Images.getModel().getSize() < 1) {
+            System.out.println("No photos loaded!");
+            return;
+        }
     }
     
     
@@ -769,6 +767,39 @@ public class MainWindow extends JFrame
                 break;
         }       
     }
+    
+    
+    public void btn_SaveOptGraph(ActionEvent e)
+    {
+        if (g == null) {
+            System.out.println("Error: must load a graph first!");
+            return;
+        }
+        
+        fd.setDialogTitle("Save as");
+        fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
+        fd.setSelectedFile(new File("graph"));
+        fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fd.setMultiSelectionEnabled(false);
+        int c = fd.showSaveDialog(this);
+        
+        switch (c) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = fd.getSelectedFile();
+                try {
+                    g.save(file.getAbsolutePath());
+                    System.out.println("Successfully saved optimized graph");
+                }
+                catch (IOException e1) {
+                    System.out.println("Failed to save optimized graph!");
+                }
+                break;
+            case JFileChooser.CANCEL_OPTION:
+                break;
+            case JFileChooser.ERROR_OPTION:
+                break;
+        }       
+    }
 
     
     public void list_Images(ListSelectionEvent e)
@@ -791,14 +822,18 @@ public class MainWindow extends JFrame
             
             if (oi.getHeight() > (3 * h / 4)) {
                 p.setLocation(p.getX(), p.getY() - (h/2) + OverlayImage.PADDING);
-                System.out.println("2");
             }
             else if (oi.getHeight() > (h / 3)) {
                 p.setLocation(p.getX(), p.getY() - (h/4));
-                System.out.println("1");
             }
             map.setCenter(p);
         }
+    }
+    
+    
+    public void cb_VisitOrder(ActionEvent e)
+    {
+        System.err.println("cb_VisitOrder not yet implemented!");
     }
     
     
@@ -862,40 +897,7 @@ public class MainWindow extends JFrame
         }
         repaint();
     }
-    
-    
-    public void btn_SaveOptGraph(ActionEvent e)
-    {
-        if (g == null) {
-            System.out.println("Error: must load a graph first!");
-            return;
-        }
         
-        fd.setDialogTitle("Save as");
-        fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
-        fd.setSelectedFile(new File("graph"));
-        fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fd.setMultiSelectionEnabled(false);
-        int c = fd.showSaveDialog(this);
-        
-        switch (c) {
-            case JFileChooser.APPROVE_OPTION:
-                File file = fd.getSelectedFile();
-                try {
-                    g.save(file.getAbsolutePath());
-                    System.out.println("Successfully saved optimized graph.");
-                }
-                catch (IOException e1) {
-                    System.out.println("Failed to save optimized graph!");
-                }
-                break;
-            case JFileChooser.CANCEL_OPTION:
-                break;
-            case JFileChooser.ERROR_OPTION:
-                break;
-        }       
-    }
-    
 
     public void updateWaypoints()
     {
