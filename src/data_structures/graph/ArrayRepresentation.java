@@ -26,16 +26,38 @@ final public class ArrayRepresentation implements Graph, Serializable {
 
     private static final long serialVersionUID = 8955873766213220121L;
     
+    
+    /*
+     * Routable nodes info
+     */
     private double    lat[] = null;
     private double    lon[] = null;
-    private int   tourism[] = null;     // TODO: vlt. andere Datenstruktur da nur sehr sparse besetzt? (3580 bei 22164098 knoten)
-    private String   name[] = null;     // TODO: wenn das kaum genutzt wird einfach entfernen
+    
+    /*
+     * Edge info
+     */
     private int    source[] = null;
     private int    target[] = null;
     private int    offset[] = null;
     private int      dist[] = null;
     private int    dist_w[] = null;
     private final double types[];
+    
+    /*
+     * Not-routable nodes info (tourism nodes)
+     * Reasoning for not saving them with the routable nodes and providing
+     * some kind of index structure to know which nodes are not routable is
+     * the assumption of a way lower number of not routable nodes.
+     * A lookup for these nodes can be provided tremendously faster when they
+     * are not mixed with routable ones. Additionally, fields like tourism
+     * or name waste way less space and one is not required to resort to other
+     * (slower) data structures because of them being very sparse.
+     */
+    private double nlat[] = null;
+    private double nlon[] = null;
+    private byte   tour[] = null;
+    private String name[] = null;
+
 
     private final double GRID_FACTOR = 0.00002;
     private int GRID_LAT_CELLS;
@@ -70,15 +92,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
         this.types[10] = 0.5;   // turning_circle
         this.types[11] = 0.3;   // service
         this.types[12] = 0.5;   // unclassified
-        //this.types[20] = ;
-        //this.types[21] = ;
-        //this.types[22] = ;
-        //this.types[23] = ;
-        //this.types[24] = ;
-        //this.types[25] = ;
-        //this.types[26] = ;
-        //this.types[27] = ;
-        //this.types[28] = ;
     }
     
     
@@ -88,14 +101,18 @@ final public class ArrayRepresentation implements Graph, Serializable {
         
         oos.writeObject(this.lat);
         oos.writeObject(this.lon);
-        oos.writeObject(this.tourism);
-        oos.writeObject(this.name);
+
         oos.writeObject(this.source);
         oos.writeObject(this.target);
         oos.writeObject(this.offset);
         oos.writeObject(this.dist);
         oos.writeObject(this.dist_w);
         
+        oos.writeObject(this.nlat);
+        oos.writeObject(this.nlon);
+        oos.writeObject(this.tour);
+        oos.writeObject(this.name);
+
         oos.writeDouble(minLat);
         oos.writeDouble(maxLat);
         oos.writeDouble(minLon);
@@ -109,37 +126,30 @@ final public class ArrayRepresentation implements Graph, Serializable {
     {
         try {
             System.out.println("Found graph text file, parsing...");
-            int t = 0, n = 0;
             
             final int node_num = Integer.parseInt(b.readLine());
             final int edge_num = Integer.parseInt(b.readLine());
+            final int tour_num = Integer.parseInt(b.readLine());
             
+            
+            // read nodes
             this.lat  = new double[node_num];
             this.lon  = new double[node_num];
-            this.tourism = new int[node_num];
-            this.name = new String[node_num];
 
             for (int i = 0; i < node_num; ++i)
             {
-                final String[] s = b.readLine().split(" ", 5);
-                this.lat[i]  = Double.parseDouble(s[1]);
-                this.lon[i]  = Double.parseDouble(s[2]);
-                this.tourism[i] = s.length > 3 ? Integer.parseInt(s[3]) : -1;
-                this.name[i] = s.length > 4 ? s[4] : null;
-                if (tourism[i] > -1)
-                    ++t;
-                if (name[i] != null)
-                    ++n;
+                final String[] s = b.readLine().split(" ", 2);
+                this.lat[i]  = Double.parseDouble(s[0]);
+                this.lon[i]  = Double.parseDouble(s[1]);
 
                 this.minLat = Math.min(minLat, this.lat[i]);
                 this.maxLat = Math.max(maxLat, this.lat[i]);
                 this.minLon = Math.min(minLon, this.lon[i]);
                 this.maxLon = Math.max(maxLon, this.lon[i]);
             }
-            //System.out.println("nodes  : " + node_num);
-            //System.out.println("tourism: " + t + " (" + (t/node_num * 100) + "%)");
-            //System.out.println("name   : " + t + " (" + (n/node_num * 100) + "%)");
             
+            
+            // read edges
             this.source = new int[edge_num];
             this.target = new int[edge_num];
             this.offset = new int[node_num + 1];    // +1 because of getNeighbor()
@@ -169,9 +179,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
                 }
             }
             
+            // fix offset array
             int last = source.length;
-            for (int i = offset.length - 1; i > 0; --i)
-            {
+            for (int i = offset.length - 1; i > 0; --i) {
                 if (offset[i] < 0) {
                     offset[i] = last;
                 }
@@ -179,6 +189,30 @@ final public class ArrayRepresentation implements Graph, Serializable {
                     last = offset[i];
                 }
             }
+
+            
+            // read tourism nodes
+            this.nlat = new double[tour_num];
+            this.nlon = new double[tour_num];
+            this.tour = new byte[tour_num];
+            this.name = new String[tour_num];
+
+            for (int i = 0; i < tour_num; ++i)
+            {
+                final String[] s = b.readLine().split(" ", 4);
+                this.nlat[i] = Double.parseDouble(s[0]);
+                this.nlon[i] = Double.parseDouble(s[1]);
+                this.tour[i] = Byte.parseByte(s[2]);
+                this.name[i] = s.length > 3 ? s[3] : null;
+
+                // only when we want not-routable nodes in the grid
+                //this.minLat = Math.min(minLat, this.nlat[i]);
+                //this.maxLat = Math.max(maxLat, this.nlat[i]);
+                //this.minLon = Math.min(minLon, this.nlon[i]);
+                //this.maxLon = Math.max(maxLon, this.nlon[i]);
+            }
+
+            
         } 
         catch (NumberFormatException e) {
             throw new InvalidGraphFormatException("Invalid graph text file format");
@@ -191,15 +225,19 @@ final public class ArrayRepresentation implements Graph, Serializable {
         try {
             System.out.println("Found serialized graph, reading...");
             
-            this.lat     = (double[]) ois.readObject();
-            this.lon     = (double[]) ois.readObject();
-            this.tourism = (int[])    ois.readObject();
-            this.name    = (String[]) ois.readObject();
-            this.source  = (int[])    ois.readObject();
-            this.target  = (int[])    ois.readObject();
-            this.offset  = (int[])    ois.readObject();
-            this.dist    = (int[])    ois.readObject();
-            this.dist_w  = (int[])    ois.readObject();
+            this.lat    = (double[]) ois.readObject();
+            this.lon    = (double[]) ois.readObject();
+
+            this.source = (int[])    ois.readObject();
+            this.target = (int[])    ois.readObject();
+            this.offset = (int[])    ois.readObject();
+            this.dist   = (int[])    ois.readObject();
+            this.dist_w = (int[])    ois.readObject();
+            
+            this.nlat   = (double[]) ois.readObject();
+            this.nlon   = (double[]) ois.readObject();
+            this.tour   = (byte[])    ois.readObject();
+            this.name   = (String[]) ois.readObject();
             
             this.minLat = ois.readDouble();
             this.maxLat = ois.readDouble();
@@ -409,7 +447,15 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
-    public void drawCells(MainWindow win)
+    /**
+     * Draw a visual marker for every routable node on the map.
+     * <br>
+     * This was originally intended to test the node grid, as it's
+     * iterating the grid cells to get all nodes.
+     * 
+     * @param win
+     */
+    public void drawRoutableNodes(MainWindow win)
     {
         Color[] c = {Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY};
         OverlayAggregate oa = new OverlayAggregate();
@@ -426,6 +472,20 @@ final public class ArrayRepresentation implements Graph, Serializable {
                 oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
             }
         }
+        win.persistentOverlayLines.add(oa);
+    }
+    
+    
+    public void drawNonRoutableNodes(MainWindow win)
+    {
+        Color[] c = {Color.MAGENTA};
+        OverlayAggregate oa = new OverlayAggregate();
+        
+        for (int i = 0; i < nlat.length; ++i) {
+            GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
+            oa.addPoint(new OverlayElement(g, c[i % c.length], 5));
+        }
+        
         win.persistentOverlayLines.add(oa);
     }
     
