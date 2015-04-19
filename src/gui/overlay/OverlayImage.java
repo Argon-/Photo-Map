@@ -165,6 +165,12 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    public String getLabel()
+    {
+        return label;
+    }
+    
+    
     public OverlayImage setVisible(boolean v)
     {
         visible = v;
