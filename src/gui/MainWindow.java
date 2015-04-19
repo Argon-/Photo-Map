@@ -4,6 +4,7 @@ package gui;
 import gui.overlay.OverlayAggregate;
 import gui.overlay.OverlayElement;
 import gui.overlay.OverlayImage;
+import gui.overlay.OverlayImageComparator;
 import gui.overlay.OverlayObject;
 
 import javax.swing.JFrame;
@@ -51,8 +52,10 @@ import javax.swing.JTextArea;
 import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.swing.DefaultListModel;
@@ -687,7 +690,7 @@ public class MainWindow extends JFrame
                     clearMap();
                     drawGraphRect();
                     System.out.println("Graph loaded in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
-                    g.drawNonRoutableNodes(this);
+                    //g.drawNonRoutableNodes(this);
                 }
                 catch (InvalidGraphFormatException ex) {
                     System.out.println("Error: supplied graph has invalid format");
@@ -706,10 +709,18 @@ public class MainWindow extends JFrame
     
     public void btn_CalculateRoute(ActionEvent e)
     {
-        System.err.println("btn_CalculateRoute not yet implemented!");
         if (list_Images.getModel().getSize() < 1) {
             System.out.println("No photos loaded!");
             return;
+        }
+        
+        DefaultListModel<OverlayImage> dm = ((DefaultListModel<OverlayImage>) list_Images.getModel());
+        List<OverlayImage> chron = Collections.list(dm.elements());
+        chron.sort(new OverlayImageComparator());
+        
+        System.out.println("Chronsort:");
+        for (OverlayImage oi : chron) {
+            System.out.println(oi.getDate() + " -> " + oi.getLabel());
         }
     }
     
