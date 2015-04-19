@@ -1,7 +1,5 @@
 package gui.overlay;
 
-import java.awt.BasicStroke;
-import java.awt.geom.Point2D;
 import java.awt.Graphics2D;
 import java.util.LinkedList;
 
@@ -14,54 +12,55 @@ public final class OverlayAggregate implements OverlayObject
 {
 	private final LinkedList<OverlayElement> points;
 	private final LinkedList<OverlayElement> lines;
+    private final LinkedList<OverlayLabel> labels;
 
 	
 	public OverlayAggregate()
 	{
 		this.points = new LinkedList<OverlayElement>();
 		this.lines = new LinkedList<OverlayElement>();
+	    this.labels = new LinkedList<OverlayLabel>();
 	}
+	
 	
 	public LinkedList<OverlayElement> getPoints()
 	{
 		return this.points;
 	}
 	
+	
 	public LinkedList<OverlayElement> getLines()
 	{
 		return this.lines;
 	}
 	
-	public void addPoint(OverlayElement oe)
+	
+	public OverlayAggregate addPoint(OverlayElement oe)
 	{
 		this.points.add(oe);
+		return this;
 	}
 	
-	public void addLine(OverlayElement oe)
+	
+	public OverlayAggregate addLine(OverlayElement oe)
 	{
 		this.lines.add(oe);
+		return this;
 	}
+	
+	
+	public OverlayAggregate addLabel(OverlayLabel ol)
+    {
+        this.labels.add(ol);
+        return this;
+    }
+	
 	
 	public void draw(Graphics2D g, JXMapViewer map)
 	{
-        for (OverlayElement oe : lines)
-        {
-            Point2D s = map.getTileFactory().geoToPixel(oe.getSource(), map.getZoom());
-            Point2D t = map.getTileFactory().geoToPixel(oe.getTarget(), map.getZoom());
-                
-            g.setColor(oe.getColor());
-            g.setStroke(new BasicStroke(oe.getWidth()));
-            g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
-        }
-        for (OverlayElement oe : points)
-        {
-            Point2D s = map.getTileFactory().geoToPixel(oe.getSource(), map.getZoom());
-            Point2D t = map.getTileFactory().geoToPixel(oe.getTarget(), map.getZoom());
-                
-            g.setColor(oe.getColor());
-            g.setStroke(new BasicStroke(oe.getWidth()));
-            g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
-        }
+        for (OverlayObject oo : lines)  { oo.draw(g, map); }
+        for (OverlayObject oo : points) { oo.draw(g, map); }
+        for (OverlayObject oo : labels) { oo.draw(g, map); }
 	}
 	
 	

@@ -1,12 +1,16 @@
 package gui.overlay;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 
+import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 
 
-public final class OverlayElement
+public final class OverlayElement implements OverlayObject
 {
 	private final GeoPosition	source;
 	private final GeoPosition	target;
@@ -98,6 +102,19 @@ public final class OverlayElement
 	{
 		return this.strokeWidth;
 	}
+	
+	
+    @Override
+    public void draw(Graphics2D g, JXMapViewer map)
+    {
+        Point2D s = map.getTileFactory().geoToPixel(getSource(), map.getZoom());
+        Point2D t = map.getTileFactory().geoToPixel(getTarget(), map.getZoom());
+            
+        g.setColor(getColor());
+        g.setStroke(new BasicStroke(getWidth()));
+        g.drawLine((int) s.getX(), (int) s.getY(), (int) t.getX(), (int) t.getY());
+    }
+
 	
 	
     /* ***********************************************************************
