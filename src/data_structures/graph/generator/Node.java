@@ -6,21 +6,27 @@ import util.StringUtil;
 
 
 
-public final class Node
+public class Node
 {
-    public long id;
-    public double lat;
-    public double lon;
-    public int tourism_type;
-    public String name;
+    private long id;
+    private double lat;
+    private double lon;
     
-    public long[] dests = new long[0];
-    public int[] highway_types = new int[0];
+    private long[] dests = new long[0];
+    private int[] highway_types = new int[0];
+    
+    
+    public Node() {}
+    public Node(double lat, double lon)
+    {
+        this.lat = lat;
+        this.lon = lon;
+    }
     
     
     public void addEdge(long id, int highwayType)
     {
-        // that's expensive, but ensures not a single byte is unnecessarily allocated
+        // that's expensive but ensures not a single byte will be unnecessarily allocated
         dests = Arrays.copyOf(dests, dests.length + 1);
         highway_types = Arrays.copyOf(highway_types, highway_types.length + 1);
         
@@ -35,11 +41,24 @@ public final class Node
         s += "ID: " + id + "\n";
         s += "   lat    : " + lat + "\n";
         s += "   lon    : " + lon + "\n";
-        s += "   t_type : " + tourism_type + "\n";
-        s += "   name   : " + name + "\n";
         s += "   dests  : " + StringUtil.arrayToString(dests) + "\n";
         s += "   h_types: " + StringUtil.arrayToString(highway_types);
         return s;
     }
-            
+    
+    
+    public void setLoc(double lat, double lon)
+    {
+        this.lat = lat;
+        this.lon = lon;
+    }
+    
+        
+    public void setID(long i)      { this.id = i; }
+    public long getID()            { return id; }
+    public double getLat()         { return lat; }
+    public double getLon()         { return lon; }
+    public long[] getDests()       { return dests; }
+    public int[] getHighwayTypes() { return highway_types; }
+
  }

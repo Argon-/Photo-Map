@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
 
 import util.Distance;
 
@@ -27,6 +28,7 @@ public class GraphGenerator
     private final String node_file_loc;
     private final String way_file_loc;
     private final TLongObjectHashMap<Node> nodes = new TLongObjectHashMap<Node>();
+    private final LinkedList<TourismNode> tourism_nodes = new LinkedList<TourismNode>();
 
     private long edge_num = 0;
     
@@ -66,7 +68,7 @@ public class GraphGenerator
                     }
                     String k = pair[0].startsWith("\"") ? pair[0].substring(1) : pair[0];
                     String v = pair[1].endsWith("\"") ? pair[1].substring(0, pair[1].length() - 1) : pair[1];
-                                        
+                    
                     if (k.startsWith("highway")) {
                         highway = highwayType(v, false);
                     }
@@ -77,10 +79,11 @@ public class GraphGenerator
                 }
                 
                 // ignore this way
-                if (highway < 0)
+                if (highway < 0) {
                     continue;
+                }
                 
-                // add edges
+                // extract edges from current way
                 long current;
                 long next = Long.parseLong(nodelist[0]);
                 for (int i = 1; i < nodelist.length; ++i) {
@@ -129,19 +132,27 @@ public class GraphGenerator
             while ((line = node_file.readLine()) != null)
             {
                 String[] tmp = line.split(ID_SEP, 5);
-                if (!nodes.containsKey(Long.parseLong(tmp[1])))
-                    continue;
                 
                 long id = Long.parseLong(tmp[1]);
                 double lat = Double.parseDouble(tmp[2]);
                 double lon = Double.parseDouble(tmp[3]);
+                
+                
+                // node was previously picked up as part of a way -> add lat/lon
+                Node n = nodes.get(id);
+                if (n != null) {
+                    n.setLoc(lat, lon);
+                }
+
+                
+                // checking if this is an interesting tourism node
                 int tourism = -2;
                 String name = null;
 
-                
                 if (tmp.length > 4) 
                 {
                     // split tags into key value pairs and parse them
+                    boolean checked = false;                                                // TODO: abort when name & t_type was read
                     for (String s : tmp[4].trim().split(N_TAG_SEP)) {
                         String[] pair = s.split(KV_SEP);
                         if (pair.length != 2) {
@@ -158,12 +169,14 @@ public class GraphGenerator
                         }
                     }
                 }
+                
+                // not a relevant tourism node
+                if (tourism < 0) {
+                    continue;
+                }
 
-                Node n = nodes.get(id);
-                n.lat = lat;
-                n.lon = lon;
-                n.name = name;
-                n.tourism_type = tourism;
+                tourism_nodes.add(new TourismNode(lat, lon, tourism, name));
+                
                 //if (n.lat < 0.1)
                 //    System.out.println(lat);
                 
@@ -200,6 +213,8 @@ public class GraphGenerator
             out_file.newLine();
             out_file.write(Long.toString(edge_num));
             out_file.newLine();
+            out_file.write(Long.toString(tourism_nodes.size()));
+            out_file.newLine();
             
             
             // write nodes
@@ -209,14 +224,9 @@ public class GraphGenerator
             {
                 it.advance();
                 Node n = it.value();
-                n.id = id++;
+                n.setID(id++);
                 
-                out_file.write(n.id + " " + n.lat + " " + n.lon);
-                if (n.tourism_type >= 0) {
-                    out_file.write(" " + n.tourism_type);
-                    if (n.name != null)
-                        out_file.write(" " + n.name);
-                }
+                out_file.write(n.getLat() + " " + n.getLon());
                 out_file.newLine();
             }
             
@@ -228,15 +238,26 @@ public class GraphGenerator
                 it.advance();
                 Node n = it.value();
                 
-                for (int e = 0; e < n.dests.length; ++e) {
-                    Node dest = nodes.get(n.dests[e]);
+                for (int e = 0; e < n.getDests().length; ++e) {
+                    Node dest = nodes.get(n.getDests()[e]);
                     if (dest == null) {
-                        System.out.println("No mapping for " + n.dests[e]);
+                        System.out.println("No mapping for " + n.getDests()[e]);
                     }
-                    long dist = Math.round(Distance.haversine(n.lat, n.lon, dest.lat, dest.lon));
-                    out_file.write(n.id + " " + dest.id + " " + dist + " " + n.highway_types[e]);
+                    long dist = Math.round(Distance.haversine(n.getLat(), n.getLon(), dest.getLat(), dest.getLon()));
+                    out_file.write(n.getID() + " " + dest.getID() + " " + dist + " " + n.getHighwayTypes()[e]);
                     out_file.newLine();
                 }
+            }
+            
+            
+            // write tourism nodes
+            for (TourismNode tn : tourism_nodes)
+            {
+                out_file.write(tn.getLat() + " " + tn.getLat() + " " + tn.getTourismType());
+                if (tn.hasName()) {
+                    out_file.write(" " + tn.getName());
+                }
+                out_file.newLine();
             }
             
             
@@ -355,10 +376,10 @@ public class GraphGenerator
         else if (s.equals("zoo"))
             return include_attractions ? 19 : -19;
         // other
-        else if (s.equals("yes"))
-            return 0;
-        else if (s.equals("user defined"))
-            return 0;
+        //else if (s.equals("yes"))
+        //    return -99;
+        //else if (s.equals("user defined"))
+        //    return -99;
         else
             return -1;
     }
