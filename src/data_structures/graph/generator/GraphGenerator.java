@@ -152,7 +152,7 @@ public class GraphGenerator
                 if (tmp.length > 4) 
                 {
                     // split tags into key value pairs and parse them
-                    boolean checked = false;                                                // TODO: abort when name & t_type was read
+                    boolean checked = false;
                     for (String s : tmp[4].trim().split(N_TAG_SEP)) {
                         String[] pair = s.split(KV_SEP);
                         if (pair.length != 2) {
@@ -163,9 +163,15 @@ public class GraphGenerator
                         
                         if (k.startsWith("tourism")) {
                             tourism = tourismType(v, false, false);
+                            if (checked)
+                                break;
+                            checked = true;
                         }
                         else if (k.startsWith("name")) {
                             name = v;
+                            if (checked)
+                                break;
+                            checked = true;
                         }
                     }
                 }
@@ -175,21 +181,13 @@ public class GraphGenerator
                     continue;
                 }
 
-                tourism_nodes.add(new TourismNode(lat, lon, tourism, name));
-                
-                //if (n.lat < 0.1)
-                //    System.out.println(lat);
-                
-                /*
-                if (tourism >= 0) {
-                    System.out.println("----------------------------------------");
-                    //System.out.println(line);
-                    //System.out.println("   => " + arrayToString(tmp[1].split(TAG_SEP)));
-                    //System.out.println("   => " + highway);
-                    System.out.println(nodes.get(id));
-                    if (++c > 2)
-                        break;
-                }*/
+                // ignore nodes with either a blank name (what is a user supposed to do without a name?)
+                // and such including "closed" in their name
+                if (name != null && !(name.contains("closed") || name.contains("geschlossen"))) {
+                    name = name.replace("&amp;", "&").replace("&quot;", "\"");
+                    tourism_nodes.add(new TourismNode(lat, lon, tourism, name));
+                }
+    
             }
             
             node_file.close();
