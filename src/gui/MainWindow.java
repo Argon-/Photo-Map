@@ -146,7 +146,7 @@ public class MainWindow extends JFrame
         initGUIComponents();
         configureMap();
         
-        log("Welcome! Load a graph file and or images to get started." + System.getProperty("line.separator"));
+        log("Welcome! Load a graph file and/or images to get started." + System.getProperty("line.separator"));
         log("Left mouse click places a starting position, right mouse click a destination." + System.getProperty("line.separator") + System.getProperty("line.separator"));
     }
     
@@ -687,7 +687,7 @@ public class MainWindow extends JFrame
                     d = new Dijkstra(g);
                     clearMap();
                     drawGraphRect();
-                    System.out.println("Loaded graph in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
+                    System.out.println("Graph loaded in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
                 }
                 catch (InvalidGraphFormatException ex) {
                     System.out.println("Error: supplied graph has invalid format");
