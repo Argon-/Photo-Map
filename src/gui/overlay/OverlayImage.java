@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 
@@ -22,6 +23,7 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.lang.GeoLocation;
 import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 
 
@@ -52,8 +54,8 @@ public final class OverlayImage implements OverlayObject
     public static final int BOT_LEFT  = 3;
     
     // pixel constants for alignment and padding in draw()
-    public static final int WAYPOINT_Y_OFFSET = 35;
-    public static final int PADDING           = 3;
+    public static final int WAYPOINT_Y_OFFSET = 35;         // waypoint height
+    public static final int PADDING           = 3;          // padding between waypoint and label/image
     public static final int LABEL_X_PADDING   = 5;
     public static final int LABEL_Y_PADDING   = 2;
 
@@ -61,6 +63,10 @@ public final class OverlayImage implements OverlayObject
     private int cachedFontWidth  = 0;
     private int cachedFontAscent = 0;
     private double cachedMapZoomFactor = 1;
+
+    // metadata
+    private GeoPosition     mapPos        = null;
+    private Date            date          = null;
     
     private BufferedImage   img;
     private BufferedImage   cachedImg;
@@ -72,7 +78,6 @@ public final class OverlayImage implements OverlayObject
     private boolean         fixedPosition = false;
     private boolean         forceResize   = false;
     private int             positionHint  = TOP_LEFT;
-    private GeoPosition     mapPos        = null;
     private int             mapZoom       = 1;
 
     private int             targetWidth;
@@ -91,10 +96,13 @@ public final class OverlayImage implements OverlayObject
         
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(file);
-            GpsDirectory directory = metadata.getDirectory(GpsDirectory.class);
-            GeoLocation loc = directory.getGeoLocation();
-            //System.out.println("Extracted geolocation: " + loc.getLatitude() + " " + loc.getLongitude());
+            
+            GpsDirectory gpsDir = metadata.getDirectory(GpsDirectory.class);
+            GeoLocation loc = gpsDir.getGeoLocation();
             mapPos = new GeoPosition(loc.getLatitude(), loc.getLongitude());
+            
+            ExifSubIFDDirectory subDir = metadata.getDirectory(ExifSubIFDDirectory.class);
+            date = subDir.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
         }
         catch (ImageProcessingException e) {
         }
@@ -104,6 +112,10 @@ public final class OverlayImage implements OverlayObject
         
         if (strict && mapPos == null) {
             throw new RuntimeException("image contains no valid geo location (strict checking)");
+        }
+        
+        if (date == null) {
+            date = new Date(0);
         }
         
         forceResize = true;
@@ -144,6 +156,12 @@ public final class OverlayImage implements OverlayObject
         if (mapPos != null)
             return new Waypoint(mapPos);
         return null;
+    }
+    
+    
+    public Date getDate()
+    {
+        return date;
     }
     
     
