@@ -483,7 +483,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
         OverlayAggregate oa = new OverlayAggregate();
         
         for (int i = 0; i < nlat.length; ++i) {
-            GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
+            GeoPosition g = new GeoPosition(this.nlat[i], this.nlon[i]);
             oa.addPoint(new OverlayElement(g, c[i % c.length], 7)).addLabel(new OverlayLabel(this.name[i], g));
         }
         

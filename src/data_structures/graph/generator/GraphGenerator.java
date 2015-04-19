@@ -251,7 +251,7 @@ public class GraphGenerator
             // write tourism nodes
             for (TourismNode tn : tourism_nodes)
             {
-                out_file.write(tn.getLat() + " " + tn.getLat() + " " + tn.getTourismType());
+                out_file.write(tn.getLat() + " " + tn.getLon() + " " + tn.getTourismType());
                 if (tn.hasName()) {
                     out_file.write(" " + tn.getName());
                 }
