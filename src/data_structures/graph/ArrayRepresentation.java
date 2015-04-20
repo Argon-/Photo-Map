@@ -65,7 +65,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
     private double minLon =  Double.MAX_VALUE; 
     private double maxLon = -Double.MAX_VALUE;
     
-    LookupGrid grid = null;
+    private LookupGrid grid = null;
+    private LookupGrid ngrid = null;
     
     
     public ArrayRepresentation()
@@ -158,13 +159,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
 
                 double weight  = this.types[Integer.parseInt(s[3])];
                 this.dist_w[i] = (int) Math.round(this.dist[i]/weight);
-                //if (Integer.parseInt(s[3]) < 1) {
-                //    System.out.println("Type  : " + Integer.parseInt(s[3]));
-                //    System.out.println("Dist  : " + this.dist[i]);
-                //    System.out.println("Dist_w: " + this.dist_w[i]);
-                //    System.out.println("Weight: " + weight);
-                //    System.out.println("--------------------------------------------------");
-                //}
                 
                 if (offset[this.source[i]] < 0) {
                     offset[this.source[i]] = i;
@@ -253,6 +247,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
         try {
             grid = new LookupGrid(this.lat, this.lon, this.minLat, this.maxLat, this.minLon, this.maxLon);
             grid.buildGrid();
+            ngrid = new LookupGrid(this.nlat, this.nlon);
+            ngrid.buildGrid();
         }
         catch (InvalidCoordinateArraysException e) {
             e.printStackTrace();
@@ -272,10 +268,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     /**
      * Draw a visual marker for every routable node on the map.
-     * <br>
-     * This was originally intended to test the node grid, as it's
-     * iterating the grid cells to get all nodes.
-     * 
      * @param win
      */
     public void drawRoutableNodes(MainWindow win)
@@ -291,6 +283,10 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Draw a visual marker for every routable node on the map.
+     * @param win
+     */
     public void drawNonRoutableNodes(MainWindow win)
     {
         Color[] c = {Color.RED};
@@ -441,10 +437,18 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
-    public void visualizeLookup(boolean t, MainWindow w)
+    public void visualizeGridLookup(boolean t, MainWindow w)
     {
         if (grid != null)
             grid.setVisualize(t, w);
     }
+    
+    
+    public void visualizeNGridLookup(boolean t, MainWindow w)
+    {
+        if (ngrid != null)
+            ngrid.setVisualize(t, w);
+    }
+
 
 }

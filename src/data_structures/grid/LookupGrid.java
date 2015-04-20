@@ -1,6 +1,7 @@
 package data_structures.grid;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 import gui.MainWindow;
 import gui.overlay.OverlayAggregate;
@@ -9,10 +10,12 @@ import util.Distance;
 
 
 
-public class LookupGrid
+public class LookupGrid implements Serializable
 {
+    private static final long serialVersionUID = 3951171285414881903L;
+    
     // factor * num_of_nodes is the amount of cells in y/x direction
-    private final double GRID_FACTOR = 0.00002;
+    private final double GRID_FACTOR = 0.000015;
     private int GRID_LAT_CELLS;
     private int GRID_LON_CELLS;
 
@@ -30,9 +33,9 @@ public class LookupGrid
     private double minLon =  Double.MAX_VALUE;
     private double maxLon = -Double.MAX_VALUE;
     
-    boolean visualize = false;
-    MainWindow win = null;
-    int vis_i = 0;
+    private boolean visualize = false;
+    private MainWindow win = null;
+    private int vis_i = 0;
     
     
     public LookupGrid(double[] lat, double[] lon) throws InvalidCoordinateArraysException
@@ -94,6 +97,7 @@ public class LookupGrid
     private void determineCellSize()
     {
         final int m = (int) Math.ceil(this.lat_ref.length * GRID_FACTOR);
+        // try to get the width and height reasonably square
         GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * (this.maxLon - this.minLon) / (this.maxLat - this.minLat));
         GRID_LON_CELLS =  m < 1 ? 1 : m;
         
@@ -168,7 +172,7 @@ public class LookupGrid
             for (int i = 0; i < grid_offset[index1 + 1] - grid_offset[index1]; ++i)
             {
                 final int pos = this.grid[grid_offset[index1] + i];
-                oa.addPoint(new OverlayElement(this.lat_ref[pos], this.lon_ref[pos], c[vis_i % c.length], 3));
+                oa.addPoint(new OverlayElement(this.lat_ref[pos], this.lon_ref[pos], c[vis_i % c.length], 2));
             }
             win.addOverlayAggregate(oa);
         }
@@ -214,16 +218,7 @@ public class LookupGrid
         /*
          * search in expanding rings, originating from (lat_center, lon_center)
          * the ring expands by one per iteration, starting with 0 (= the cell containing the clicked position)
-         * after a node was found (mid_id != -1) we expand the ring additional_rings more time
-         * —————————————————————————————
-         * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
-         * | 3 | 2 | 2 | 2 | 2 | 2 | 3 |
-         * | 3 | 2 | 1 | 1 | 1 | 2 | 3 |
-         * | 3 | 2 | 1 | 0 | 1 | 2 | 3 | 
-         * | 3 | 2 | 1 | 1 | 1 | 2 | 3 |
-         * | 3 | 2 | 2 | 2 | 2 | 2 | 3 |
-         * | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
-         * —————————————————————————————
+         * after a node was found (mid_id != -1) we expand the ring additional_rings more times
          */
         
         int min_id = -1;
