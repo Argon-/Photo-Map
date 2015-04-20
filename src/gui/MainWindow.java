@@ -540,6 +540,12 @@ public class MainWindow extends JFrame
         currSource = null;
         currTarget = null;
     }
+    
+    
+    public void addOverlayAggregate(OverlayAggregate oa)
+    {
+        overlayLines.add(oa);
+    }
         
     
     public void mapMouseClicked(MouseEvent e)
@@ -691,6 +697,7 @@ public class MainWindow extends JFrame
                     drawGraphRect();
                     System.out.println("Graph loaded in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
                     //g.drawNonRoutableNodes(this);
+                    g.visualizeLookup(true, this);
                 }
                 catch (InvalidGraphFormatException ex) {
                     System.out.println("Error: supplied graph has invalid format");
