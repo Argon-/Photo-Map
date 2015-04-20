@@ -34,10 +34,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     private double    lat[] = null;
     private double    lon[] = null;
-    
-    /*
-     * Edge info
-     */
     private int    source[] = null;
     private int    target[] = null;
     private int    offset[] = null;
@@ -51,8 +47,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
      * some kind of index structure to know which nodes are not routable is
      * the assumption of a way lower number of not routable nodes.
      * A lookup for these nodes can be provided tremendously faster when they
-     * are not mixed with routable ones. Additionally, fields like tourism
-     * or name waste way less space and one is not required to resort to other
+     * are not mixed with routable ones. Additionally, fields like "tourism"
+     * or "name" waste way less space and one is not required to resort to other
      * (slower) data structures because of them being very sparse.
      */
     private double nlat[] = null;
@@ -62,14 +58,18 @@ final public class ArrayRepresentation implements Graph, Serializable {
 
     private double minLat =  Double.MAX_VALUE;
     private double maxLat = -Double.MAX_VALUE;
-    private double minLon =  Double.MAX_VALUE; 
+    private double minLon =  Double.MAX_VALUE;
     private double maxLon = -Double.MAX_VALUE;
     
     private LookupGrid grid = null;
     private LookupGrid ngrid = null;
     
+    private final Object grid_lock = new Object();
+    private final Object ngrid_lock = new Object();
+
     
-    public ArrayRepresentation()
+    
+    public ArrayRepresentation(String f) throws InvalidGraphFormatException, IOException
     {
         super();
         this.types = new double[29];
@@ -85,6 +85,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
         this.types[10] = 0.5;   // turning_circle
         this.types[11] = 0.3;   // service
         this.types[12] = 0.5;   // unclassified
+        
+        load(f);
     }
     
     
@@ -231,7 +233,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
-    public void load(String f) throws InvalidGraphFormatException, IOException
+    private void load(String f) throws InvalidGraphFormatException, IOException
     {
         try {
             final ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
@@ -254,15 +256,29 @@ final public class ArrayRepresentation implements Graph, Serializable {
             e.printStackTrace();
         }
     }
-        
+    
     
     public int getNearestNode(double lat, double lon)
     {
-        if (grid != null) {
-            return grid.getNearestNode(lat, lon);
+        synchronized (grid_lock) {
+            if (grid != null) {
+                return grid.getNearestNode(lat, lon);
+            }
+            System.err.println("error: no lookup grid");
+            return -1;
         }
-        System.err.println("error: no lookup grid");
-        return -1;
+    }
+    
+    
+    public int getNearestNNode(double lat, double lon)
+    {
+        synchronized (ngrid_lock) {
+            if (ngrid != null) {
+                return ngrid.getNearestNode(lat, lon);
+            }
+            System.err.println("error: no lookup grid");
+            return -1;
+        }
     }
     
     
@@ -358,33 +374,11 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
 
     
-    /**
-     * This returns no clone but the internally used array reference.
-     * 
-     * @return latitude array
-     */
-    public double[] getLatArray()
-    {
-        return this.lat;
-    }
-    
-    
     public double getLat(int n)
     {
         return this.lat[n];
     }
 
-    
-    /**
-     * This returns no clone but the internally used array reference.
-     * 
-     * @return longitude array
-     */
-    public double[] getLonArray()
-    {
-        return this.lon;
-    }
-    
     
     public double getLon(int n)
     {
@@ -439,15 +433,19 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     public void visualizeGridLookup(boolean t, MainWindow w)
     {
-        if (grid != null)
-            grid.setVisualize(t, w);
+        synchronized (grid_lock) {
+            if (grid != null)
+                grid.setVisualize(t, w);
+        }
     }
     
     
     public void visualizeNGridLookup(boolean t, MainWindow w)
     {
-        if (ngrid != null)
-            ngrid.setVisualize(t, w);
+        synchronized (ngrid_lock) {
+            if (ngrid != null)
+                ngrid.setVisualize(t, w);
+        }
     }
 
 
