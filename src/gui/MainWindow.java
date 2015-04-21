@@ -52,6 +52,7 @@ import javax.swing.JTextArea;
 import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -76,7 +77,7 @@ import javax.swing.event.ListSelectionEvent;
 
 
 
-public class MainWindow extends JFrame
+public class MainWindow extends JFrame implements Serializable
 {
     private static final long serialVersionUID = -590468540732816556L;
     
@@ -154,7 +155,7 @@ public class MainWindow extends JFrame
     }
     
     
-    public void testInit() 
+    public void testInit()
     {
         if (g == null) {
             try {
@@ -695,9 +696,11 @@ public class MainWindow extends JFrame
                     d = new Dijkstra(g);
                     clearMap();
                     drawGraphRect();
+                    clearMap();
                     System.out.println("Graph loaded in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
                     //g.drawNonRoutableNodes(this);
-                    g.visualizeLookup(true, this);
+                    //g.visualizeGridLookup(true, this);
+                    //g.visualizeNGridLookup(true, this);
                 }
                 catch (InvalidGraphFormatException ex) {
                     System.out.println("Error: supplied graph has invalid format");
@@ -716,6 +719,8 @@ public class MainWindow extends JFrame
     
     public void btn_CalculateRoute(ActionEvent e)
     {
+        // TODO: better don't load a new graph or add/remove photos during this
+        
         if (list_Images.getModel().getSize() < 1) {
             System.out.println("No photos loaded!");
             return;
