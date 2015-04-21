@@ -248,9 +248,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
         
         try {
             grid = new LookupGrid(this.lat, this.lon, this.minLat, this.maxLat, this.minLon, this.maxLon);
-            grid.buildGrid();
             ngrid = new LookupGrid(this.nlat, this.nlon);
-            ngrid.buildGrid();
         }
         catch (InvalidCoordinateArraysException e) {
             e.printStackTrace();
@@ -260,25 +258,21 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     public int getNearestNode(double lat, double lon)
     {
-        synchronized (grid_lock) {
-            if (grid != null) {
-                return grid.getNearestNode(lat, lon);
-            }
-            System.err.println("error: no lookup grid");
-            return -1;
+        if (grid != null) {
+            return grid.getNearestNode(lat, lon);
         }
+        System.err.println("error: no lookup grid");
+        return -1;
     }
     
     
     public int getNearestNNode(double lat, double lon)
     {
-        synchronized (ngrid_lock) {
-            if (ngrid != null) {
-                return ngrid.getNearestNode(lat, lon);
-            }
-            System.err.println("error: no lookup grid");
-            return -1;
+        if (ngrid != null) {
+            return ngrid.getNearestNode(lat, lon);
         }
+        System.err.println("error: no lookup grid");
+        return -1;
     }
     
     
