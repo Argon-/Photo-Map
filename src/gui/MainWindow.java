@@ -74,6 +74,7 @@ import javax.swing.Box;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.JTextField;
 
 
 
@@ -126,10 +127,14 @@ public class MainWindow extends JFrame implements Serializable
     private JLabel                lbl_ImageSize;
     private JLabel                lbl_VisitOrder;
     private JLabel                lbl_ImageQuality;
-    private JSeparator            separator_0;
     private JSeparator            separator_1;
     private Component             verticalStrut;
     private JFileChooser          fd;
+    private JButton btn_ShowAccomodations;
+    private JSeparator separator_2;
+    private JButton btn_RemoveAccomodation;
+    private JTextField textField_MaxAccomodationDist;
+    private JLabel lbl_MaxAccomodationDist;
 
 
     /**
@@ -199,11 +204,11 @@ public class MainWindow extends JFrame implements Serializable
         contentPane.setBorder(null);
         setContentPane(contentPane);
         GridBagLayout gbl_contentPane = new GridBagLayout();
-        gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        gbl_contentPane.rowHeights = new int[] { 0, 20, 0, 0, 0, 0, 0, 0 };
-        gbl_contentPane.columnWeights = new double[] { 1.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-        gbl_contentPane.rowWeights = new double[] { 1.0,
+        gbl_contentPane.columnWidths = new int[] { 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 20, 0, 0, 0, 0, 0, 0 };
+        gbl_contentPane.columnWeights = new double[] { 1.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
         contentPane.setLayout(gbl_contentPane);
 
@@ -216,20 +221,77 @@ public class MainWindow extends JFrame implements Serializable
             }
         });
         GridBagConstraints gbc_mapKit = new GridBagConstraints();
-        gbc_mapKit.gridwidth = 5;
+        gbc_mapKit.gridheight = 3;
+        gbc_mapKit.gridwidth = 8;
         gbc_mapKit.insets = new Insets(0, 0, 5, 5);
         gbc_mapKit.fill = GridBagConstraints.BOTH;
         gbc_mapKit.gridx = 0;
         gbc_mapKit.gridy = 0;
         contentPane.add(mapKit, gbc_mapKit);
         
+        btn_ClearLast = new JButton("Clear last");
+        btn_ClearLast.setToolTipText("Remove the last set position marker from the map.");
+        btn_ClearLast.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_ClearLast(e);
+            }
+        });
+        GridBagConstraints gbc_btn_ClearLast = new GridBagConstraints();
+        gbc_btn_ClearLast.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_ClearLast.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ClearLast.gridx = 8;
+        gbc_btn_ClearLast.gridy = 0;
+        contentPane.add(btn_ClearLast, gbc_btn_ClearLast);
+        
+        btn_ClearAll = new JButton("Clear map");
+        btn_ClearAll.setToolTipText("Remove all position markers from the map. Shortcut: middle mouse button");
+        btn_ClearAll.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_ClearAll(e);
+            }
+        });
+        
+        btn_LoadGraph = new JButton("Load graph");
+        btn_LoadGraph.setToolTipText("Load a graph from either an optimized (binary) or plain text file.");
+        btn_LoadGraph.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_LoadGraph(e);
+            }
+        } );
+        GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
+        gbc_btn_LoadGraph.anchor = GridBagConstraints.EAST;
+        gbc_btn_LoadGraph.insets = new Insets(0, 0, 5, 0);
+        gbc_btn_LoadGraph.gridx = 9;
+        gbc_btn_LoadGraph.gridy = 0;
+        contentPane.add(btn_LoadGraph, gbc_btn_LoadGraph);
+        GridBagConstraints gbc_btn_ClearAll = new GridBagConstraints();
+        gbc_btn_ClearAll.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_ClearAll.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ClearAll.gridx = 8;
+        gbc_btn_ClearAll.gridy = 1;
+        contentPane.add(btn_ClearAll, gbc_btn_ClearAll);
+        
+        btn_SaveOptGraph = new JButton("Save opt graph");
+        btn_SaveOptGraph.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_SaveOptGraph(e);
+            }
+        });
+        btn_SaveOptGraph.setToolTipText("Save the currently loaded graph as optimized (binary) file for faster loading.");
+        GridBagConstraints gbc_btn_SaveOptGraph = new GridBagConstraints();
+        gbc_btn_SaveOptGraph.insets = new Insets(0, 0, 5, 0);
+        gbc_btn_SaveOptGraph.anchor = GridBagConstraints.EAST;
+        gbc_btn_SaveOptGraph.gridx = 9;
+        gbc_btn_SaveOptGraph.gridy = 1;
+        contentPane.add(btn_SaveOptGraph, gbc_btn_SaveOptGraph);
+        
         scrollPane_Images = new JScrollPane();
         GridBagConstraints gbc_scrollPane_Images = new GridBagConstraints();
         gbc_scrollPane_Images.fill = GridBagConstraints.BOTH;
-        gbc_scrollPane_Images.gridwidth = 3;
+        gbc_scrollPane_Images.gridwidth = 2;
         gbc_scrollPane_Images.insets = new Insets(0, 0, 5, 0);
-        gbc_scrollPane_Images.gridx = 5;
-        gbc_scrollPane_Images.gridy = 0;
+        gbc_scrollPane_Images.gridx = 8;
+        gbc_scrollPane_Images.gridy = 2;
         contentPane.add(scrollPane_Images, gbc_scrollPane_Images);
         
         list_Images = new JList<OverlayImage>();
@@ -254,7 +316,7 @@ public class MainWindow extends JFrame implements Serializable
         gbc_scrollPane_Log.gridheight = 6;
         gbc_scrollPane_Log.fill = GridBagConstraints.BOTH;
         gbc_scrollPane_Log.gridx = 0;
-        gbc_scrollPane_Log.gridy = 1;
+        gbc_scrollPane_Log.gridy = 3;
         contentPane.add(scrollPane_Log, gbc_scrollPane_Log);
         
         textArea_Log = new JTextArea();
@@ -268,36 +330,11 @@ public class MainWindow extends JFrame implements Serializable
                 btn_CalculateRoute(e);
             }
         });
-        
-        btn_ClearLast = new JButton("Clear last marker");
-        btn_ClearLast.setToolTipText("Remove the last set position marker from the map.");
-        btn_ClearLast.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                btn_ClearLast(e);
-            }
-        });
-        btn_ClearLast.setActionCommand("Clear last");
-        GridBagConstraints gbc_btn_ClearLast = new GridBagConstraints();
-        gbc_btn_ClearLast.anchor = GridBagConstraints.WEST;
-        gbc_btn_ClearLast.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_ClearLast.gridx = 1;
-        gbc_btn_ClearLast.gridy = 1;
-        contentPane.add(btn_ClearLast, gbc_btn_ClearLast);
-        
-        separator_0 = new JSeparator();
-        separator_0.setOrientation(SwingConstants.VERTICAL);
-        GridBagConstraints gbc_separator_0 = new GridBagConstraints();
-        gbc_separator_0.fill = GridBagConstraints.VERTICAL;
-        gbc_separator_0.gridheight = 6;
-        gbc_separator_0.insets = new Insets(0, 0, 0, 5);
-        gbc_separator_0.gridx = 2;
-        gbc_separator_0.gridy = 1;
-        contentPane.add(separator_0, gbc_separator_0);
         GridBagConstraints gbc_btn_CalculateRoute = new GridBagConstraints();
         gbc_btn_CalculateRoute.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_CalculateRoute.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_CalculateRoute.gridx = 4;
-        gbc_btn_CalculateRoute.gridy = 1;
+        gbc_btn_CalculateRoute.gridx = 3;
+        gbc_btn_CalculateRoute.gridy = 3;
         contentPane.add(btn_CalculateRoute, gbc_btn_CalculateRoute);
         
         btn_RemoveImage = new JButton("Remove photo");
@@ -314,14 +351,28 @@ public class MainWindow extends JFrame implements Serializable
         gbc_separator_1.fill = GridBagConstraints.VERTICAL;
         gbc_separator_1.gridheight = 6;
         gbc_separator_1.insets = new Insets(0, 0, 0, 5);
-        gbc_separator_1.gridx = 5;
-        gbc_separator_1.gridy = 1;
+        gbc_separator_1.gridx = 4;
+        gbc_separator_1.gridy = 3;
         contentPane.add(separator_1, gbc_separator_1);
+        
+        this.btn_ShowAccomodations = new JButton("Accomodations");
+        this.btn_ShowAccomodations.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btn_ShowAccomodations(e);
+            }
+        });
+        this.btn_ShowAccomodations.setToolTipText("Show possible accomodations near the selected photo");
+        GridBagConstraints gbc_btn_ShowAccomodations = new GridBagConstraints();
+        gbc_btn_ShowAccomodations.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_ShowAccomodations.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ShowAccomodations.gridx = 6;
+        gbc_btn_ShowAccomodations.gridy = 3;
+        this.contentPane.add(this.btn_ShowAccomodations, gbc_btn_ShowAccomodations);
         GridBagConstraints gbc_btn_RemoveImage = new GridBagConstraints();
         gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
-        gbc_btn_RemoveImage.gridx = 7;
-        gbc_btn_RemoveImage.gridy = 1;
+        gbc_btn_RemoveImage.gridx = 9;
+        gbc_btn_RemoveImage.gridy = 3;
         contentPane.add(btn_RemoveImage, gbc_btn_RemoveImage);
         
         btn_AddImages = new JButton("Add photos");
@@ -332,61 +383,61 @@ public class MainWindow extends JFrame implements Serializable
             }
         });
         
-        btn_ClearAll = new JButton("Clear all markers");
-        btn_ClearAll.setToolTipText("Remove all position markers from the map. Shortcut: middle mouse button");
-        btn_ClearAll.addActionListener(new ActionListener() {
+        this.btn_RemoveAccomodation = new JButton("Remove acc");
+        this.btn_RemoveAccomodation.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                btn_ClearAll(e);
+                btn_RemoveAccomodation(e);
             }
         });
-        GridBagConstraints gbc_btn_ClearAll = new GridBagConstraints();
-        gbc_btn_ClearAll.anchor = GridBagConstraints.WEST;
-        gbc_btn_ClearAll.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_ClearAll.gridx = 1;
-        gbc_btn_ClearAll.gridy = 2;
-        contentPane.add(btn_ClearAll, gbc_btn_ClearAll);
+        this.btn_RemoveAccomodation.setToolTipText("Remove the accomodation associated with the selected photo");
+        GridBagConstraints gbc_btn_RemoveAccomodation = new GridBagConstraints();
+        gbc_btn_RemoveAccomodation.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_RemoveAccomodation.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_RemoveAccomodation.gridx = 6;
+        gbc_btn_RemoveAccomodation.gridy = 4;
+        this.contentPane.add(this.btn_RemoveAccomodation, gbc_btn_RemoveAccomodation);
         
         verticalStrut = Box.createVerticalStrut(20);
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
         gbc_verticalStrut.insets = new Insets(0, 0, 5, 5);
         gbc_verticalStrut.gridx = 1;
-        gbc_verticalStrut.gridy = 3;
+        gbc_verticalStrut.gridy = 5;
         contentPane.add(verticalStrut, gbc_verticalStrut);
         
-        btn_LoadGraph = new JButton("Load graph");
-        btn_LoadGraph.setToolTipText("Load a graph from either an optimized (binary) or plain text file.");
-        btn_LoadGraph.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                btn_LoadGraph(e);
-            }
-        } );
-        GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
-        gbc_btn_LoadGraph.anchor = GridBagConstraints.WEST;
-        gbc_btn_LoadGraph.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_LoadGraph.gridx = 1;
-        gbc_btn_LoadGraph.gridy = 5;
-        contentPane.add(btn_LoadGraph, gbc_btn_LoadGraph);
+        this.separator_2 = new JSeparator();
+        this.separator_2.setOrientation(SwingConstants.VERTICAL);
+        GridBagConstraints gbc_separator_2 = new GridBagConstraints();
+        gbc_separator_2.gridheight = 6;
+        gbc_separator_2.fill = GridBagConstraints.VERTICAL;
+        gbc_separator_2.insets = new Insets(0, 0, 0, 5);
+        gbc_separator_2.gridx = 7;
+        gbc_separator_2.gridy = 3;
+        this.contentPane.add(this.separator_2, gbc_separator_2);
         
-        btn_SaveOptGraph = new JButton("Save opt graph");
-        btn_SaveOptGraph.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                btn_SaveOptGraph(e);
-            }
-        });
-        btn_SaveOptGraph.setToolTipText("Save the currently loaded graph as optimized (binary) file for faster loading.");
-        GridBagConstraints gbc_btn_SaveOptGraph = new GridBagConstraints();
-        gbc_btn_SaveOptGraph.anchor = GridBagConstraints.WEST;
-        gbc_btn_SaveOptGraph.insets = new Insets(0, 0, 0, 5);
-        gbc_btn_SaveOptGraph.gridx = 1;
-        gbc_btn_SaveOptGraph.gridy = 6;
-        contentPane.add(btn_SaveOptGraph, gbc_btn_SaveOptGraph);
+        this.lbl_MaxAccomodationDist = new JLabel("Range:");
+        GridBagConstraints gbc_lbl_MaxAccomodationDist = new GridBagConstraints();
+        gbc_lbl_MaxAccomodationDist.insets = new Insets(0, 0, 5, 5);
+        gbc_lbl_MaxAccomodationDist.anchor = GridBagConstraints.EAST;
+        gbc_lbl_MaxAccomodationDist.gridx = 5;
+        gbc_lbl_MaxAccomodationDist.gridy = 6;
+        this.contentPane.add(this.lbl_MaxAccomodationDist, gbc_lbl_MaxAccomodationDist);
+        
+        this.textField_MaxAccomodationDist = new JTextField();
+        this.textField_MaxAccomodationDist.setText("200");
+        GridBagConstraints gbc_textField_MaxAccomodationDist = new GridBagConstraints();
+        gbc_textField_MaxAccomodationDist.fill = GridBagConstraints.HORIZONTAL;
+        gbc_textField_MaxAccomodationDist.insets = new Insets(0, 0, 5, 5);
+        gbc_textField_MaxAccomodationDist.gridx = 6;
+        gbc_textField_MaxAccomodationDist.gridy = 6;
+        this.contentPane.add(this.textField_MaxAccomodationDist, gbc_textField_MaxAccomodationDist);
+        this.textField_MaxAccomodationDist.setColumns(3);
         
         lbl_ImageQuality = new JLabel("Photo quality:");
         GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
         gbc_lbl_ImageQuality.anchor = GridBagConstraints.EAST;
         gbc_lbl_ImageQuality.insets = new Insets(0, 0, 0, 5);
-        gbc_lbl_ImageQuality.gridx = 6;
-        gbc_lbl_ImageQuality.gridy = 6;
+        gbc_lbl_ImageQuality.gridx = 8;
+        gbc_lbl_ImageQuality.gridy = 8;
         contentPane.add(lbl_ImageQuality, gbc_lbl_ImageQuality);
         
         cb_ImageQuality = new JComboBox<String>();
@@ -399,22 +450,22 @@ public class MainWindow extends JFrame implements Serializable
         cb_ImageQuality.setModel(new DefaultComboBoxModel<String>(new String[] {"high", "low"}));
         GridBagConstraints gbc_cb_ImageQuality = new GridBagConstraints();
         gbc_cb_ImageQuality.anchor = GridBagConstraints.WEST;
-        gbc_cb_ImageQuality.gridx = 7;
-        gbc_cb_ImageQuality.gridy = 6;
+        gbc_cb_ImageQuality.gridx = 9;
+        gbc_cb_ImageQuality.gridy = 8;
         contentPane.add(cb_ImageQuality, gbc_cb_ImageQuality);
         GridBagConstraints gbc_btn_AddImages = new GridBagConstraints();
         gbc_btn_AddImages.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_AddImages.insets = new Insets(0, 0, 5, 0);
-        gbc_btn_AddImages.gridx = 7;
-        gbc_btn_AddImages.gridy = 2;
+        gbc_btn_AddImages.gridx = 9;
+        gbc_btn_AddImages.gridy = 4;
         contentPane.add(btn_AddImages, gbc_btn_AddImages);
         
-        lbl_VisitOrder = new JLabel("Visit in order:");
+        lbl_VisitOrder = new JLabel("Visit order:");
         GridBagConstraints gbc_lbl_VisitOrder = new GridBagConstraints();
         gbc_lbl_VisitOrder.anchor = GridBagConstraints.EAST;
         gbc_lbl_VisitOrder.insets = new Insets(0, 0, 5, 5);
-        gbc_lbl_VisitOrder.gridx = 3;
-        gbc_lbl_VisitOrder.gridy = 4;
+        gbc_lbl_VisitOrder.gridx = 2;
+        gbc_lbl_VisitOrder.gridy = 6;
         contentPane.add(lbl_VisitOrder, gbc_lbl_VisitOrder);
         
         cb_VisitOrder = new JComboBox<String>();
@@ -428,16 +479,16 @@ public class MainWindow extends JFrame implements Serializable
         GridBagConstraints gbc_cb_VisitOrder = new GridBagConstraints();
         gbc_cb_VisitOrder.anchor = GridBagConstraints.WEST;
         gbc_cb_VisitOrder.insets = new Insets(0, 0, 5, 5);
-        gbc_cb_VisitOrder.gridx = 4;
-        gbc_cb_VisitOrder.gridy = 4;
+        gbc_cb_VisitOrder.gridx = 3;
+        gbc_cb_VisitOrder.gridy = 6;
         contentPane.add(cb_VisitOrder, gbc_cb_VisitOrder);
         
         lbl_ResizeMethod = new JLabel("Resize photos:");
         GridBagConstraints gbc_lbl_ResizeMethod = new GridBagConstraints();
         gbc_lbl_ResizeMethod.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_ResizeMethod.anchor = GridBagConstraints.EAST;
-        gbc_lbl_ResizeMethod.gridx = 6;
-        gbc_lbl_ResizeMethod.gridy = 4;
+        gbc_lbl_ResizeMethod.gridx = 8;
+        gbc_lbl_ResizeMethod.gridy = 6;
         contentPane.add(lbl_ResizeMethod, gbc_lbl_ResizeMethod);
         
         cb_ResizeMethod = new JComboBox<String>();
@@ -451,16 +502,16 @@ public class MainWindow extends JFrame implements Serializable
         GridBagConstraints gbc_cb_ResizeMethod = new GridBagConstraints();
         gbc_cb_ResizeMethod.anchor = GridBagConstraints.WEST;
         gbc_cb_ResizeMethod.insets = new Insets(0, 0, 5, 0);
-        gbc_cb_ResizeMethod.gridx = 7;
-        gbc_cb_ResizeMethod.gridy = 4;
+        gbc_cb_ResizeMethod.gridx = 9;
+        gbc_cb_ResizeMethod.gridy = 6;
         contentPane.add(cb_ResizeMethod, gbc_cb_ResizeMethod);
         
-        lbl_ImageSize = new JLabel("Limit photo size:");
+        lbl_ImageSize = new JLabel("Limit size:");
         GridBagConstraints gbc_lbl_ImageSize = new GridBagConstraints();
         gbc_lbl_ImageSize.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_ImageSize.anchor = GridBagConstraints.EAST;
-        gbc_lbl_ImageSize.gridx = 6;
-        gbc_lbl_ImageSize.gridy = 5;
+        gbc_lbl_ImageSize.gridx = 8;
+        gbc_lbl_ImageSize.gridy = 7;
         contentPane.add(lbl_ImageSize, gbc_lbl_ImageSize);
         
         cb_ImageSize = new JComboBox<String>();
@@ -475,8 +526,8 @@ public class MainWindow extends JFrame implements Serializable
         GridBagConstraints gbc_cb_ImageSize = new GridBagConstraints();
         gbc_cb_ImageSize.insets = new Insets(0, 0, 5, 0);
         gbc_cb_ImageSize.anchor = GridBagConstraints.WEST;
-        gbc_cb_ImageSize.gridx = 7;
-        gbc_cb_ImageSize.gridy = 5;
+        gbc_cb_ImageSize.gridx = 9;
+        gbc_cb_ImageSize.gridy = 7;
         contentPane.add(cb_ImageSize, gbc_cb_ImageSize);
         
         map.addMouseListener(new MouseAdapter() {
@@ -789,6 +840,16 @@ public class MainWindow extends JFrame implements Serializable
             case JFileChooser.ERROR_OPTION:
                 break;
         }       
+    }
+    
+    
+    public void btn_ShowAccomodations(ActionEvent e)
+    {
+    }
+    
+    
+    public void btn_RemoveAccomodation(ActionEvent e)
+    {
     }
     
     
