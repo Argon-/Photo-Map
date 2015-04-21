@@ -64,9 +64,6 @@ final public class ArrayRepresentation implements Graph, Serializable {
     private LookupGrid grid = null;
     private LookupGrid ngrid = null;
     
-    private final Object grid_lock = new Object();
-    private final Object ngrid_lock = new Object();
-
     
     
     public ArrayRepresentation(String f) throws InvalidGraphFormatException, IOException
@@ -427,20 +424,15 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     public void visualizeGridLookup(boolean t, MainWindow w)
     {
-        synchronized (grid_lock) {
-            if (grid != null)
-                grid.setVisualize(t, w);
-        }
-    }
-    
-    
-    public void visualizeNGridLookup(boolean t, MainWindow w)
-    {
-        synchronized (ngrid_lock) {
-            if (ngrid != null)
-                ngrid.setVisualize(t, w);
-        }
+        if (grid != null)
+            grid.setVisualize(t, w);
     }
 
+
+    public void visualizeNGridLookup(boolean t, MainWindow w)
+    {
+        if (ngrid != null)
+            ngrid.setVisualize(t, w);
+    }
 
 }
