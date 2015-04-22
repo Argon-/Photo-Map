@@ -28,11 +28,11 @@ public final class Dijkstra implements Runnable
 	
 	public Dijkstra(Graph graph, boolean weighted)
 	{
-		this.g = graph;
+		g = graph;
 		this.weighted = weighted;
-		this.state = new int[this.g.size()];
-		this.pred  = new int[this.g.size()];
-		Arrays.fill(this.pred, -1);
+		state = new int[g.size()];
+		pred  = new int[g.size()];
+		Arrays.fill(pred, -1);
 	}
 	
 	
@@ -45,8 +45,8 @@ public final class Dijkstra implements Runnable
 	public Dijkstra(Graph graph, boolean weighted, int from, int to)
 	{
 		this(graph, weighted);
-		this.setSource(from);
-		this.setTarget(to);
+		setSource(from);
+		setTarget(to);
 	}
 	
 	
@@ -58,46 +58,46 @@ public final class Dijkstra implements Runnable
 	
 	public void buildNewHeap(int source)
 	{
-		Arrays.fill(this.state, UNSETTLED);
-		this.heap = new BinaryMinHeap(this.g.size() / 10);
-		this.heap.insert(source, 0);
+		Arrays.fill(state, UNSETTLED);
+		heap = new BinaryMinHeap(g.size() / 10);
+		heap.insert(source, 0);
 	}
 	
 	
 	public boolean pathFromTo(int from, int to)
 	{
-		this.setSource(from);
-		this.setTarget(to);
-		return this.pathFromTo();
+		setSource(from);
+		setTarget(to);
+		return pathFromTo();
 	}
 		
 	
 	public boolean pathFromTo()
 	{
-		if (this.state[this.target] == SETTLED) {
+		if (state[target] == SETTLED) {
 			//System.out.println("Dist from " + this.source + " to " + this.target + " = (already settled)");
 			return true;
 		}
 		
-		loop : while (!this.heap.isEmpty()) 
+		loop : while (!heap.isEmpty()) 
 		{
-			int u_id = this.heap.getMinID();
-			int u_dist = this.heap.getMinValue();
-			this.heap.removeMin();
+			int u_id = heap.getMinID();
+			int u_dist = heap.getMinValue();
+			heap.removeMin();
 			
-			this.state[u_id] = SETTLED;
+			state[u_id] = SETTLED;
 			int i = 0;
 			int neighbor = -1;
 			
-			if (this.target == u_id) {
+			if (target == u_id) {
 				//System.out.println("Dist from " + this.source + " to " + this.target + " = " + u_dist + " (1)");
 				break loop;
 			}
 			
-			while ((neighbor = this.g.getIthNeighbor(u_id, i++)) != -1)
+			while ((neighbor = g.getIthNeighbor(u_id, i++)) != -1)
 			{
 
-				if (this.state[neighbor] == SETTLED) {
+				if (state[neighbor] == SETTLED) {
 					continue;
 				}
 				
@@ -106,49 +106,49 @@ public final class Dijkstra implements Runnable
 				    continue;
 				final int new_dist = u_dist + inc;
 				
-				if (this.state[neighbor] > new_dist) {
-					this.heap.insert(neighbor, new_dist);
-					this.state[neighbor] = new_dist;
-					this.pred[neighbor] = u_id;
+				if (state[neighbor] > new_dist) {
+					heap.insert(neighbor, new_dist);
+					state[neighbor] = new_dist;
+					pred[neighbor] = u_id;
 				}
 				
-				if (this.target == neighbor) {
+				if (target == neighbor) {
 					//System.out.println("Dist from " + this.source + " to " + this.target + " = " + this.state[neighbor]);
-					this.state[neighbor] = SETTLED;
-					this.pred[neighbor] = u_id;
+					state[neighbor] = SETTLED;
+					pred[neighbor] = u_id;
 					break loop;
 				}
 			}
 		}
 		
-		if (this.state[this.target] == SETTLED)
+		if (state[target] == SETTLED)
 		{
 			return true;
 		}
 		
-		System.out.println("Found no route from " + this.source + " to " + this.target);
+		System.out.println("Found no route from " + source + " to " + target);
 		return false;
 	}
 	
 	
 	public void setSource(int from)
 	{
-		if (this.source != from) {
-			this.source = from;
-			this.buildNewHeap(from);
+		if (source != from) {
+			source = from;
+			buildNewHeap(from);
 		}
 	}
 	
 	
 	public void setTarget(int to)
 	{
-		this.target = to;
+		target = to;
 	}
 	
 	
 	public void printRouteStats(int from, int to)
 	{
-		LinkedList<Integer> l = this.getRoute_NodeIDs();
+		LinkedList<Integer> l = getRoute_NodeIDs();
 		int last = l.pop();
 		int curr;
 		int dist = 0;
@@ -159,7 +159,7 @@ public final class Dijkstra implements Runnable
 		while (!l.isEmpty())
 		{
 			curr = l.pop();
-			if (this.g.getDist(last, curr) == -1) {
+			if (g.getDist(last, curr) == -1) {
 				System.out.println("NO EDGE FOUND FROM " + curr + " TO " + last);
 			}
 			else {
@@ -167,7 +167,7 @@ public final class Dijkstra implements Runnable
 					++line_count;
 					s += System.getProperty("line.separator") + "           ";
 				}
-				dist += this.g.getDist(last, curr);
+				dist += g.getDist(last, curr);
 				s += " -> " + curr;
 			}
 			last = curr;
@@ -175,7 +175,7 @@ public final class Dijkstra implements Runnable
 		
 		
 		//System.out.println("----------------------------------------------------------------------");
-		System.out.println("Shortest path from " + this.source + " to " + this.target);
+		System.out.println("Shortest path from " + source + " to " + target);
 		System.out.println("   >  Hops: " + hops);
 		System.out.println("   >  Dist: " + dist);
 		//System.out.println("   > Route: " + s);
@@ -185,19 +185,19 @@ public final class Dijkstra implements Runnable
 	
 	public LinkedList<GeoPosition> getRoute()
 	{
-		if (this.target == -1)
+		if (target == -1)
 			throw new RuntimeException("Can't return route without target");
 		
 		LinkedList<GeoPosition> l = new LinkedList<GeoPosition>();
-		l.addFirst(this.g.getPosition(this.target));
+		l.addFirst(g.getPosition(target));
 		
-		int i = this.pred[this.target];
+		int i = pred[target];
 		while (i != -1) {
-			l.addFirst(this.g.getPosition(i));
-			if (i == this.source) {
+			l.addFirst(g.getPosition(i));
+			if (i == source) {
 				break;
 			}
-			i = this.pred[i];
+			i = pred[i];
 		}
 		return l;
 	}
@@ -205,19 +205,19 @@ public final class Dijkstra implements Runnable
 	
 	public LinkedList<Integer> getRoute_NodeIDs()
 	{
-		if (this.target == -1)
+		if (target == -1)
 			throw new RuntimeException("Can't return route without target");
 		
 		LinkedList<Integer> l = new LinkedList<Integer>();
-		l.addFirst(this.target);
+		l.addFirst(target);
 		
-		int i = this.pred[this.target];
+		int i = pred[target];
 		while (i != -1) {
 			l.addFirst(i);
-			if (i == this.source) {
+			if (i == source) {
 				break;
 			}
-			i = this.pred[i];
+			i = pred[i];
 		}
 		return l;
 	}
@@ -226,7 +226,7 @@ public final class Dijkstra implements Runnable
 	@Override
 	public void run()
 	{
-		this.pathFromTo();
+		pathFromTo();
 	}
 	
 	

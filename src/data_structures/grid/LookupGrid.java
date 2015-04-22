@@ -41,15 +41,14 @@ public class LookupGrid implements Serializable
     private int vis_i = 0;
     
     
-    
     /**
      * See {@link #LookupGrid(double[], double[], double, double, double, double) LookupGrid}.
      * <br>
-     * Please note this is merely a convenience function and will loop both passed arrays
+     * Please note this: is merely a convenience constructor and will loop both passed arrays
      * two times consecutively.
      * 
-     * @param lat
-     * @param lon
+     * @param lat array
+     * @param lon array
      * @throws InvalidCoordinateArraysException
      */
     public LookupGrid(double[] lat, double[] lon) throws InvalidCoordinateArraysException
@@ -67,21 +66,21 @@ public class LookupGrid implements Serializable
      * <br><br>
      * This class is effectively final (except for the visualization part, but this is
      * only considered some sort of debug output anyway and disabled by default).
-     * 
+     *
      * @param lat
      * @param lon
      * @param minLat
      * @param maxLat
      * @param minLon
      * @param maxLon
-     * @throws InvalidCoordinateArraysException
+     * @throws InvalidCoordinateArraysException when {@code lat.length != lon.lenght} or {@code lat.length < 1}
      */
     public LookupGrid(double[] lat, double[] lon, double minLat, double maxLat, double minLon, double maxLon) throws InvalidCoordinateArraysException
     {
         if (lat.length != lon.length) {
             throw new InvalidCoordinateArraysException("array length differs");
         }
-        if (lat.length < 2) {
+        if (lat.length < 1) {
             throw new InvalidCoordinateArraysException("too few elements");
         }
 
@@ -89,29 +88,35 @@ public class LookupGrid implements Serializable
         this.maxLat = maxLat;
         this.minLon = minLon;
         this.maxLon = maxLon;
-        this.lat_ref = lat;
-        this.lon_ref = lon;
+        lat_ref = lat;
+        lon_ref = lon;
         
         // determine grid sizes (amount of cells)
-        final int m = (int) Math.ceil(this.lat_ref.length * GRID_FACTOR);
+        final int m = (int) Math.ceil(lat_ref.length * GRID_FACTOR);
         // try to get the width and height reasonably square
-        GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * (this.maxLon - this.minLon) / (this.maxLat - this.minLat));
+        GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * (maxLon - minLon) / (maxLat - minLat));
         GRID_LON_CELLS =  m < 1 ? 1 : m;
         
-        LAT_CELL_SIZE = (this.maxLat - this.minLat) / GRID_LAT_CELLS;
-        LON_CELL_SIZE = (this.maxLon - this.minLon) / GRID_LON_CELLS;
+        LAT_CELL_SIZE = (maxLat - minLat) / GRID_LAT_CELLS;
+        LON_CELL_SIZE = (maxLon - minLon) / GRID_LON_CELLS;
 
-        System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
-        System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
-
+        //System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
+        //System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
         
         // create grid arrays and fill them
-        this.grid = new int[this.lon_ref.length];
-        this.grid_offset = new int[GRID_LAT_CELLS * GRID_LON_CELLS + 1];
+        grid = new int[lon_ref.length];
+        grid_offset = new int[GRID_LAT_CELLS * GRID_LON_CELLS + 1];
         buildGrid();
     }
     
     
+    /**
+     * Color the nodes touched when searching for a node.<br>
+     * Not necessarily thread safe.
+     *
+     * @param t
+     * @param w
+     */
     public void setVisualize(boolean t, MainWindow w)
     {
         visualize = t;
@@ -124,10 +129,10 @@ public class LookupGrid implements Serializable
         int[] count = new int[GRID_LAT_CELLS * GRID_LON_CELLS];
         
         // first pass
-        for (int i = 0; i < this.lon_ref.length; ++i)
+        for (int i = 0; i < lon_ref.length; ++i)
         {
-            int lat_cell = this.lat_ref[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat_ref[i] - this.minLat) / LAT_CELL_SIZE);
-            int lon_cell = this.lon_ref[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon_ref[i] - this.minLon) / LON_CELL_SIZE);
+            int lat_cell = lat_ref[i] == maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat_ref[i] - minLat) / LAT_CELL_SIZE);
+            int lon_cell = lon_ref[i] == maxLon ? GRID_LON_CELLS - 1 : (int) ((lon_ref[i] - minLon) / LON_CELL_SIZE);
             count[lat_cell * GRID_LON_CELLS + lon_cell] += 1;
         }
         
@@ -138,10 +143,10 @@ public class LookupGrid implements Serializable
         }
         
         // second pass
-        for (int i = 0; i < this.lon_ref.length; ++i)
+        for (int i = 0; i < lon_ref.length; ++i)
         {
-            int lat_cell = this.lat_ref[i] == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((this.lat_ref[i] - this.minLat) / LAT_CELL_SIZE);
-            int lon_cell = this.lon_ref[i] == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((this.lon_ref[i] - this.minLon) / LON_CELL_SIZE);
+            int lat_cell = lat_ref[i] == maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat_ref[i] - minLat) / LAT_CELL_SIZE);
+            int lon_cell = lon_ref[i] == maxLon ? GRID_LON_CELLS - 1 : (int) ((lon_ref[i] - minLon) / LON_CELL_SIZE);
             int pos = grid_offset[lat_cell * GRID_LON_CELLS + lon_cell] + (count[lat_cell * GRID_LON_CELLS + lon_cell]-- - 1);
             grid[pos] = i;
         }
@@ -156,13 +161,13 @@ public class LookupGrid implements Serializable
         
 
         int min_id = last_min_id < 0 ? -1 : last_min_id;
-        double min_dist = last_min_id > -1 ? Distance.haversine(lat, lon, this.lat_ref[last_min_id], this.lon_ref[last_min_id]) : Double.MAX_VALUE;
+        double min_dist = last_min_id > -1 ? Distance.haversine(lat, lon, lat_ref[last_min_id], lon_ref[last_min_id]) : Double.MAX_VALUE;
         
         final int index = lat_cell * GRID_LON_CELLS + lon_cell;
         for (int i = 0; i < grid_offset[index + 1] - grid_offset[index]; ++i)
         {
-            final int pos = this.grid[grid_offset[index] + i];
-            final double dist = Distance.haversine(lat, lon, this.lat_ref[pos], this.lon_ref[pos]);
+            final int pos = grid[grid_offset[index] + i];
+            final double dist = Distance.haversine(lat, lon, lat_ref[pos], lon_ref[pos]);
             
             if (dist < min_dist) {
                 min_dist = dist;
@@ -180,8 +185,8 @@ public class LookupGrid implements Serializable
             final int e = lat_cell * GRID_LON_CELLS + lon_cell;
             for (int i = 0; i < grid_offset[e + 1] - grid_offset[e]; ++i)
             {
-                final int pos = this.grid[grid_offset[e] + i];
-                oa.addPoint(new OverlayElement(this.lat_ref[pos], this.lon_ref[pos], c[vis_i % c.length], 2));
+                final int pos = grid[grid_offset[e] + i];
+                oa.addPoint(new OverlayElement(lat_ref[pos], lon_ref[pos], c[vis_i % c.length], 2));
             }
             win.addOverlayAggregate(oa);
         }
@@ -217,12 +222,12 @@ public class LookupGrid implements Serializable
      */
     public int getNearestNode(double lat, double lon)
     {
-        if (lat < this.minLat || lat > this.maxLat || lon < this.minLon || lon > this.maxLon) {
+        if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) {
             return -1;
         }
         
-        final int lat_center = lat == this.maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat - this.minLat) / LAT_CELL_SIZE);
-        final int lon_center = lon == this.maxLon ? GRID_LON_CELLS - 1 : (int) ((lon - this.minLon) / LON_CELL_SIZE);
+        final int lat_center = lat == maxLat ? GRID_LAT_CELLS - 1 : (int) ((lat - minLat) / LAT_CELL_SIZE);
+        final int lon_center = lon == maxLon ? GRID_LON_CELLS - 1 : (int) ((lon - minLon) / LON_CELL_SIZE);
         
         /*
          * search in expanding rings, originating from (lat_center, lon_center)
@@ -241,13 +246,13 @@ public class LookupGrid implements Serializable
                 --additional_rings;
             }
             
-            // seek upwards to this ring's starting position
+            // seek upwards to the current ring's starting position
             int lat_curr = lat_center + ring;
             int lon_curr = lon_center;
             
             min_id = searchMinInCell(lat, lon, lat_curr, lon_curr, min_id);
             
-            // iterate right
+            // iterate right (half the side length)
             for (int i = 1; i < ring; ++i) {
                 min_id = searchMinInCell(lat, lon, lat_curr, lon_curr + i, min_id);
             }
@@ -271,7 +276,7 @@ public class LookupGrid implements Serializable
             }
             lat_curr = lat_curr + (ring * 2);
             
-            // iterate right
+            // iterate right (half the side length)
             for (int i = 0; i < ring; ++i) {
                 min_id = searchMinInCell(lat, lon, lat_curr, lon_curr + i, min_id);
             }
@@ -285,6 +290,11 @@ public class LookupGrid implements Serializable
     }
     
     
+    /**
+     * Compute the minimum over the passed array.
+     * 
+     * @param arr
+     */
     public static double arrayMin(double[] arr)
     {
         double r = Double.MAX_VALUE;
@@ -295,6 +305,11 @@ public class LookupGrid implements Serializable
     }
     
     
+    /**
+     * Compute the maximum over the passed array.
+     * 
+     * @param arr
+     */
     public static double arrayMax(double[] arr)
     {
         double r = -Double.MAX_VALUE;

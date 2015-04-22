@@ -21,8 +21,8 @@ public final class OverlayElement implements OverlayObject
 
 	public OverlayElement(GeoPosition point)
 	{
-		this.source = point;
-		this.target = point;
+		source = point;
+		target = point;
 	}
 
 
@@ -51,8 +51,8 @@ public final class OverlayElement implements OverlayObject
 
 	public OverlayElement(double point_lat, double point_lon)
 	{
-		this.source = new GeoPosition(point_lat, point_lon);
-		this.target = new GeoPosition(point_lat, point_lon);
+		source = new GeoPosition(point_lat, point_lon);
+		target = new GeoPosition(point_lat, point_lon);
 	}
 
 
@@ -66,8 +66,8 @@ public final class OverlayElement implements OverlayObject
 
 	public OverlayElement(double source_lat, double source_lon, double target_lat, double target_lon)
 	{
-		this.source = new GeoPosition(source_lat, source_lon);
-		this.target = new GeoPosition(target_lat, target_lon);
+		source = new GeoPosition(source_lat, source_lon);
+		target = new GeoPosition(target_lat, target_lon);
 	}
 
 
@@ -82,25 +82,25 @@ public final class OverlayElement implements OverlayObject
 
 	public GeoPosition getSource()
 	{
-		return this.source;
+		return source;
 	}
 
 
 	public GeoPosition getTarget()
 	{
-		return this.target;
+		return target;
 	}
 
 
 	public Color getColor()
 	{
-		return this.color;
+		return color;
 	}
 
 
 	public int getWidth()
 	{
-		return this.strokeWidth;
+		return strokeWidth;
 	}
 	
 	

@@ -68,7 +68,7 @@ public final class OverlayImage implements OverlayObject
     private GeoPosition     mapPos        = null;
     private Date            date          = null;
     
-    private BufferedImage   img;
+    private final BufferedImage img;
     private BufferedImage   cachedImg;
     private boolean         highQuality   = true;
     private String          label         = null;

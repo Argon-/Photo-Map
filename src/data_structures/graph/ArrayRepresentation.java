@@ -103,19 +103,19 @@ final public class ArrayRepresentation implements Graph, Serializable {
     public ArrayRepresentation(String f) throws InvalidGraphFormatException, IOException
     {
         super();
-        this.types = new double[29];
-        Arrays.fill(this.types, -1);
-        this.types[1]  = 1.3;   // motorway
-        this.types[2]  = 1.2;   // primary
-        this.types[3]  = 0.8;   // secondary
-        this.types[4]  = 0.7;   // tertiary
-        this.types[6]  = 1.3;   // trunk
-        this.types[7]  = 0.5;   // road
-        this.types[8]  = 0.45;  // residential
-        this.types[9]  = 0.3;   // living_street
-        this.types[10] = 0.5;   // turning_circle
-        this.types[11] = 0.3;   // service
-        this.types[12] = 0.5;   // unclassified
+        types = new double[29];
+        Arrays.fill(types, -1);
+        types[1]  = 1.3;   // motorway
+        types[2]  = 1.2;   // primary
+        types[3]  = 0.8;   // secondary
+        types[4]  = 0.7;   // tertiary
+        types[6]  = 1.3;   // trunk
+        types[7]  = 0.5;   // road
+        types[8]  = 0.45;  // residential
+        types[9]  = 0.3;   // living_street
+        types[10] = 0.5;   // turning_circle
+        types[11] = 0.3;   // service
+        types[12] = 0.5;   // unclassified
         
         load(f);
     }
@@ -130,19 +130,19 @@ final public class ArrayRepresentation implements Graph, Serializable {
     {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
         
-        oos.writeObject(this.lat);
-        oos.writeObject(this.lon);
+        oos.writeObject(lat);
+        oos.writeObject(lon);
 
-        oos.writeObject(this.source);
-        oos.writeObject(this.target);
-        oos.writeObject(this.offset);
-        oos.writeObject(this.dist);
-        oos.writeObject(this.dist_w);
+        oos.writeObject(source);
+        oos.writeObject(target);
+        oos.writeObject(offset);
+        oos.writeObject(dist);
+        oos.writeObject(dist_w);
         
-        oos.writeObject(this.nlat);
-        oos.writeObject(this.nlon);
-        oos.writeObject(this.tour);
-        oos.writeObject(this.name);
+        oos.writeObject(nlat);
+        oos.writeObject(nlon);
+        oos.writeObject(tour);
+        oos.writeObject(name);
 
         oos.writeDouble(minLat);
         oos.writeDouble(maxLat);
@@ -164,42 +164,42 @@ final public class ArrayRepresentation implements Graph, Serializable {
             
             
             // read nodes
-            this.lat  = new double[node_num];
-            this.lon  = new double[node_num];
+            lat  = new double[node_num];
+            lon  = new double[node_num];
 
             for (int i = 0; i < node_num; ++i)
             {
                 final String[] s = b.readLine().split(" ", 2);
-                this.lat[i]  = Double.parseDouble(s[0]);
-                this.lon[i]  = Double.parseDouble(s[1]);
+                lat[i]  = Double.parseDouble(s[0]);
+                lon[i]  = Double.parseDouble(s[1]);
 
-                this.minLat = Math.min(minLat, this.lat[i]);
-                this.maxLat = Math.max(maxLat, this.lat[i]);
-                this.minLon = Math.min(minLon, this.lon[i]);
-                this.maxLon = Math.max(maxLon, this.lon[i]);
+                minLat = Math.min(minLat, lat[i]);
+                maxLat = Math.max(maxLat, lat[i]);
+                minLon = Math.min(minLon, lon[i]);
+                maxLon = Math.max(maxLon, lon[i]);
             }
             
             
             // read edges
-            this.source = new int[edge_num];
-            this.target = new int[edge_num];
-            this.offset = new int[node_num + 1];    // +1 because of getNeighbor()
-            this.dist   = new int[edge_num];
-            this.dist_w = new int[edge_num];
-            Arrays.fill(this.offset, -1);
+            source = new int[edge_num];
+            target = new int[edge_num];
+            offset = new int[node_num + 1];    // +1 because of getNeighbor()
+            dist   = new int[edge_num];
+            dist_w = new int[edge_num];
+            Arrays.fill(offset, -1);
             
             for (int i = 0; i < edge_num; ++i)
             {
                 final String[] s = b.readLine().split(" ");
-                this.source[i] = Integer.parseInt(s[0]);
-                this.target[i] = Integer.parseInt(s[1]);
-                this.dist[i]   = Integer.parseInt(s[2]);
+                source[i] = Integer.parseInt(s[0]);
+                target[i] = Integer.parseInt(s[1]);
+                dist[i]   = Integer.parseInt(s[2]);
 
-                final double weight  = this.types[Integer.parseInt(s[3])];
-                this.dist_w[i] = (int) Math.round(this.dist[i]/weight);
+                final double weight  = types[Integer.parseInt(s[3])];
+                dist_w[i] = (int) Math.round(dist[i]/weight);
                 
-                if (offset[this.source[i]] < 0) {
-                    offset[this.source[i]] = i;
+                if (offset[source[i]] < 0) {
+                    offset[source[i]] = i;
                 }
             }
             
@@ -216,18 +216,18 @@ final public class ArrayRepresentation implements Graph, Serializable {
 
             
             // read tourism nodes
-            this.nlat = new double[tour_num];
-            this.nlon = new double[tour_num];
-            this.tour = new byte[tour_num];
-            this.name = new String[tour_num];
+            nlat = new double[tour_num];
+            nlon = new double[tour_num];
+            tour = new byte[tour_num];
+            name = new String[tour_num];
 
             for (int i = 0; i < tour_num; ++i)
             {
                 final String[] s = b.readLine().split(" ", 4);
-                this.nlat[i] = Double.parseDouble(s[0]);
-                this.nlon[i] = Double.parseDouble(s[1]);
-                this.tour[i] = Byte.parseByte(s[2]);
-                this.name[i] = s.length > 3 ? s[3] : null;
+                nlat[i] = Double.parseDouble(s[0]);
+                nlon[i] = Double.parseDouble(s[1]);
+                tour[i] = Byte.parseByte(s[2]);
+                name[i] = s.length > 3 ? s[3] : null;
             }
 
             
@@ -243,24 +243,24 @@ final public class ArrayRepresentation implements Graph, Serializable {
         try {
             System.out.println("Found serialized graph, reading...");
             
-            this.lat    = (double[]) ois.readObject();
-            this.lon    = (double[]) ois.readObject();
+            lat    = (double[]) ois.readObject();
+            lon    = (double[]) ois.readObject();
 
-            this.source = (int[])    ois.readObject();
-            this.target = (int[])    ois.readObject();
-            this.offset = (int[])    ois.readObject();
-            this.dist   = (int[])    ois.readObject();
-            this.dist_w = (int[])    ois.readObject();
+            source = (int[])    ois.readObject();
+            target = (int[])    ois.readObject();
+            offset = (int[])    ois.readObject();
+            dist   = (int[])    ois.readObject();
+            dist_w = (int[])    ois.readObject();
             
-            this.nlat   = (double[]) ois.readObject();
-            this.nlon   = (double[]) ois.readObject();
-            this.tour   = (byte[])    ois.readObject();
-            this.name   = (String[]) ois.readObject();
+            nlat   = (double[]) ois.readObject();
+            nlon   = (double[]) ois.readObject();
+            tour   = (byte[])    ois.readObject();
+            name   = (String[]) ois.readObject();
             
-            this.minLat = ois.readDouble();
-            this.maxLat = ois.readDouble();
-            this.minLon = ois.readDouble();
-            this.maxLon = ois.readDouble();
+            minLat = ois.readDouble();
+            maxLat = ois.readDouble();
+            minLon = ois.readDouble();
+            maxLon = ois.readDouble();
         }
         catch (ClassNotFoundException e) {
             throw new InvalidGraphFormatException("Invalid serialized graph format");
@@ -283,8 +283,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
         }
         
         try {
-            grid = new LookupGrid(this.lat, this.lon, this.minLat, this.maxLat, this.minLon, this.maxLon);
-            ngrid = new LookupGrid(this.nlat, this.nlon);
+            grid = new LookupGrid(lat, lon, minLat, maxLat, minLon, maxLon);
+            ngrid = new LookupGrid(nlat, nlon);
         }
         catch (InvalidCoordinateArraysException e) {
             e.printStackTrace();
@@ -337,7 +337,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
         OverlayAggregate oa = new OverlayAggregate();
         
         for (int i = 0; i < lat.length; ++i) {
-            GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
+            GeoPosition g = new GeoPosition(lat[i], lon[i]);
             oa.addPoint(new OverlayElement(g, c[i % c.length], 7));
         }
         win.addPersistentOverlayAggregate(oa);
@@ -355,8 +355,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
         OverlayAggregate oa = new OverlayAggregate();
         
         for (int i = 0; i < nlat.length; ++i) {
-            GeoPosition g = new GeoPosition(this.nlat[i], this.nlon[i]);
-            oa.addPoint(new OverlayElement(g, c[i % c.length], 7)).addLabel(new OverlayLabel(this.name[i], g));
+            GeoPosition g = new GeoPosition(nlat[i], nlon[i]);
+            oa.addPoint(new OverlayElement(g, c[i % c.length], 7)).addLabel(new OverlayLabel(name[i], g));
         }
         
         win.addPersistentOverlayAggregate(oa);
@@ -374,13 +374,13 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public int[] getNeighbors(int n)
     {
-        if (n < 0 || n >= this.lat.length) {
-            throw new RuntimeException("Bad Node ID: " + n + " (offset.length = " + this.lat.length + ")");
+        if (n < 0 || n >= lat.length) {
+            throw new RuntimeException("Bad Node ID: " + n + " (offset.length = " + lat.length + ")");
         }
 
-        int[] r = new int[this.offset[n+1] - this.offset[n]];
+        int[] r = new int[offset[n+1] - offset[n]];
         for (int i = 0; i < r.length; ++i) {
-            r[i] = this.target[this.offset[n] + i];
+            r[i] = target[offset[n] + i];
         }
         return r;
     }
@@ -396,12 +396,12 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public int getIthNeighbor(int n, int i)
     {
-        if (n < 0 || n >= this.lat.length) {
-            throw new RuntimeException("Bad Node ID: " + n + " (offset.length = " + this.lat.length + ")");
+        if (n < 0 || n >= lat.length) {
+            throw new RuntimeException("Bad Node ID: " + n + " (offset.length = " + lat.length + ")");
         }
         
-        if ((this.offset[n] + i) < this.offset[n+1])
-            return this.target[this.offset[n] + i];
+        if ((offset[n] + i) < offset[n+1])
+            return target[offset[n] + i];
         return -1;
     }
     
@@ -418,13 +418,13 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public int getDist(int from, int to)
     {
-        if (from < 0 || from >= this.lat.length) {
-            throw new RuntimeException("Bad Node ID: " + from + " (offset.length = " + this.lat.length + ")");
+        if (from < 0 || from >= lat.length) {
+            throw new RuntimeException("Bad Node ID: " + from + " (offset.length = " + lat.length + ")");
         }
         
-        for (int i = this.offset[from]; i < this.offset[from+1]; ++i) {
-            if (this.target[i] == to)
-                return this.dist[i];
+        for (int i = offset[from]; i < offset[from+1]; ++i) {
+            if (target[i] == to)
+                return dist[i];
         }
         return -1;
     }
@@ -435,7 +435,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public double getLat(int n)
     {
-        return this.lat[n];
+        return lat[n];
     }
 
     
@@ -444,7 +444,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public double getLon(int n)
     {
-        return this.lon[n];
+        return lon[n];
     }
     
     
@@ -457,7 +457,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public GeoPosition getPosition(int n)
     {
-        return new GeoPosition(this.lat[n], this.lon[n]);
+        return new GeoPosition(lat[n], lon[n]);
     }
     
 
@@ -466,13 +466,13 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public int size()
     {
-        return this.lat.length;
+        return lat.length;
     }
     
     
     public int getIthEdgeDistFor(int n, int i)
     {
-        return this.getIthEdgeDistFor(n, i, false);
+        return getIthEdgeDistFor(n, i, false);
     }
     
     
@@ -487,9 +487,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
     public int getIthEdgeDistFor(int n, int i, boolean weighted)
     {
         if (weighted)
-            return this.dist_w[this.offset[n]+i];
+            return dist_w[offset[n]+i];
         else
-            return this.dist[this.offset[n]+i];
+            return dist[offset[n]+i];
     }
     
     
@@ -501,7 +501,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public double[] getBoundingRectLat()
     {
-        return new double[] {this.maxLat, this.maxLat, this.minLat, this.minLat};
+        return new double[] {maxLat, maxLat, minLat, minLat};
     }
     
     
@@ -513,7 +513,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public double[] getBoundingRectLon()
     {
-        return new double[] {this.maxLon, this.minLon, this.minLon, this.maxLon};
+        return new double[] {maxLon, minLon, minLon, maxLon};
     }
     
     

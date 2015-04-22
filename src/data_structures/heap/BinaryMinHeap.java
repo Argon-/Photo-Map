@@ -21,59 +21,59 @@ public final class BinaryMinHeap
      */
     public BinaryMinHeap(int size)
     {
-        this.heap_nid = new int[size];
-        this.heap_val = new int[size];
+        heap_nid = new int[size];
+        heap_val = new int[size];
         this.size = 0;
     }
 
 
     private void grow()
     {
-        int new_capacity = this.heap_nid.length + ((int) (this.heap_nid.length * growthFactor) + 1);
-        System.out.println(">>> Increasing BinaryMinHeap Capacity: " + this.heap_nid.length + " -> " + new_capacity + " <<<");
-        this.heap_nid = Arrays.copyOf(this.heap_nid, new_capacity);
-        this.heap_val = Arrays.copyOf(this.heap_val, new_capacity);
+        int new_capacity = heap_nid.length + ((int) (heap_nid.length * growthFactor) + 1);
+        System.out.println(">>> Increasing BinaryMinHeap Capacity: " + heap_nid.length + " -> " + new_capacity + " <<<");
+        heap_nid = Arrays.copyOf(heap_nid, new_capacity);
+        heap_val = Arrays.copyOf(heap_val, new_capacity);
     }
 
 
     public boolean isEmpty()
     {
-        return this.size == 0;
+        return size == 0;
     }
 
 
     public boolean isFull()
     {
-        return this.size >= this.heap_nid.length;
+        return size >= heap_nid.length;
     }
 
 
     public int size()
     {
-        return this.size;
+        return size;
     }
 
 
     public void insert(int node_id, int value)
     {
-        if (this.isFull())
-            this.grow();
+        if (isFull())
+            grow();
 
-        int c = this.size;
-        this.heap_nid[c] = node_id;
-        this.heap_val[c] = value;
-        ++this.size;
+        int c = size;
+        heap_nid[c] = node_id;
+        heap_val[c] = value;
+        ++size;
 
         int tmp1, tmp2;
         int parent = (c - 1) / 2;
 
-        while ((this.heap_val[parent] > this.heap_val[c]) && parent >= 0) {
-            tmp1 = this.heap_nid[parent];
-            tmp2 = this.heap_val[parent];
-            this.heap_nid[parent] = this.heap_nid[c];
-            this.heap_val[parent] = this.heap_val[c];
-            this.heap_nid[c] = tmp1;
-            this.heap_val[c] = tmp2;
+        while ((heap_val[parent] > heap_val[c]) && parent >= 0) {
+            tmp1 = heap_nid[parent];
+            tmp2 = heap_val[parent];
+            heap_nid[parent] = heap_nid[c];
+            heap_val[parent] = heap_val[c];
+            heap_nid[c] = tmp1;
+            heap_val[c] = tmp2;
             c = parent;
             parent = (c - 1) / 2;
         }
@@ -85,10 +85,10 @@ public final class BinaryMinHeap
      */
     public int getMinID()
     {
-        if (this.isEmpty())
+        if (isEmpty())
             throw new RuntimeException("Empty Heap");
         else
-            return this.heap_nid[0];
+            return heap_nid[0];
     }
 
 
@@ -97,10 +97,10 @@ public final class BinaryMinHeap
      */
     public int getMinValue()
     {
-        if (this.isEmpty())
+        if (isEmpty())
             throw new RuntimeException("Empty Heap");
         else
-            return this.heap_val[0];
+            return heap_val[0];
     }
 
 
@@ -111,24 +111,24 @@ public final class BinaryMinHeap
      */
     public int[] extractMin()
     {
-        if (this.isEmpty())
+        if (isEmpty())
             throw new RuntimeException("Empty Heap");
-        int[] min = new int[] { this.heap_nid[0], this.heap_val[0] };
-        this.removeMin();
+        int[] min = new int[] { heap_nid[0], heap_val[0] };
+        removeMin();
         return min;
     }
 
 
     public void removeMin()
     {
-        if (this.isEmpty())
+        if (isEmpty())
             throw new RuntimeException("Empty Heap");
 
-        --this.size;
-        this.heap_nid[0] = this.heap_nid[this.size];
-        this.heap_val[0] = this.heap_val[this.size];
-        if (this.size > 0) {
-            this.heapify(0);
+        --size;
+        heap_nid[0] = heap_nid[size];
+        heap_val[0] = heap_val[size];
+        if (size > 0) {
+            heapify(0);
         }
     }
 
@@ -136,19 +136,19 @@ public final class BinaryMinHeap
     private void heapify(int i)
     {
         int c, rc;
-        while ((c = (i << 1) + 1) < this.size) { // left child
+        while ((c = (i << 1) + 1) < size) { // left child
             rc = (i << 1) + 2; // right child
-            if (rc < this.size && this.heap_val[c] > this.heap_val[rc]) {
+            if (rc < size && heap_val[c] > heap_val[rc]) {
                 c = rc;
             }
 
-            if (this.heap_val[i] > (this.heap_val[c])) {
-                int tmp1 = this.heap_nid[i];
-                int tmp2 = this.heap_val[i];
-                this.heap_nid[i] = this.heap_nid[c];
-                this.heap_val[i] = this.heap_val[c];
-                this.heap_nid[c] = tmp1;
-                this.heap_val[c] = tmp2;
+            if (heap_val[i] > (heap_val[c])) {
+                int tmp1 = heap_nid[i];
+                int tmp2 = heap_val[i];
+                heap_nid[i] = heap_nid[c];
+                heap_val[i] = heap_val[c];
+                heap_nid[c] = tmp1;
+                heap_val[c] = tmp2;
             }
             else {
                 break;
@@ -160,16 +160,16 @@ public final class BinaryMinHeap
 
     public int getNodeDist(int n)
     {
-        if (n > this.size || n < 0) {
+        if (n > size || n < 0) {
             throw new RuntimeException("hurr");
         }
-        return this.heap_val[n];
+        return heap_val[n];
     }
 
 
     public int getSize()
     {
-        return this.size;
+        return size;
     }
 
 }

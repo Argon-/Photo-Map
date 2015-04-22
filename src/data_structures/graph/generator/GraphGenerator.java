@@ -35,8 +35,8 @@ public class GraphGenerator
     
     public GraphGenerator(String node_file, String way_file)
     {
-        this.node_file_loc = node_file;
-        this.way_file_loc = way_file;
+        node_file_loc = node_file;
+        way_file_loc = way_file;
     }
     
     

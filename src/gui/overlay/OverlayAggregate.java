@@ -17,41 +17,41 @@ public final class OverlayAggregate implements OverlayObject
 	
 	public OverlayAggregate()
 	{
-		this.points = new LinkedList<OverlayElement>();
-		this.lines = new LinkedList<OverlayElement>();
-	    this.labels = new LinkedList<OverlayLabel>();
+		points = new LinkedList<OverlayElement>();
+		lines = new LinkedList<OverlayElement>();
+	    labels = new LinkedList<OverlayLabel>();
 	}
 	
 	
 	public LinkedList<OverlayElement> getPoints()
 	{
-		return this.points;
+		return points;
 	}
 	
 	
 	public LinkedList<OverlayElement> getLines()
 	{
-		return this.lines;
+		return lines;
 	}
 	
 	
 	public OverlayAggregate addPoint(OverlayElement oe)
 	{
-		this.points.add(oe);
+		points.add(oe);
 		return this;
 	}
 	
 	
 	public OverlayAggregate addLine(OverlayElement oe)
 	{
-		this.lines.add(oe);
+		lines.add(oe);
 		return this;
 	}
 	
 	
 	public OverlayAggregate addLabel(OverlayLabel ol)
     {
-        this.labels.add(ol);
+        labels.add(ol);
         return this;
     }
 	

@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
@@ -92,7 +93,9 @@ public class MainWindow extends JFrame implements Serializable
     private final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
     private final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
     
-    
+    // specifies if a click in mapMouseClicked() is supposed to target an Overlay element
+    // this is determined in mapMouseMoved()
+    private final AtomicBoolean targetedClick = new AtomicBoolean(false);
     
     private WaypointPainter<JXMapViewer> waypointPainter;
     private Painter<JXMapViewer> overlayPainter;
@@ -363,7 +366,7 @@ public class MainWindow extends JFrame implements Serializable
                 btn_ShowAccomodations(e);
             }
         });
-        this.btn_ShowAccomodations.setToolTipText("Show possible accomodations near the selected photo");
+        this.btn_ShowAccomodations.setToolTipText("Show possible accomodations near the selected photo.");
         GridBagConstraints gbc_btn_ShowAccomodations = new GridBagConstraints();
         gbc_btn_ShowAccomodations.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_ShowAccomodations.insets = new Insets(0, 0, 5, 5);
@@ -391,7 +394,7 @@ public class MainWindow extends JFrame implements Serializable
                 btn_RemoveAccomodation(e);
             }
         });
-        this.btn_RemoveAccomodation.setToolTipText("Remove the accomodation associated with the selected photo");
+        this.btn_RemoveAccomodation.setToolTipText("Remove the accomodation associated with the selected photo.");
         GridBagConstraints gbc_btn_RemoveAccomodation = new GridBagConstraints();
         gbc_btn_RemoveAccomodation.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_RemoveAccomodation.insets = new Insets(0, 0, 5, 5);
@@ -615,58 +618,68 @@ public class MainWindow extends JFrame implements Serializable
             return;
         }
         
-        // middle mouse button -> clear
-        if (SwingUtilities.isMiddleMouseButton(e)) {
-            clearMap();
-            return;
-        }
-        // right mouse button -> select target, but not without a source
-        else if (SwingUtilities.isRightMouseButton(e) && currSource == null) {
-            System.out.println("Please set a source first");
-            return;
-        }
-
-        // from here on it's either a left mouse button click (-> select source)
-        // or a right mouse button click with a previously selected source (-> select target, calculate route)
-
-        System.out.println();
-        GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
-        System.out.println("Clicked at  : " + String.format("%.4f", clickPos.getLatitude()) + ", " + String.format("%.4f", clickPos.getLongitude()));
-
-        StopWatch.lap();
-        int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
-        StopWatch.lap();
-        if (n == -1) {
-            System.out.println("Found no node!");
-            return;
-        }
-        System.out.println("Closest node: " + String.format("%.4f", g.getLat(n)) + ", " + String.format("%.4f", g.getLon(n)) + "  (found in "
-                + String.format("%.3f", StopWatch.getLastLapSec()) + " sec)");
-
         
-        if (SwingUtilities.isLeftMouseButton(e)) 
+        // targeted click -> get the Overlay element he clicked
+        // not?           -> assume the user wanted to place a marker for standard route calculation
+        if (targetedClick.get())
         {
-            currSource = g.getPosition(n);
-            currTarget = null;
-            overlayLines.add(OverlayAggregate.route_var3(clickPos, currSource));
-            d.setSource(n);
+            // get targeted element
         }
-        else if (SwingUtilities.isRightMouseButton(e)) 
+        else
         {
-            currTarget = g.getPosition(n);
-            d.setTarget(n);
-            if (currSource != null && currTarget != null) {
-                StopWatch.lap();
-                boolean r = d.pathFromTo();
-                StopWatch.lap();
-                if (r) {
-                    overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
-                }
-                System.out.println("Calculated route in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
+            // middle mouse button -> clear
+            if (SwingUtilities.isMiddleMouseButton(e)) {
+                clearMap();
+                return;
             }
+            // right mouse button -> select target, but not without a source
+            else if (SwingUtilities.isRightMouseButton(e) && currSource == null) {
+                System.out.println("Please set a source first");
+                return;
+            }
+    
+            // from here on it's either a left mouse button click (-> select source)
+            // or a right mouse button click with a previously selected source (-> select target, calculate route)
+    
+            System.out.println();
+            GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
+            System.out.println("Clicked at  : " + String.format("%.4f", clickPos.getLatitude()) + ", " + String.format("%.4f", clickPos.getLongitude()));
+    
+            StopWatch.lap();
+            int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
+            StopWatch.lap();
+            if (n == -1) {
+                System.out.println("Found no node!");
+                return;
+            }
+            System.out.println("Closest node: " + String.format("%.4f", g.getLat(n)) + ", " + String.format("%.4f", g.getLon(n)) + "  (found in "
+                    + String.format("%.3f", StopWatch.getLastLapSec()) + " sec)");
+    
+            
+            if (SwingUtilities.isLeftMouseButton(e)) 
+            {
+                currSource = g.getPosition(n);
+                currTarget = null;
+                overlayLines.add(OverlayAggregate.route_var3(clickPos, currSource));
+                d.setSource(n);
+            }
+            else if (SwingUtilities.isRightMouseButton(e)) 
+            {
+                currTarget = g.getPosition(n);
+                d.setTarget(n);
+                if (currSource != null && currTarget != null) {
+                    StopWatch.lap();
+                    boolean r = d.pathFromTo();
+                    StopWatch.lap();
+                    if (r) {
+                        overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
+                    }
+                    System.out.println("Calculated route in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
+                }
+            }
+    
+            mapKit.repaint();
         }
-
-        mapKit.repaint();
     }
     
     
