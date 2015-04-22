@@ -88,9 +88,11 @@ public class MainWindow extends JFrame implements Serializable
     private ArrayRepresentation g = null;
     private Dijkstra d = null;
     
-    public final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-    public final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-    public final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
+    private final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+    private final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+    private final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
+    
+    
     
     private WaypointPainter<JXMapViewer> waypointPainter;
     private Painter<JXMapViewer> overlayPainter;
@@ -598,7 +600,13 @@ public class MainWindow extends JFrame implements Serializable
     {
         overlayLines.add(oa);
     }
-        
+    
+    
+    public void addPersistentOverlayAggregate(OverlayAggregate oa)
+    {
+        persistentOverlayLines.add(oa);
+    }
+    
     
     public void mapMouseClicked(MouseEvent e)
     {

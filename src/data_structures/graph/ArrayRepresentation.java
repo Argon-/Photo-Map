@@ -286,7 +286,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
             GeoPosition g = new GeoPosition(this.lat[i], this.lon[i]);
             oa.addPoint(new OverlayElement(g, c[i % c.length], 7));
         }
-        win.persistentOverlayLines.add(oa);
+        win.addPersistentOverlayAggregate(oa);
     }
     
     
@@ -303,7 +303,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
             GeoPosition g = new GeoPosition(this.nlat[i], this.nlon[i]);
             oa.addPoint(new OverlayElement(g, c[i % c.length], 7)).addLabel(new OverlayLabel(this.name[i], g));
         }
-        win.persistentOverlayLines.add(oa);
+        
+        win.addPersistentOverlayAggregate(oa);
     }
     
     

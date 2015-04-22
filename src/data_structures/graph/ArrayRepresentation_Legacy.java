@@ -368,7 +368,7 @@ final public class ArrayRepresentation_Legacy implements Graph, Serializable {
 				oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
 			}
 		}
-		win.persistentOverlayLines.add(oa);
+		win.addPersistentOverlayAggregate(oa);
 	}
 	
 	
