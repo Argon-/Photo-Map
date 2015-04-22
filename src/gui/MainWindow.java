@@ -482,7 +482,7 @@ public class MainWindow extends JFrame implements Serializable
                 cb_VisitOrder(e);
             }
         });
-        cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"chronological", "shortest route", "selected order"}));
+        cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"chronological", "selected order", "shortest route"}));
         GridBagConstraints gbc_cb_VisitOrder = new GridBagConstraints();
         gbc_cb_VisitOrder.anchor = GridBagConstraints.WEST;
         gbc_cb_VisitOrder.insets = new Insets(0, 0, 5, 5);
@@ -946,7 +946,7 @@ public class MainWindow extends JFrame implements Serializable
     
     public void cb_VisitOrder(ActionEvent e)
     {
-        System.err.println("cb_VisitOrder not yet implemented!");
+        //System.err.println("cb_VisitOrder not yet implemented!");
     }
     
     
