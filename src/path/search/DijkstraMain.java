@@ -13,11 +13,12 @@ public class DijkstraMain {
 		//String f = "./15K.txt";
 		//String f = "/Users/Julian/Documents/Dropbox/_Semester 9/Fapra OSM/1/15000.txt";
 		String f = "./15000K.bin";
-
-		StopWatch.lap();
+		
+		StopWatch sw = new StopWatch();
+		sw.lap();
 		Graph g = GraphFactory.load(f);
 		//g.save("./15000K.bin");
-		System.out.println(StopWatch.lapSec() + " sec");
+		System.out.println(sw.getLastInSecStr() + " sec");
 		System.out.println("");
 		
 		
@@ -41,12 +42,13 @@ public class DijkstraMain {
 		System.out.println("Dijkstra_Old");
 		System.out.println("================================================================================");
 		
-		StopWatch.lap();
+	    StopWatch sw = new StopWatch();
+		sw.lap();
 		d_old.pathFromTo(from, to);
-		System.out.println(StopWatch.lapSecStr() + " sec");
+		System.out.println(sw.getLastInSecStr() + " sec");
 		System.out.println("");
 		
-		StopWatch.lap();
+		sw.lap();
 		d_old.printRouteStats(from, to);
 		//System.out.println(StopWatch.lapSecStr() + " sec");
 		System.out.println("");
@@ -56,12 +58,12 @@ public class DijkstraMain {
 		System.out.println("Dijkstra Priority Queue");
 		System.out.println("================================================================================");
 		
-		StopWatch.lap();
+		sw.lap();
 		d_pq.pathFromTo(from, to);
-		System.out.println(StopWatch.lapSecStr() + " sec");
+		System.out.println(sw.getLastInSecStr() + " sec");
 		System.out.println("");
 		
-		StopWatch.lap();
+		sw.lap();
 		d_pq.printRouteStats(from, to);
 		//System.out.println(StopWatch.lapSecStr() + " sec");
 		System.out.println("");
@@ -71,12 +73,12 @@ public class DijkstraMain {
 		System.out.println("Dijkstra BinHeap");
 		System.out.println("================================================================================");
 		
-		StopWatch.lap();
+		sw.lap();
 		d_2h.pathFromTo(from, to);
-		System.out.println(StopWatch.lapSecStr() + " sec");
+		System.out.println(sw.getLastInSecStr() + " sec");
 		System.out.println("");
 		
-		StopWatch.lap();
+		sw.lap();
 		d_2h.printRouteStats(from, to);
 		//System.out.println(StopWatch.lapSecStr() + " sec");
 		System.out.println("");

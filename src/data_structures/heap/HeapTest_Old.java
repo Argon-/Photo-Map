@@ -242,48 +242,49 @@ public class HeapTest_Old
 
 	public static void main(String[] args)
 	{
-		//System.out.println("# Static Test");
+        StopWatch sw = new StopWatch();
+	    
+        //System.out.println("# Static Test");
 		//staticTest();
 		System.out.println("\n# Random Tests");
-		
 		
 		final int FROM = 1;
 		final int TO   = 100;
 		
 		System.out.println("Insert Test 1");
-		StopWatch.lap();
+		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			insertTest1(i);
 		}
-		System.out.println("...took " + StopWatch.lapSec() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
 		
 		System.out.println("Insert Test 2");
-		StopWatch.lap();
+		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			insertTest2(i);
 		}
-		System.out.println("...took " + StopWatch.lapSec() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
 		
 		System.out.println("Build Test");
-		StopWatch.lap();
+		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			buildTest(i);
 		}
-		System.out.println("...took " + StopWatch.lapSec() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
 		
 		System.out.println("DecreaseKey Test");
-		StopWatch.lap();
+		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			decreaseKeyTest(i);
 		}
-		System.out.println("...took " + StopWatch.lapSec() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
 		
 		System.out.println("DecreaseKeyByNodeID Test");
-		StopWatch.lap();
+		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			decreaseKeyByNodeIDTest(i);
 		}
-		System.out.println("...took " + StopWatch.lapSec() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
 		
 	}
 }

@@ -645,15 +645,16 @@ public class MainWindow extends JFrame implements Serializable
             GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
             System.out.println("Clicked at  : " + String.format("%.4f", clickPos.getLatitude()) + ", " + String.format("%.4f", clickPos.getLongitude()));
     
-            StopWatch.lap();
+            StopWatch sw = new StopWatch();
+            sw.lap();
             int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
-            StopWatch.lap();
+            sw.lap();
             if (n == -1) {
                 System.out.println("Found no node!");
                 return;
             }
             System.out.println("Closest node: " + String.format("%.4f", g.getLat(n)) + ", " + String.format("%.4f", g.getLon(n)) + "  (found in "
-                    + String.format("%.3f", StopWatch.getLastLapSec()) + " sec)");
+                    + sw.getLastInSecStrShort() + " sec)");
     
             
             if (SwingUtilities.isLeftMouseButton(e)) 
@@ -668,13 +669,13 @@ public class MainWindow extends JFrame implements Serializable
                 currTarget = g.getPosition(n);
                 d.setTarget(n);
                 if (currSource != null && currTarget != null) {
-                    StopWatch.lap();
+                    sw.lap();
                     boolean r = d.pathFromTo();
-                    StopWatch.lap();
+                    sw.lap();
                     if (r) {
                         overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
+                        System.out.println("Calculated route in " + sw.getLastInSecStrShort() + " sec");
                     }
-                    System.out.println("Calculated route in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
                 }
             }
     
@@ -762,14 +763,15 @@ public class MainWindow extends JFrame implements Serializable
             case JFileChooser.APPROVE_OPTION:
                 File file = fd.getSelectedFile();
                 try {
-                    StopWatch.lap();
+                    StopWatch sw = new StopWatch();
+                    sw.lap();
                     g = GraphFactory.loadArrayRepresentation(file.getAbsolutePath());
-                    StopWatch.lap();
+                    sw.lap();
                     d = new Dijkstra(g);
                     clearMap();
                     drawGraphRect();
                     clearMap();
-                    System.out.println("Graph loaded in " + String.format("%.3f", StopWatch.getLastLapSec()) + " sec");
+                    System.out.println("Graph loaded in " + sw.getLastInSecStrShort() + " sec");
                     //g.drawNonRoutableNodes(this);
                     //g.visualizeGridLookup(true, this);
                     //g.visualizeNGridLookup(true, this);
@@ -841,11 +843,12 @@ public class MainWindow extends JFrame implements Serializable
             case JFileChooser.APPROVE_OPTION:
                 File[] files = fd.getSelectedFiles();
                 LinkedList<OverlayImage> list = new LinkedList<OverlayImage>();
-                StopWatch.lap();
+                StopWatch sw = new StopWatch();
+                sw.lap();
                 for (File file : files) {
                     FileUtil.loadOverlayImagesFrom(file.getAbsolutePath(), list, imagesSize, imagesDynamicResize, imagesHighQuality);
                 }
-                System.out.println("Processed images in: " + StopWatch.lapSecStr() + " sec");
+                System.out.println("Processed images in: " + sw.lap().getLastInSecStrShort() + " sec");
                 
                 DefaultListModel<OverlayImage> model = (DefaultListModel<OverlayImage>) list_Images.getModel();
                 for (OverlayImage oi : list) {
