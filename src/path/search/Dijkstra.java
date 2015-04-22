@@ -12,6 +12,7 @@ import data_structures.heap.BinaryMinHeap;
 
 public final class Dijkstra implements Runnable
 {
+    private final int HEAP_SIZE_FACTOR = 10;
 	private final int UNSETTLED = Integer.MAX_VALUE;
 	private final int   SETTLED = Integer.MAX_VALUE - 1;
 	private final boolean weighted;
@@ -59,7 +60,7 @@ public final class Dijkstra implements Runnable
 	public void buildNewHeap(int source)
 	{
 		Arrays.fill(state, UNSETTLED);
-		heap = new BinaryMinHeap(g.size() / 10);
+		heap = new BinaryMinHeap(g.size() / HEAP_SIZE_FACTOR);
 		heap.insert(source, 0);
 	}
 	

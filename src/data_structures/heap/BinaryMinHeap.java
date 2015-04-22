@@ -4,9 +4,12 @@ import java.util.Arrays;
 
 
 
+/**
+ * See {@link #BinaryMinHeap(int) BinaryMinHeap}.
+ */
 public final class BinaryMinHeap
 {
-    private final double growthFactor = 0.5;
+    private final double GROWTH_FACTOR = 0.5;
 
     private int[] heap_nid = null;
     private int[] heap_val = null;
@@ -14,10 +17,15 @@ public final class BinaryMinHeap
 
 
     /**
-     * Initializes a new empty heap with fixed size.
+     * Initializes a new empty minimum heap with initial size {@code size}.<br>
+     * This heap is specifically tailored for storing a node ID along with its value,
+     * as used by {@link path.search.Dijkstra Dijkstra}.
+     * The value is used for sorting.
+     * <br><br>
+     * The heap will increase its size upon {@link #insert(int, int) insert()} when {@link #isFull()}
+     * {@code == true}. This requires copying the current heap.
      * 
-     * @param size
-     * @param <strike>buildHeap</strike>
+     * @param size initial size
      */
     public BinaryMinHeap(int size)
     {
@@ -29,31 +37,58 @@ public final class BinaryMinHeap
 
     private void grow()
     {
-        int new_capacity = heap_nid.length + ((int) (heap_nid.length * growthFactor) + 1);
+        final int new_capacity = heap_nid.length + (int) (heap_nid.length * GROWTH_FACTOR) + 1;
         System.out.println(">>> Increasing BinaryMinHeap Capacity: " + heap_nid.length + " -> " + new_capacity + " <<<");
         heap_nid = Arrays.copyOf(heap_nid, new_capacity);
         heap_val = Arrays.copyOf(heap_val, new_capacity);
     }
 
 
+    /**
+     * Are there any elements stored in the heap?
+     * 
+     * @return {@code true} when there's no element stored
+     */
     public boolean isEmpty()
     {
         return size == 0;
     }
 
 
+    /**
+     * Is the heap full?<br>
+     * When this returns {@code true} a subsequent call to {@link #insert(int, int) insert()}
+     * will increase the size of the heap.
+     * 
+     * @return {@code true} when full
+     */
     public boolean isFull()
     {
         return size >= heap_nid.length;
     }
 
 
+    /**
+     * Returns the number of elements in the heap.
+     * 
+     * @return size
+     */
     public int size()
     {
         return size;
     }
 
 
+    /**
+     * Insert a new heap element consisting of an arbitrary node ID and value.
+     * Only the value is used for sorting, the node ID bears no relevance to the heap.
+     * <br><br>
+     * <b>Note:</b> this will increase the heap size in case {@link #isFull()}
+     * {@code == true}, which requires to copy arrays. 
+     * 
+     * @param node_id
+     * @param value
+     */
     public void insert(int node_id, int value)
     {
         if (isFull())
@@ -81,7 +116,7 @@ public final class BinaryMinHeap
 
 
     /**
-     * @return the min heap node ID.
+     * @return the min heap node ID
      */
     public int getMinID()
     {
@@ -93,7 +128,7 @@ public final class BinaryMinHeap
 
 
     /**
-     * @return the min heap node value.
+     * @return the min heap node value
      */
     public int getMinValue()
     {
@@ -105,20 +140,23 @@ public final class BinaryMinHeap
 
 
     /**
-     * This will remove the node.
+     * <b>Note:</b> this will remove the node.
      * 
-     * @return the min heap node.
+     * @return the min heap node
      */
     public int[] extractMin()
     {
         if (isEmpty())
             throw new RuntimeException("Empty Heap");
-        int[] min = new int[] { heap_nid[0], heap_val[0] };
+        final int[] min = new int[] { heap_nid[0], heap_val[0] };
         removeMin();
         return min;
     }
 
 
+    /**
+     * Remove the heap minimum without returning it.
+     */
     public void removeMin()
     {
         if (isEmpty())
@@ -136,15 +174,16 @@ public final class BinaryMinHeap
     private void heapify(int i)
     {
         int c, rc;
-        while ((c = (i << 1) + 1) < size) { // left child
+        while ((c = (i << 1) + 1) < size) { // c = left child
             rc = (i << 1) + 2; // right child
+            // follow right child in case its value is lower
             if (rc < size && heap_val[c] > heap_val[rc]) {
                 c = rc;
             }
 
             if (heap_val[i] > (heap_val[c])) {
-                int tmp1 = heap_nid[i];
-                int tmp2 = heap_val[i];
+                final int tmp1 = heap_nid[i];
+                final int tmp2 = heap_val[i];
                 heap_nid[i] = heap_nid[c];
                 heap_val[i] = heap_val[c];
                 heap_nid[c] = tmp1;
@@ -155,21 +194,6 @@ public final class BinaryMinHeap
             }
             i = c;
         }
-    }
-
-
-    public int getNodeDist(int n)
-    {
-        if (n > size || n < 0) {
-            throw new RuntimeException("hurr");
-        }
-        return heap_val[n];
-    }
-
-
-    public int getSize()
-    {
-        return size;
     }
 
 }
