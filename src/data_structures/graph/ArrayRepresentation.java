@@ -24,6 +24,9 @@ import data_structures.grid.LookupGrid;
 
 
 
+/**
+ * See {@link #ArrayRepresentation(String) ArrayRepresentation}.
+ */
 final public class ArrayRepresentation implements Graph, Serializable {
 
     private static final long serialVersionUID = 8955873766213220121L;
@@ -65,7 +68,38 @@ final public class ArrayRepresentation implements Graph, Serializable {
     private LookupGrid ngrid = null;
     
     
-    
+    /**
+     * Read graph data from the given file and provide various access methods.
+     * <br><br>
+     * This class is effectively final. No (global) state modification occurs after
+     * loading of the graph. Getters don't have side effects and get by without locking.
+     * <br><br>
+     * The graph can either be loaded from a plain text file or as the binary result
+     * of {@link #save(String)}, the latter is considerably faster.
+     * <br><br>
+     * Graph file specification:
+     * <pre>
+     * {@code
+     * <number_of_nodes>
+     * <number_of_edges>
+     * <number_of_not_routable_nodes>
+     * <node>  * <number_of_nodes>
+     * <edge>  * <number_of_edges>
+     * <nnode> * <number_of_not_routable_nodes>
+     * }
+     * </pre>
+     * With
+     * <pre>
+     * node  ::= double double            // lat lon
+     * edge  ::= int int int int          // node_id node_id dist hightway_type
+     * nnode ::= double double int string // lat lon tourism_type name
+     * </pre>
+     * The ID of a node is implicitly given by its position (first node = 0, second node = 1, ...).
+     * 
+     * @param f graph file
+     * @throws InvalidGraphFormatException
+     * @throws IOException
+     */
     public ArrayRepresentation(String f) throws InvalidGraphFormatException, IOException
     {
         super();
@@ -87,6 +121,11 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Save the graph as a binary blob.
+     * 
+     * @param f file location
+     */
     public void save(String f) throws IOException
     {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
@@ -156,7 +195,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
                 this.target[i] = Integer.parseInt(s[1]);
                 this.dist[i]   = Integer.parseInt(s[2]);
 
-                double weight  = this.types[Integer.parseInt(s[3])];
+                final double weight  = this.types[Integer.parseInt(s[3])];
                 this.dist_w[i] = (int) Math.round(this.dist[i]/weight);
                 
                 if (offset[this.source[i]] < 0) {
@@ -253,6 +292,13 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Search the ID of the node closest to the given coordinates.
+     * 
+     * @param lat latitude in decimal degrees
+     * @param lon longitude in decimal degrees
+     * @return ID of the found node or {@code -1}
+     */
     public int getNearestNode(double lat, double lon)
     {
         if (grid != null) {
@@ -263,6 +309,13 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Search the ID of the not-routable node closest to the given coordinates.
+     * 
+     * @param lat latitude in decimal degrees
+     * @param lon longitude in decimal degrees
+     * @return ID of the found node or {@code -1}
+     */
     public int getNearestNNode(double lat, double lon)
     {
         if (ngrid != null) {
@@ -275,6 +328,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     /**
      * Draw a visual marker for every routable node on the map.
+     * 
      * @param win
      */
     public void drawRoutableNodes(MainWindow win)
@@ -291,7 +345,8 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Draw a visual marker for every routable node on the map.
+     * Draw a visual marker for every not-routable node on the map.
+     * 
      * @param win
      */
     public void drawNonRoutableNodes(MainWindow win)
@@ -309,13 +364,13 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Return a set of <code>n</code>'s neighbors.
-     * <br>
+     * Return an array of {@code n}'s neighbors (outgoing edges).<br>
      * This assumes directed edges.
      * 
-     * @param n
-     * @return Array of target node IDs. <br>
-     *         Might be empty in case no such node exists.
+     * @param n node ID
+     * @return array of target node IDs<br>
+     *         Might be empty in case no such node exists
+     * @throws RuntimeException when not {@code -1 < n < }{@link #size()}
      */
     public int[] getNeighbors(int n)
     {
@@ -331,6 +386,14 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Get the {@code i}'th neighbor of node {@code n}.
+     * 
+     * @param n node ID
+     * @param i 
+     * @return node ID of {@code i}'th neighbor or {@code -1}
+     * @throws RuntimeException when not {@code -1 < n < }{@link #size()}
+     */
     public int getIthNeighbor(int n, int i)
     {
         if (n < 0 || n >= this.lat.length) {
@@ -344,13 +407,14 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Searches all outgoing edges of <code>from</code> and
+     * Searches all outgoing edges of {@code from} and
      * returns the distance of the first edge found with
-     * target <code>to</code>, else <code>-1</code>.
+     * target {@code to}.
      * 
-     * @param from
-     * @param to
-     * @return dist from <code>from</code> to <code>to</code>
+     * @param from node ID
+     * @param to node ID
+     * @return dist from {@code from} to {@code to} or {@code -1}
+     * @throws RuntimeException when not {@code -1 < n < }{@link #size()}
      */
     public int getDist(int from, int to)
     {
@@ -366,33 +430,43 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
 
     
+    /**
+     * @return latitude of given node ID in decimal degrees
+     */
     public double getLat(int n)
     {
         return this.lat[n];
     }
 
     
+    /**
+     * @return longitude of given node ID in decimal degrees
+     */
     public double getLon(int n)
     {
         return this.lon[n];
     }
     
     
+    /**
+     * Return the location of {@code n} as a 
+     * {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} object.
+     * 
+     * @param n node ID
+     * @return {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} of {@code n}
+     */
     public GeoPosition getPosition(int n)
     {
         return new GeoPosition(this.lat[n], this.lon[n]);
     }
     
 
+    /**
+     * Size of the loaded graph (number of nodes).
+     */
     public int size()
     {
         return this.lat.length;
-    }
-    
-    
-    public int getOffset(int n)
-    {
-        return this.offset[n];
     }
     
     
@@ -402,6 +476,14 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Get the distance of the {@code i}'th edge of node {@code n}.
+     * 
+     * @param n node ID
+     * @param i 
+     * @param weighted dist weighted by street type
+     * @return distance
+     */
     public int getIthEdgeDistFor(int n, int i, boolean weighted)
     {
         if (weighted)
@@ -411,18 +493,37 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Return a rectangle enclosing all routable latitude values of this 
+     * graph in decimal degrees.
+     * 
+     * @return {@code double[]} of size 4
+     */
     public double[] getBoundingRectLat()
     {
         return new double[] {this.maxLat, this.maxLat, this.minLat, this.minLat};
     }
     
     
+    /**
+     * Return a rectangle enclosing all routable longitude values of this 
+     * graph in decimal degrees.
+     * 
+     * @return {@code double[]} of size 4
+     */
     public double[] getBoundingRectLon()
     {
         return new double[] {this.maxLon, this.minLon, this.minLon, this.maxLon};
     }
     
     
+    /**
+     * Color the nodes touched when searching for a nearest node.<br>
+     * Not necessarily thread safe.
+     * 
+     * @param t
+     * @param w
+     */
     public void visualizeGridLookup(boolean t, MainWindow w)
     {
         if (grid != null)
@@ -430,6 +531,13 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
 
 
+    /**
+     * Color the nodes touched when searching for a nearest not-routable node.<br>
+     * Not necessarily thread safe.
+     * 
+     * @param t
+     * @param w
+     */
     public void visualizeNGridLookup(boolean t, MainWindow w)
     {
         if (ngrid != null)

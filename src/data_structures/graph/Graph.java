@@ -18,7 +18,6 @@ public interface Graph {
 	public double getLon(int n);
 	public GeoPosition getPosition(int n);
 	public int getNearestNode(double lat, double lon);
-	public int getOffset(int n);
 	public double[] getBoundingRectLat();
 	public double[] getBoundingRectLon();
 }
