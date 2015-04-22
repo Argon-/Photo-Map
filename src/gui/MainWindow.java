@@ -227,7 +227,7 @@ public class MainWindow extends JFrame implements Serializable
         });
         GridBagConstraints gbc_mapKit = new GridBagConstraints();
         gbc_mapKit.gridheight = 3;
-        gbc_mapKit.gridwidth = 8;
+        gbc_mapKit.gridwidth = 7;
         gbc_mapKit.insets = new Insets(0, 0, 5, 5);
         gbc_mapKit.fill = GridBagConstraints.BOTH;
         gbc_mapKit.gridx = 0;
@@ -242,9 +242,10 @@ public class MainWindow extends JFrame implements Serializable
             }
         });
         GridBagConstraints gbc_btn_ClearLast = new GridBagConstraints();
+        gbc_btn_ClearLast.gridwidth = 2;
         gbc_btn_ClearLast.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_ClearLast.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_ClearLast.gridx = 8;
+        gbc_btn_ClearLast.gridx = 7;
         gbc_btn_ClearLast.gridy = 0;
         contentPane.add(btn_ClearLast, gbc_btn_ClearLast);
         
@@ -264,19 +265,20 @@ public class MainWindow extends JFrame implements Serializable
             }
         } );
         GridBagConstraints gbc_btn_LoadGraph = new GridBagConstraints();
-        gbc_btn_LoadGraph.anchor = GridBagConstraints.EAST;
+        gbc_btn_LoadGraph.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_LoadGraph.insets = new Insets(0, 0, 5, 0);
         gbc_btn_LoadGraph.gridx = 9;
         gbc_btn_LoadGraph.gridy = 0;
         contentPane.add(btn_LoadGraph, gbc_btn_LoadGraph);
         GridBagConstraints gbc_btn_ClearAll = new GridBagConstraints();
+        gbc_btn_ClearAll.gridwidth = 2;
         gbc_btn_ClearAll.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_ClearAll.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_ClearAll.gridx = 8;
+        gbc_btn_ClearAll.gridx = 7;
         gbc_btn_ClearAll.gridy = 1;
         contentPane.add(btn_ClearAll, gbc_btn_ClearAll);
         
-        btn_SaveOptGraph = new JButton("Save opt graph");
+        btn_SaveOptGraph = new JButton("Save graph");
         btn_SaveOptGraph.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 btn_SaveOptGraph(e);
@@ -284,18 +286,18 @@ public class MainWindow extends JFrame implements Serializable
         });
         btn_SaveOptGraph.setToolTipText("Save the currently loaded graph as optimized (binary) file for faster loading.");
         GridBagConstraints gbc_btn_SaveOptGraph = new GridBagConstraints();
+        gbc_btn_SaveOptGraph.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_SaveOptGraph.insets = new Insets(0, 0, 5, 0);
-        gbc_btn_SaveOptGraph.anchor = GridBagConstraints.EAST;
         gbc_btn_SaveOptGraph.gridx = 9;
         gbc_btn_SaveOptGraph.gridy = 1;
         contentPane.add(btn_SaveOptGraph, gbc_btn_SaveOptGraph);
         
         scrollPane_Images = new JScrollPane();
         GridBagConstraints gbc_scrollPane_Images = new GridBagConstraints();
+        gbc_scrollPane_Images.gridwidth = 3;
         gbc_scrollPane_Images.fill = GridBagConstraints.BOTH;
-        gbc_scrollPane_Images.gridwidth = 2;
         gbc_scrollPane_Images.insets = new Insets(0, 0, 5, 0);
-        gbc_scrollPane_Images.gridx = 8;
+        gbc_scrollPane_Images.gridx = 7;
         gbc_scrollPane_Images.gridy = 2;
         contentPane.add(scrollPane_Images, gbc_scrollPane_Images);
         
@@ -377,7 +379,7 @@ public class MainWindow extends JFrame implements Serializable
         gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
         gbc_btn_RemoveImage.gridx = 9;
-        gbc_btn_RemoveImage.gridy = 3;
+        gbc_btn_RemoveImage.gridy = 4;
         contentPane.add(btn_RemoveImage, gbc_btn_RemoveImage);
         
         btn_AddImages = new JButton("Add photos");
@@ -462,7 +464,7 @@ public class MainWindow extends JFrame implements Serializable
         gbc_btn_AddImages.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_AddImages.insets = new Insets(0, 0, 5, 0);
         gbc_btn_AddImages.gridx = 9;
-        gbc_btn_AddImages.gridy = 4;
+        gbc_btn_AddImages.gridy = 3;
         contentPane.add(btn_AddImages, gbc_btn_AddImages);
         
         lbl_VisitOrder = new JLabel("Visit order:");
@@ -503,7 +505,7 @@ public class MainWindow extends JFrame implements Serializable
                 cb_ResizeMethod(e);
             }
         });
-        cb_ResizeMethod.setModel(new DefaultComboBoxModel<String>(new String[] {"when zooming", "don't resize"}));
+        cb_ResizeMethod.setModel(new DefaultComboBoxModel<String>(new String[] {"to zoom", "don't resize"}));
         GridBagConstraints gbc_cb_ResizeMethod = new GridBagConstraints();
         gbc_cb_ResizeMethod.anchor = GridBagConstraints.WEST;
         gbc_cb_ResizeMethod.insets = new Insets(0, 0, 5, 0);
@@ -815,6 +817,7 @@ public class MainWindow extends JFrame implements Serializable
     {
         OverlayImage oi = list_Images.getSelectedValue();
         if (oi == null) {
+            System.out.println("No photo selected!");
             return;
         }
         else if (list_Images.getValueIsAdjusting()) {
@@ -869,11 +872,13 @@ public class MainWindow extends JFrame implements Serializable
     
     public void btn_ShowAccomodations(ActionEvent e)
     {
+        System.err.println("btn_ShowAccomodations: not yet implemented");
     }
     
     
     public void btn_RemoveAccomodation(ActionEvent e)
     {
+        System.err.println("btn_RemoveAccomodation: not yet implemented");
     }
     
     
@@ -953,9 +958,8 @@ public class MainWindow extends JFrame implements Serializable
         }
         
         @SuppressWarnings("unchecked")
-        JComboBox<String> cb = (JComboBox<String>)e.getSource();
-        String value = (String) cb.getSelectedItem();
-        imagesDynamicResize = value == "when zooming";
+        JComboBox<String> cb = (JComboBox<String>) e.getSource();
+        imagesDynamicResize = cb.getSelectedIndex() == 0;       // TODO: this is bad
         
         for (OverlayImage oi : overlayImages) {
             oi.dynamicResize(imagesDynamicResize);
@@ -976,7 +980,7 @@ public class MainWindow extends JFrame implements Serializable
         String value = (String) cb.getSelectedItem();
         imagesSize = -1;
         
-        if (value.matches("[0-9]{2,3}0 px")) {
+        if (value.matches("[0-9]{2,3}0 px")) {                  // TODO: this is bad
             value = value.substring(0, value.length() - 3);
             imagesSize = Integer.parseInt(value);
         }
