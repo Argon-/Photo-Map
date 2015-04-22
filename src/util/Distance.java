@@ -23,6 +23,16 @@ public final class Distance
 	*/
 	
 	
+	/**
+	 * Computes distance between (lat1, lon1) and (lat2, lon2) according to
+	 * the Haversine formula.
+	 * 
+	 * @param lat1
+	 * @param lon1
+	 * @param lat2
+	 * @param lon2
+	 * @return distance in meters
+	 */
 	public static double haversine(double lat1, double lon1, double lat2, double lon2)
 	{
 		double dLat = Math.toRadians(lat2 - lat1);

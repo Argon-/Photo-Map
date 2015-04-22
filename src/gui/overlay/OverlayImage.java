@@ -33,7 +33,7 @@ import com.drew.metadata.exif.GpsDirectory;
  * <br>
  * <strong>Note</strong>: for performance reasons (indirect) resizing operations
  * are usually deferred as long as possible. This would leads to several getters
- * returning potentially outdated imformation because the actual requested 
+ * returning potentially outdated information because the actual requested 
  * resize did not yet happen.
  * Therefore various variables and methods are used to cache or
  * pre-calculate values. For this reason methods like {@code getHeight} are
@@ -44,21 +44,28 @@ import com.drew.metadata.exif.GpsDirectory;
  */
 public final class OverlayImage implements OverlayObject
 {
-    public static final int IMAGE_MIN_HEIGHT = 50;
-    public static final int IMAGE_MIN_WIDTH  = 50;
-    
-    // positioning constants for fixed position images
-    public static final int TOP_RIGHT = 0;
-    public static final int TOP_LEFT  = 1;
-    public static final int BOT_RIGHT = 2;
-    public static final int BOT_LEFT  = 3;
-    
-    // pixel constants for alignment and padding in draw()
-    public static final int WAYPOINT_Y_OFFSET = 35;         // waypoint height
-    public static final int PADDING           = 3;          // padding between waypoint and label/image
-    public static final int LABEL_X_PADDING   = 5;
-    public static final int LABEL_Y_PADDING   = 2;
+    /**
+     * Minimum size for images.
+     */
+    public static final int     IMAGE_MIN_HEIGHT    = 50, IMAGE_MIN_WIDTH = 50;
+    /**
+     * Positioning constants for fixed position images.
+     */
+    public static final int     TOP_RIGHT           = 0, TOP_LEFT = 1, BOT_RIGHT = 2, BOT_LEFT = 3;
+    /**
+     * Waypoint height.
+     */
+    public static final int     WAYPOINT_Y_OFFSET   = 35;
+    /**
+     * Padding between waypoint and label/image.
+     */
+    public static final int     PADDING             = 3;
+    /**
+     * Padding left/right above/below between text and box around the text.
+     */
+    public static final int     LABEL_X_PADDING     = 5, LABEL_Y_PADDING = 2;
 
+    // cached data
     private int cachedFontHeight = 0;
     private int cachedFontWidth  = 0;
     private int cachedFontAscent = 0;
@@ -84,6 +91,15 @@ public final class OverlayImage implements OverlayObject
     private int             targetHeight;
     
 
+    /**
+     * Load a image from file {@code f} and extract relevant metadata.
+     * In case no date could be extracted {@code new Date(0)} is used.
+     * 
+     * @param f image file location
+     * @param strict throw exception when unable to extract location data
+     * @throws IOException when unable to read {@code f}
+     * @throws RuntimeException when unable to extract location data and {@code strict = true}
+     */
     public OverlayImage(String f, boolean strict) throws IOException
     {
         File file = new File(f);
@@ -122,6 +138,9 @@ public final class OverlayImage implements OverlayObject
     }
         
     
+    /**
+     * @return current image height
+     */
     public int getHeight()
     {
         int r = 0;
@@ -133,24 +152,27 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * @return current image width
+     */
     public int getWidth()
     {
         return dynamicResize ? Math.max(dynamicWidth(), cachedFontWidth) : targetWidth;
     }
+        
     
-    
-    public OverlayImage(String f) throws IOException
-    {
-        this(f, true);
-    }
-    
-    
+    /**
+     * @return is this image currently supposed to be visible (requested by the user)?
+     */
     public boolean isVisible()
     {
         return visible;
     }
     
     
+    /**
+     * @return the Waypoint associated with this image
+     */
     public Waypoint getWaypoint()
     {
         if (mapPos != null)
@@ -159,18 +181,29 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * @return the date extracted from this image's metadata or {@code new Date(0)}
+     */
     public Date getDate()
     {
         return date;
     }
     
     
+    /**
+     * @return label of the image, usually the file name
+     */
     public String getLabel()
     {
         return label;
     }
     
     
+    /**
+     * Set this image (in)visible.
+     * 
+     * @param v
+     */
     public OverlayImage setVisible(boolean v)
     {
         visible = v;
@@ -178,6 +211,11 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * Use higher quality scaling (or not).
+     * 
+     * @param q
+     */
     public OverlayImage setHighQuality(boolean q)
     {
         highQuality = q;
@@ -186,6 +224,11 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * Whether to display the label of this image.
+     * 
+     * @param sl
+     */
     public OverlayImage displayLabel(boolean sl)
     {
         displayLabel = sl;
@@ -193,6 +236,11 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * Change the label of this image.
+     * 
+     * @param l
+     */
     public OverlayImage setLabel(String l)
     {
         label = l;
@@ -200,6 +248,12 @@ public final class OverlayImage implements OverlayObject
     }
 
     
+    /**
+     * Resize the image.
+     * 
+     * @param w width in px
+     * @param h height in px
+     */
     public OverlayImage resize(int w, int h)
     {
         targetWidth = w;
@@ -246,6 +300,14 @@ public final class OverlayImage implements OverlayObject
     }
 
     
+    /**
+     * Specify the maximum size of this image.
+     * The aspect ratio is preserved the the bigger side of the image
+     * is limited to {@code m}.
+     * 
+     * @param m size in px
+     * @param lazy resize immediately?
+     */
     public OverlayImage maxSize(int m, boolean lazy)
     {
         // special case: original size
@@ -279,12 +341,22 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * See {@link #maxSize(int, boolean) maxSize(int, true)}.
+     * 
+     * @param m
+     */
     public OverlayImage maxSize(int m)
     {
         return maxSize(m, false);
     }
     
     
+    /**
+     * Enable/Disable dynamic resizing.
+     * 
+     * @param dr
+     */
     public OverlayImage dynamicResize(boolean dr)
     {
         dynamicResize = dr;
@@ -293,6 +365,12 @@ public final class OverlayImage implements OverlayObject
     }
 
 
+    /**
+     * Whether to use fixed positioning for this image, 
+     * not based on geographic coordinates.
+     * 
+     * @param useFixedPos
+     */
     public OverlayImage useFixedPos(boolean useFixedPos)
     {
         fixedPosition = useFixedPos;
@@ -300,12 +378,24 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * Whether to use fixed positioning for this image, 
+     * not based on geographic coordinates.
+     * 
+     * @return fixedPosition
+     */
     public boolean isFixedPosition()
     {
         return fixedPosition;
     }
 
 
+    /**
+     * Set the fixed position to use for this image.
+     * Ignored unless {@link #isFixedPosition()} {@code == true}.
+     * 
+     * @param positionHint
+     */
     public OverlayImage setFixedPos(int positionHint)
     {
         this.positionHint = positionHint;
@@ -313,6 +403,12 @@ public final class OverlayImage implements OverlayObject
     }
 
 
+    /**
+     * Set geographic position for this image.
+     * Ignored unless {@link #isFixedPosition()} {@code == false}.
+     * 
+     * @param g
+     */
     public OverlayImage setGeoPos(GeoPosition g)
     {
         mapPos = g;
@@ -391,6 +487,11 @@ public final class OverlayImage implements OverlayObject
     }
     
     
+    /**
+     * Return geographic position for this image.
+     * 
+     * @return mapPos
+     */
     public GeoPosition getPosition()
     {
         return mapPos;

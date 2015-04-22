@@ -20,8 +20,8 @@ public final class FileUtil
      * them to {@code c}.
      * 
      * @param f path to a file or directory
-     * @param c collection to add the images
-     * @param maxSize maximum size on the lowest zoom level (resizing retains aspect ratio)
+     * @param c collection to add the images to
+     * @param maxSize maximum image size on the lowest zoom level (resizing retains aspect ratio)
      * @param dynamicResize shrink images when zooming out
      * @param highQuality perform high(er) quality resizing
      * @return {@code true} when at least one image was loaded, {@code false} otherwise.
@@ -39,7 +39,7 @@ public final class FileUtil
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
                         try {
-                            c.add(new OverlayImage(path.toAbsolutePath().toString())
+                            c.add(new OverlayImage(path.toAbsolutePath().toString(), true)
                                     .setHighQuality(highQuality)
                                     .dynamicResize(dynamicResize)
                                     .maxSize(maxSize));
@@ -61,7 +61,7 @@ public final class FileUtil
         else if (file.isFile())
         {
             try {
-                c.add(new OverlayImage(f)
+                c.add(new OverlayImage(f, true)
                         .setHighQuality(highQuality)
                         .dynamicResize(dynamicResize)
                         .maxSize(maxSize));                
@@ -76,14 +76,16 @@ public final class FileUtil
         
         return c.size() > l;
     }
-    
+
     
     /**
-     * Overloaded method using {@code maxSize = 400} and {@code dynamicResize = true}.
+     * See {@link #loadOverlayImagesFrom(String, Collection, int, boolean, boolean) loadOverlayImagesFrom}.
+     * <br>
+     * Overloaded convenience method using {@code maxSize = 400} and {@code dynamicResize = true}.
      * 
      * @see #loadOverlayImagesFrom
      * @param f path to a file or directory
-     * @param c collection to add the images
+     * @param c collection to add the images to
      */
     public static boolean loadOverlayImagesFrom(String f, Collection<OverlayImage> c) 
     {
