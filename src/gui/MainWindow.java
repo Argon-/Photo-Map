@@ -31,6 +31,7 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
 import path.search.Dijkstra;
+import util.Accommodation;
 import util.FileUtil;
 import util.StopWatch;
 import data_structures.graph.ArrayRepresentation;
@@ -58,7 +59,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
@@ -89,13 +89,15 @@ public class MainWindow extends JFrame implements Serializable
     private ArrayRepresentation g = null;
     private Dijkstra d = null;
     
-    private final LinkedBlockingDeque<OverlayAggregate> overlayLines = new LinkedBlockingDeque<OverlayAggregate>();
-    private final LinkedBlockingDeque<OverlayAggregate> persistentOverlayLines = new LinkedBlockingDeque<OverlayAggregate>();
+    private final LinkedBlockingDeque<OverlayAggregate> overlay = new LinkedBlockingDeque<OverlayAggregate>();
+    private final LinkedBlockingDeque<OverlayAggregate> persistentOverlay = new LinkedBlockingDeque<OverlayAggregate>();
     private final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
+    private final LinkedBlockingDeque<Accommodation> accommodations = new LinkedBlockingDeque<Accommodation>();
     
     // specifies if a click in mapMouseClicked() is supposed to target an Overlay element
     // this is determined in mapMouseMoved()
-    private final AtomicBoolean targetedClick = new AtomicBoolean(false);
+    private boolean targetedClick = false;
+    private Accommodation clickTarget = null;
     
     private WaypointPainter<JXMapViewer> waypointPainter;
     private Painter<JXMapViewer> overlayPainter;
@@ -118,8 +120,8 @@ public class MainWindow extends JFrame implements Serializable
     private JScrollPane           scrollPane_Images;
     private JTextArea             textArea_Log;
     private JButton               btn_LoadGraph;
-    private JButton               btn_ClearLast;
-    private JButton               btn_ClearAll;
+    private JButton               btn_ClearMarkers;
+    private JButton               btn_ClearAccommodations;
     private JButton               btn_AddImages;
     private JButton               btn_RemoveImage;
     private JButton               btn_CalculateRoute;
@@ -135,11 +137,11 @@ public class MainWindow extends JFrame implements Serializable
     private JSeparator            separator_1;
     private Component             verticalStrut;
     private JFileChooser          fd;
-    private JButton btn_ShowAccomodations;
+    private JButton btn_ShowAccommodations;
     private JSeparator separator_2;
-    private JButton btn_RemoveAccomodation;
-    private JTextField textField_MaxAccomodationDist;
-    private JLabel lbl_MaxAccomodationDist;
+    private JButton btn_RemoveAccommodation;
+    private JTextField textField_MaxAccommodationDist;
+    private JLabel lbl_MaxAccommodationDist;
 
 
     /**
@@ -167,7 +169,7 @@ public class MainWindow extends JFrame implements Serializable
     
     public void testInit()
     {
-        if (g == null) {
+        if (!graphLoaded()) {
             try {
                 g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/out-stg.txt");
                 d = new Dijkstra(g);
@@ -185,18 +187,18 @@ public class MainWindow extends JFrame implements Serializable
     
     public void drawGraphRect()
     {
-        if (g == null)
+        if (!graphLoaded())
             return;
         
-        persistentOverlayLines.clear();
-        overlayLines.clear();
+        persistentOverlay.clear();
+        overlay.clear();
         
         double[] lat = g.getBoundingRectLat();
         double[] lon = g.getBoundingRectLon();
         for (int i = 0; i < lat.length; ++i) {
             GeoPosition s = new GeoPosition(lat[i], lon[i]);
             GeoPosition t = new GeoPosition(lat[(i + 1) % lat.length],   lon[(i + 1) % lat.length]);
-            persistentOverlayLines.add(OverlayAggregate.line(OverlayElement.lineBlackMedium(s, t)));
+            persistentOverlay.add(OverlayAggregate.line(OverlayElement.lineBlackMedium(s, t)));
         }
     }
 
@@ -234,26 +236,26 @@ public class MainWindow extends JFrame implements Serializable
         gbc_mapKit.gridy = 0;
         contentPane.add(mapKit, gbc_mapKit);
         
-        btn_ClearLast = new JButton("Clear last");
-        btn_ClearLast.setToolTipText("Remove the last set position marker from the map.");
-        btn_ClearLast.addActionListener(new ActionListener() {
+        btn_ClearMarkers = new JButton("Clear markers");
+        btn_ClearMarkers.setToolTipText("Remove all set position markers from the map.");
+        btn_ClearMarkers.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                btn_ClearLast(e);
+                btn_ClearMarkers(e);
             }
         });
-        GridBagConstraints gbc_btn_ClearLast = new GridBagConstraints();
-        gbc_btn_ClearLast.gridwidth = 2;
-        gbc_btn_ClearLast.fill = GridBagConstraints.HORIZONTAL;
-        gbc_btn_ClearLast.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_ClearLast.gridx = 7;
-        gbc_btn_ClearLast.gridy = 0;
-        contentPane.add(btn_ClearLast, gbc_btn_ClearLast);
+        GridBagConstraints gbc_btn_ClearMarkers = new GridBagConstraints();
+        gbc_btn_ClearMarkers.gridwidth = 2;
+        gbc_btn_ClearMarkers.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_ClearMarkers.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ClearMarkers.gridx = 7;
+        gbc_btn_ClearMarkers.gridy = 0;
+        contentPane.add(btn_ClearMarkers, gbc_btn_ClearMarkers);
         
-        btn_ClearAll = new JButton("Clear map");
-        btn_ClearAll.setToolTipText("Remove all position markers from the map. Shortcut: middle mouse button");
-        btn_ClearAll.addActionListener(new ActionListener() {
+        btn_ClearAccommodations = new JButton("Clear accomm.");
+        btn_ClearAccommodations.setToolTipText("Remove all unassociated accommodations from the map.");
+        btn_ClearAccommodations.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                btn_ClearAll(e);
+                btn_ClearAccommodations(e);
             }
         });
         
@@ -270,13 +272,13 @@ public class MainWindow extends JFrame implements Serializable
         gbc_btn_LoadGraph.gridx = 9;
         gbc_btn_LoadGraph.gridy = 0;
         contentPane.add(btn_LoadGraph, gbc_btn_LoadGraph);
-        GridBagConstraints gbc_btn_ClearAll = new GridBagConstraints();
-        gbc_btn_ClearAll.gridwidth = 2;
-        gbc_btn_ClearAll.fill = GridBagConstraints.HORIZONTAL;
-        gbc_btn_ClearAll.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_ClearAll.gridx = 7;
-        gbc_btn_ClearAll.gridy = 1;
-        contentPane.add(btn_ClearAll, gbc_btn_ClearAll);
+        GridBagConstraints gbc_btn_ClearAccommodations = new GridBagConstraints();
+        gbc_btn_ClearAccommodations.gridwidth = 2;
+        gbc_btn_ClearAccommodations.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_ClearAccommodations.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ClearAccommodations.gridx = 7;
+        gbc_btn_ClearAccommodations.gridy = 1;
+        contentPane.add(btn_ClearAccommodations, gbc_btn_ClearAccommodations);
         
         btn_SaveOptGraph = new JButton("Save graph");
         btn_SaveOptGraph.addActionListener(new ActionListener() {
@@ -362,19 +364,19 @@ public class MainWindow extends JFrame implements Serializable
         gbc_separator_1.gridy = 3;
         contentPane.add(separator_1, gbc_separator_1);
         
-        this.btn_ShowAccomodations = new JButton("Accomodations");
-        this.btn_ShowAccomodations.addActionListener(new ActionListener() {
+        this.btn_ShowAccommodations = new JButton("Show accommodations");
+        this.btn_ShowAccommodations.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                btn_ShowAccomodations(e);
+                btn_ShowAccommodations(e);
             }
         });
-        this.btn_ShowAccomodations.setToolTipText("Show possible accomodations near the selected photo.");
-        GridBagConstraints gbc_btn_ShowAccomodations = new GridBagConstraints();
-        gbc_btn_ShowAccomodations.fill = GridBagConstraints.HORIZONTAL;
-        gbc_btn_ShowAccomodations.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_ShowAccomodations.gridx = 6;
-        gbc_btn_ShowAccomodations.gridy = 3;
-        this.contentPane.add(this.btn_ShowAccomodations, gbc_btn_ShowAccomodations);
+        this.btn_ShowAccommodations.setToolTipText("Show possible accommodations near the selected photo.");
+        GridBagConstraints gbc_btn_ShowAccommodations = new GridBagConstraints();
+        gbc_btn_ShowAccommodations.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_ShowAccommodations.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_ShowAccommodations.gridx = 6;
+        gbc_btn_ShowAccommodations.gridy = 3;
+        this.contentPane.add(this.btn_ShowAccommodations, gbc_btn_ShowAccommodations);
         GridBagConstraints gbc_btn_RemoveImage = new GridBagConstraints();
         gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
@@ -390,19 +392,19 @@ public class MainWindow extends JFrame implements Serializable
             }
         });
         
-        this.btn_RemoveAccomodation = new JButton("Remove acc");
-        this.btn_RemoveAccomodation.addActionListener(new ActionListener() {
+        this.btn_RemoveAccommodation = new JButton("Remove accomm.");
+        this.btn_RemoveAccommodation.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                btn_RemoveAccomodation(e);
+                btn_RemoveAccommodation(e);
             }
         });
-        this.btn_RemoveAccomodation.setToolTipText("Remove the accomodation associated with the selected photo.");
-        GridBagConstraints gbc_btn_RemoveAccomodation = new GridBagConstraints();
-        gbc_btn_RemoveAccomodation.fill = GridBagConstraints.HORIZONTAL;
-        gbc_btn_RemoveAccomodation.insets = new Insets(0, 0, 5, 5);
-        gbc_btn_RemoveAccomodation.gridx = 6;
-        gbc_btn_RemoveAccomodation.gridy = 4;
-        this.contentPane.add(this.btn_RemoveAccomodation, gbc_btn_RemoveAccomodation);
+        this.btn_RemoveAccommodation.setToolTipText("Remove the accommodation associated with the selected photo.");
+        GridBagConstraints gbc_btn_RemoveAccommodation = new GridBagConstraints();
+        gbc_btn_RemoveAccommodation.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btn_RemoveAccommodation.insets = new Insets(0, 0, 5, 5);
+        gbc_btn_RemoveAccommodation.gridx = 6;
+        gbc_btn_RemoveAccommodation.gridy = 4;
+        this.contentPane.add(this.btn_RemoveAccommodation, gbc_btn_RemoveAccommodation);
         
         verticalStrut = Box.createVerticalStrut(20);
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
@@ -421,23 +423,24 @@ public class MainWindow extends JFrame implements Serializable
         gbc_separator_2.gridy = 3;
         this.contentPane.add(this.separator_2, gbc_separator_2);
         
-        this.lbl_MaxAccomodationDist = new JLabel("Range:");
-        GridBagConstraints gbc_lbl_MaxAccomodationDist = new GridBagConstraints();
-        gbc_lbl_MaxAccomodationDist.insets = new Insets(0, 0, 5, 5);
-        gbc_lbl_MaxAccomodationDist.anchor = GridBagConstraints.EAST;
-        gbc_lbl_MaxAccomodationDist.gridx = 5;
-        gbc_lbl_MaxAccomodationDist.gridy = 6;
-        this.contentPane.add(this.lbl_MaxAccomodationDist, gbc_lbl_MaxAccomodationDist);
+        this.lbl_MaxAccommodationDist = new JLabel("Range:");
+        GridBagConstraints gbc_lbl_MaxAccommodationDist = new GridBagConstraints();
+        gbc_lbl_MaxAccommodationDist.insets = new Insets(0, 0, 5, 5);
+        gbc_lbl_MaxAccommodationDist.anchor = GridBagConstraints.EAST;
+        gbc_lbl_MaxAccommodationDist.gridx = 5;
+        gbc_lbl_MaxAccommodationDist.gridy = 6;
+        this.contentPane.add(this.lbl_MaxAccommodationDist, gbc_lbl_MaxAccommodationDist);
         
-        this.textField_MaxAccomodationDist = new JTextField();
-        this.textField_MaxAccomodationDist.setText("200");
-        GridBagConstraints gbc_textField_MaxAccomodationDist = new GridBagConstraints();
-        gbc_textField_MaxAccomodationDist.fill = GridBagConstraints.HORIZONTAL;
-        gbc_textField_MaxAccomodationDist.insets = new Insets(0, 0, 5, 5);
-        gbc_textField_MaxAccomodationDist.gridx = 6;
-        gbc_textField_MaxAccomodationDist.gridy = 6;
-        this.contentPane.add(this.textField_MaxAccomodationDist, gbc_textField_MaxAccomodationDist);
-        this.textField_MaxAccomodationDist.setColumns(3);
+        this.textField_MaxAccommodationDist = new JTextField();
+        this.textField_MaxAccommodationDist.setToolTipText("Maximum distance in meters from the selected photo");
+        this.textField_MaxAccommodationDist.setText("1000");
+        GridBagConstraints gbc_textField_MaxAccommodationDist = new GridBagConstraints();
+        gbc_textField_MaxAccommodationDist.fill = GridBagConstraints.HORIZONTAL;
+        gbc_textField_MaxAccommodationDist.insets = new Insets(0, 0, 5, 5);
+        gbc_textField_MaxAccommodationDist.gridx = 6;
+        gbc_textField_MaxAccommodationDist.gridy = 6;
+        this.contentPane.add(this.textField_MaxAccommodationDist, gbc_textField_MaxAccommodationDist);
+        this.textField_MaxAccommodationDist.setColumns(3);
         
         lbl_ImageQuality = new JLabel("Photo quality:");
         GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
@@ -555,9 +558,8 @@ public class MainWindow extends JFrame implements Serializable
     }
 
 
-    public void configureMap()
+    private void configureMap()
     {
-        
         mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
         mapKit.setAddressLocationShown(false); // don't show center
         //mapKit.setAddressLocation(new GeoPosition(48.74670985863194, 9.105284214019775)); // Uni
@@ -577,9 +579,10 @@ public class MainWindow extends JFrame implements Serializable
                 g.translate(-rect.x, -rect.y);
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
-                for (OverlayObject o : overlayImages)          { o.draw(g, map); }
-                for (OverlayObject o : overlayLines)           { o.draw(g, map); }
-                for (OverlayObject o : persistentOverlayLines) { o.draw(g, map); }
+                for (OverlayObject o : overlayImages)     { o.draw(g, map); }
+                for (OverlayObject o : overlay)           { o.draw(g, map); }
+                for (OverlayObject o : persistentOverlay) { o.draw(g, map); }
+                for (Accommodation a : accommodations)    { a.getOverlay().draw(g, map); }
                 
                 g.dispose();
             }
@@ -590,112 +593,142 @@ public class MainWindow extends JFrame implements Serializable
         map.setOverlayPainter(c);      // $hide$ (WindowBuilder doesn't like this line)
         updateWaypoints();
     }
-    
-    
-    public void clearMap()
-    {
-        overlayLines.clear();
-        mapKit.repaint();
-        currSource = null;
-        currTarget = null;
-    }
-    
-    
-    public void addOverlayAggregate(OverlayAggregate oa)
-    {
-        overlayLines.add(oa);
-    }
-    
-    
-    public void addPersistentOverlayAggregate(OverlayAggregate oa)
-    {
-        persistentOverlayLines.add(oa);
-    }
-    
-    
-    public void mapMouseClicked(MouseEvent e)
-    {
-        if (g == null) {
-            System.out.println("Error: must load a graph first!");
-            return;
-        }
         
-        
+    
+    private void mapMouseClicked(MouseEvent e)
+    {
         // targeted click -> get the Overlay element he clicked
         // not?           -> assume the user wanted to place a marker for standard route calculation
-        if (targetedClick.get())
+        if (targetedClick)
         {
-            // get targeted element
+            // add accommodation to image
+            handleTargetedClick(e);
         }
         else
         {
-            // middle mouse button -> clear
-            if (SwingUtilities.isMiddleMouseButton(e)) {
-                clearMap();
-                return;
-            }
-            // right mouse button -> select target, but not without a source
-            else if (SwingUtilities.isRightMouseButton(e) && currSource == null) {
-                System.out.println("Please set a source first");
-                return;
-            }
-    
-            // from here on it's either a left mouse button click (-> select source)
-            // or a right mouse button click with a previously selected source (-> select target, calculate route)
-    
-            System.out.println();
-            GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
-            System.out.println("Clicked at  : " + String.format("%.4f", clickPos.getLatitude()) + ", " + String.format("%.4f", clickPos.getLongitude()));
-    
-            StopWatch sw = new StopWatch();
-            sw.lap();
-            int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
-            sw.lap();
-            if (n == -1) {
-                System.out.println("Found no node!");
-                return;
-            }
-            System.out.println("Closest node: " + String.format("%.4f", g.getLat(n)) + ", " + String.format("%.4f", g.getLon(n)) + "  (found in "
-                    + sw.getLastInSecStrShort() + " sec)");
-    
-            
-            if (SwingUtilities.isLeftMouseButton(e)) 
-            {
-                currSource = g.getPosition(n);
-                currTarget = null;
-                overlayLines.add(OverlayAggregate.route_var3(clickPos, currSource));
-                d.setSource(n);
-            }
-            else if (SwingUtilities.isRightMouseButton(e)) 
-            {
-                currTarget = g.getPosition(n);
-                d.setTarget(n);
-                if (currSource != null && currTarget != null) {
-                    sw.lap();
-                    boolean r = d.pathFromTo();
-                    sw.lap();
-                    if (r) {
-                        overlayLines.add(OverlayAggregate.route_multi_var2(d.getRoute()));
-                        System.out.println("Calculated route in " + sw.getLastInSecStrShort() + " sec");
-                    }
-                }
-            }
-    
-            mapKit.repaint();
+            // place source/target markers and calculate shortest route
+            handleRegularMapClick(e);
         }
     }
     
     
-    public void mapMouseMoved(MouseEvent e)
+    private void handleTargetedClick(MouseEvent e)
     {
-        int zoom = map.getZoom();
+        if (clickTarget == null) {
+            System.out.println("clickTarget == null, this should not have happened");
+            return;
+        }
+        
+        OverlayImage oi = getSelectedImage();
+        if (oi == null)
+            return;
+        
+        // don't accidently replace the current accommodation
+        if (targetedClick) {
+            if (oi.getAccommodation() == null) {
+                accommodations.remove(clickTarget);
+                oi.setAccommodation(clickTarget);
+                map.repaint();
+            }
+            else {
+                System.out.println("oi.getAccommodation() != null");
+            }
+        }
+        else {
+            System.out.println("targetedClick == false, this shouldn't have happened either");
+        }
+    }
+    
+    
+    private void handleRegularMapClick(MouseEvent e)
+    {
+        // middle mouse button -> clear
+        if (SwingUtilities.isMiddleMouseButton(e)) {
+            clearMap();
+            return;
+        }
+        // we can only proceed with a graph
+        if (!graphLoaded()) {
+            return;
+        }
+        // right mouse button -> select target, but not without a source
+        if (SwingUtilities.isRightMouseButton(e) && currSource == null) {
+            System.out.println("Please set a source first");
+            return;
+        }
+
+        // from here on it's either a left mouse button click (-> select source)
+        // or a right mouse button click with a previously selected source (->
+        // select target, calculate route)
+
+        System.out.println();
+        GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
+        System.out.println("Clicked at  : " + String.format("%.4f", clickPos.getLatitude()) + ", "
+                + String.format("%.4f", clickPos.getLongitude()));
+
+        final StopWatch sw = new StopWatch();
+        sw.lap();
+        int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
+        sw.lap();
+        if (n == -1) {
+            System.out.println("Found no node!");
+            return;
+        }
+        System.out.println("Closest node: " + String.format("%.4f", g.getLat(n)) + ", "
+                + String.format("%.4f", g.getLon(n)) + "  (found in " + sw.getLastInSecStr() + " sec)");
+
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            currSource = g.getPosition(n);
+            currTarget = null;
+            overlay.add(OverlayAggregate.route_var3(clickPos, currSource));
+            d.setSource(n);
+        }
+        else if (SwingUtilities.isRightMouseButton(e)) {
+            currTarget = g.getPosition(n);
+            d.setTarget(n);
+            if (currSource != null && currTarget != null) {
+                sw.lap();
+                boolean r = d.pathFromTo();
+                sw.lap();
+                if (r) {
+                    overlay.add(OverlayAggregate.route_multi_var2(d.getRoute()));
+                    System.out.println("Calculated route in " + sw.getLastInSecStr() + " sec");
+                }
+            }
+        }
+        mapKit.repaint();
+    }
+    
+    
+    private void mapMouseMoved(MouseEvent e)
+    {
+        final int zoom = map.getZoom();
+        final Rectangle rect = map.getViewportBounds();
         GeoPosition pos = null;
         boolean change = false;
         int visibleNum = 0;
+
+
+        // when the mouse is above an accommodation the next click is handled 
+        // as "targeted" click in mapMouseClicked
+        targetedClick = false;
+        clickTarget = null;
+        for (Accommodation a : accommodations) 
+        {
+            final Point2D p = map.getTileFactory().geoToPixel(a.getPos(), zoom);
+            p.setLocation(p.getX() - rect.x, p.getY() - rect.y);
+            if (p.distance(e.getPoint()) <= (Accommodation.STROKE_WIDTH / 2)) 
+            {
+                targetedClick = true;
+                clickTarget = a;
+                System.out.println(targetedClick); // TODO: remove
+            }
+        }
+
         
         for (OverlayImage oi : overlayImages) 
         {
-            // there's already one visible image, imply invisibility for the others
+            // there are already enough visible images, imply invisibility for the others
             if (visibleNum >= MAX_CONCURRENTLY_VISIBLE_IMAGES) {
                 if (oi.isVisible() && !imageSelectedFromList) {
                     oi.setVisible(false);
@@ -709,8 +742,7 @@ public class MainWindow extends JFrame implements Serializable
                 continue;
             }
             
-            Point2D p = map.getTileFactory().geoToPixel(pos, zoom);
-            Rectangle rect = map.getViewportBounds();
+            final Point2D p = map.getTileFactory().geoToPixel(pos, zoom);
             // move the point "into" the center of the waypoint image
             p.setLocation(p.getX() - rect.x, p.getY() - rect.y - (OverlayImage.WAYPOINT_Y_OFFSET / 2));
             
@@ -739,22 +771,22 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void btn_ClearAll(ActionEvent e)
+    private void btn_ClearAccommodations(ActionEvent e)
+    {
+        targetedClick = false;
+        clickTarget = null;
+        accommodations.clear();
+        mapKit.repaint();
+    }
+    
+    
+    private void btn_ClearMarkers(ActionEvent e)
     {
         clearMap();
     }
     
     
-    public void btn_ClearLast(ActionEvent e)
-    {
-        overlayLines.pollLast();
-        mapKit.repaint();
-        currSource = null;
-        currTarget = null;
-    }
-    
-    
-    public void btn_LoadGraph(ActionEvent e)
+    private void btn_LoadGraph(ActionEvent e)
     {
         fd.setDialogTitle("Select a graph file");
         fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
@@ -768,10 +800,10 @@ public class MainWindow extends JFrame implements Serializable
                     g = null;
                     d = null;
                     clearMap();
-                    persistentOverlayLines.clear();
+                    persistentOverlay.clear();
                     System.gc();
                     
-                    StopWatch sw = new StopWatch();
+                    final StopWatch sw = new StopWatch();
                     sw.lap();
                     g = GraphFactory.loadArrayRepresentation(file.getAbsolutePath());
                     sw.lap();
@@ -779,7 +811,7 @@ public class MainWindow extends JFrame implements Serializable
                     
                     drawGraphRect();
                     clearMap();
-                    System.out.println("Graph loaded in " + sw.getLastInSecStrShort() + " sec");
+                    System.out.println("Graph loaded in " + sw.getLastInSecStr() + " sec");
                     //g.drawNonRoutableNodes(this);
                     //g.visualizeGridLookup(true, this);
                     //g.visualizeNGridLookup(true, this);
@@ -799,7 +831,7 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void btn_CalculateRoute(ActionEvent e)
+    private void btn_CalculateRoute(ActionEvent e)
     {
         // TODO: better don't load a new graph or add/remove photos during this
         
@@ -819,16 +851,11 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void btn_RemoveImage(ActionEvent e)
+    private void btn_RemoveImage(ActionEvent e)
     {
-        OverlayImage oi = list_Images.getSelectedValue();
-        if (oi == null) {
-            System.out.println("No photo selected!");
+        OverlayImage oi = getSelectedImage();
+        if (oi == null)
             return;
-        }
-        else if (list_Images.getValueIsAdjusting()) {
-            return;
-        }
         
         int i = list_Images.getSelectedIndex();
         DefaultListModel<OverlayImage> model = (DefaultListModel<OverlayImage>) list_Images.getModel();
@@ -840,7 +867,7 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void btn_AddImages(ActionEvent e)
+    private void btn_AddImages(ActionEvent e)
     {
         fd.setDialogTitle("Select image(s) or a directory containing images");
         fd.setCurrentDirectory(new File("./"));
@@ -852,12 +879,12 @@ public class MainWindow extends JFrame implements Serializable
             case JFileChooser.APPROVE_OPTION:
                 File[] files = fd.getSelectedFiles();
                 LinkedList<OverlayImage> list = new LinkedList<OverlayImage>();
-                StopWatch sw = new StopWatch();
+                final StopWatch sw = new StopWatch();
                 sw.lap();
                 for (File file : files) {
                     FileUtil.loadOverlayImagesFrom(file.getAbsolutePath(), list, imagesSize, imagesDynamicResize, imagesHighQuality);
                 }
-                System.out.println("Processed images in: " + sw.lap().getLastInSecStrShort() + " sec");
+                System.out.println("Processed images in: " + sw.lap().getLastInSecStr() + " sec");
                 
                 DefaultListModel<OverlayImage> model = (DefaultListModel<OverlayImage>) list_Images.getModel();
                 for (OverlayImage oi : list) {
@@ -876,22 +903,61 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void btn_ShowAccomodations(ActionEvent e)
+    private void btn_ShowAccommodations(ActionEvent e)
     {
-        System.err.println("btn_ShowAccomodations: not yet implemented");
+        if (!graphLoaded())
+            return;
+        
+        OverlayImage oi = getSelectedImage();
+        if (oi == null)
+            return;
+
+        // parse radius from text field
+        int radius = 0;
+        try {
+            radius = Integer.parseInt(textField_MaxAccommodationDist.getText());
+        }
+        catch (NumberFormatException ex) {
+            System.out.println("Specified range is invalid!");
+            return;
+        }
+
+        // request tourism nodes in range
+        final StopWatch sw = new StopWatch().lap();
+        final LinkedList<Integer> l = g.getNNodesInRange(oi.getPosition().getLatitude(), oi.getPosition().getLongitude(), radius);
+        sw.lap();
+        if (l != null && l.size() < 1) {
+            System.out.println("No accommodation found! Try increasing the range");
+            return;
+        }
+        System.out.println("Found " + l.size() + " nearby accommodation(s) in " + sw.getLastInSecStr() + " sec");
+        System.out.println("Select one to associate it with the selected photo");
+        
+        // visualize tourism nodes
+        accommodations.clear();
+        for (int i : l) {
+            accommodations.add(new Accommodation(g.getNPosition(i), g.getName(i)));
+        }
+        
+        mapKit.repaint();
     }
     
     
-    public void btn_RemoveAccomodation(ActionEvent e)
+    private void btn_RemoveAccommodation(ActionEvent e)
     {
-        System.err.println("btn_RemoveAccomodation: not yet implemented");
+        OverlayImage oi = getSelectedImage();
+        if (oi == null || oi.getAccommodation() == null)
+            return;
+        
+        accommodations.add(oi.getAccommodation());
+        oi.setAccommodation(null);
+        map.repaint();
     }
     
     
-    public void btn_SaveOptGraph(ActionEvent e)
+    private void btn_SaveOptGraph(ActionEvent e)
     {
-        if (g == null) {
-            System.out.println("Error: must load a graph first!");
+        if (!graphLoaded()) {
             return;
         }
         
@@ -921,7 +987,7 @@ public class MainWindow extends JFrame implements Serializable
     }
 
     
-    public void list_Images(ListSelectionEvent e)
+    private void list_Images(ListSelectionEvent e)
     {
         OverlayImage oi = list_Images.getSelectedValue();
         if (oi == null || list_Images.getValueIsAdjusting() || oi.isFixedPosition()) {
@@ -950,13 +1016,13 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void cb_VisitOrder(ActionEvent e)
+    private void cb_VisitOrder(ActionEvent e)
     {
         //System.err.println("cb_VisitOrder not yet implemented!");
     }
     
     
-    public void cb_ResizeMethod(ActionEvent e)
+    private void cb_ResizeMethod(ActionEvent e)
     {
         if (!(e.getSource() instanceof JComboBox<?>)) {
             System.err.println("cb_ResizeMethod: e.getSource() is no instance of JComboBox");
@@ -974,7 +1040,7 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void cb_ImageSize(ActionEvent e)
+    private void cb_ImageSize(ActionEvent e)
     {
         if (!(e.getSource() instanceof JComboBox<?>)) {
             System.err.println("cb_ImageSize: e.getSource() is no instance of JComboBox");
@@ -998,7 +1064,7 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void cb_ImageQuality(ActionEvent e)
+    private void cb_ImageQuality(ActionEvent e)
     {
         if (!(e.getSource() instanceof JComboBox<?>)) {
             System.err.println("cb_ImageQuality: e.getSource() is no instance of JComboBox");
@@ -1017,7 +1083,7 @@ public class MainWindow extends JFrame implements Serializable
     }
         
 
-    public void updateWaypoints()
+    private void updateWaypoints()
     {
         HashSet<Waypoint> waypointSet = new HashSet<Waypoint>();
         for (OverlayImage oi : overlayImages) {
@@ -1026,6 +1092,39 @@ public class MainWindow extends JFrame implements Serializable
                 waypointSet.add(wp);
         }
         waypointPainter.setWaypoints(waypointSet);
+    }
+    
+    
+    private void clearMap()
+    {
+        overlay.clear();
+        mapKit.repaint();
+        currSource = null;
+        currTarget = null;
+    }
+    
+    
+    private boolean graphLoaded()
+    {
+        if (g != null) {
+            return true;
+        }
+        System.out.println("Error: must load a graph first!");
+        return false;
+    }
+    
+    
+    private OverlayImage getSelectedImage()
+    {
+        OverlayImage oi = list_Images.getSelectedValue();
+        if (oi == null) {
+            System.out.println("No photo selected!");
+            return null;
+        }
+        else if (list_Images.getValueIsAdjusting()) {
+            return null;
+        }
+        return oi;
     }
     
     
@@ -1038,4 +1137,15 @@ public class MainWindow extends JFrame implements Serializable
         textArea_Log.append(s);
     }
     
+    public void addOverlayAggregate(OverlayAggregate oa)
+    {
+        overlay.add(oa);
+    }
+    
+    
+    public void addPersistentOverlayAggregate(OverlayAggregate oa)
+    {
+        persistentOverlay.add(oa);
+    }
+
 }
