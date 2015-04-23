@@ -16,9 +16,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
+import util.Distance;
 import data_structures.grid.InvalidCoordinateArraysException;
 import data_structures.grid.LookupGrid;
 
@@ -328,12 +330,33 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
-    public int[] getNNodesInRange(double lat, double lon, int range)
+    private LinkedList<Integer> getNodesInRange(double[] la, double[] lo, double lat, double lon, int range)
     {
+        final double max_lat = Distance.translateLat(lat,  range);
+        final double min_lat = Distance.translateLat(lat, -range);
+        final double max_lon = Distance.translateLon(lon,  range, lat);
+        final double min_lon = Distance.translateLon(lon, -range, lat);
+        final LinkedList<Integer> r = new LinkedList<Integer>();
         
-        
-        
-        return null;
+        for (int i = 0; i < la.length; ++i)
+        {
+            if (la[i] > min_lat && la[i] < max_lat && lo[i] > min_lon && lo[i] < max_lon && Distance.haversine(la[i], lo[i], lat, lon) < range) {
+                r.add(i);
+            }
+        }
+        return r;
+    }
+    
+    
+    public LinkedList<Integer> getNodesInRange(double lat, double lon, int range)
+    {
+        return getNodesInRange(this.lat, this.lon, lat, lon, range);
+    }
+    
+    
+    public LinkedList<Integer> getNNodesInRange(double lat, double lon, int range)
+    {
+        return getNodesInRange(this.nlat, this.nlon, lat, lon, range);
     }
     
     
@@ -448,6 +471,15 @@ final public class ArrayRepresentation implements Graph, Serializable {
     {
         return lat[n];
     }
+    
+    
+    /**
+     * @return latitude of given not-routable node ID in decimal degrees
+     */
+    public double getNLat(int n)
+    {
+        return nlat[n];
+    }
 
     
     /**
@@ -460,7 +492,16 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Return the location of {@code n} as a 
+     * @return longitude of given not-routable node ID in decimal degrees
+     */
+    public double getNLon(int n)
+    {
+        return nlon[n];
+    }
+    
+    
+    /**
+     * Return the location of node {@code n} as a 
      * {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} object.
      * 
      * @param n node ID
@@ -469,6 +510,30 @@ final public class ArrayRepresentation implements Graph, Serializable {
     public GeoPosition getPosition(int n)
     {
         return new GeoPosition(lat[n], lon[n]);
+    }
+    
+    
+    /**
+     * Return the location of not-routable node {@code n} as a 
+     * {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} object.
+     * 
+     * @param n node ID
+     * @return {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} of {@code n}
+     */
+    public GeoPosition getNPosition(int n)
+    {
+        return new GeoPosition(nlat[n], nlon[n]);
+    }
+    
+    
+    /**
+     * Return the name of the given not-routable node {@code n}.
+     * @param n
+     * @return name of node
+     */
+    public String getName(int n)
+    {
+        return name[n];
     }
     
 
