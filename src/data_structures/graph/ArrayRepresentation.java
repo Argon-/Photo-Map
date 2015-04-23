@@ -301,11 +301,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public int getNearestNode(double lat, double lon)
     {
-        if (grid != null) {
-            return grid.getNearestNode(lat, lon);
-        }
-        System.err.println("error: no lookup grid");
-        return -1;
+        return getNearestNode(grid, lat, lon);
     }
     
     
@@ -318,11 +314,26 @@ final public class ArrayRepresentation implements Graph, Serializable {
      */
     public int getNearestNNode(double lat, double lon)
     {
-        if (ngrid != null) {
-            return ngrid.getNearestNode(lat, lon);
+        return getNearestNode(ngrid, lat, lon);
+    }
+    
+    
+    private int getNearestNode(LookupGrid lg, double lat, double lon)
+    {
+        if (lg != null) {
+            return lg.getNearestNode(lat, lon);
         }
         System.err.println("error: no lookup grid");
         return -1;
+    }
+    
+    
+    public int[] getNNodesInRange(double lat, double lon, int range)
+    {
+        
+        
+        
+        return null;
     }
     
     

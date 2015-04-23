@@ -17,7 +17,9 @@ public class LookupGrid implements Serializable
 {
     private static final long serialVersionUID = 3951171285414881903L;
     
-    // factor * num_of_nodes is the amount of cells in y/x direction
+    /**
+     * factor * num_of_nodes is the amount of cells in y/x direction
+     */
     private final double GRID_FACTOR = 0.000015;
     private final int    GRID_LAT_CELLS;
     private final int    GRID_LON_CELLS;

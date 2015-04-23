@@ -4,7 +4,9 @@ package util;
 
 public final class Distance
 {
-	static final double EQUATOR_LON_LENGTH = 111.320;
+    // everything in meters
+    static final long EARTH_CIRCUMFERENCE_EQUATORIAL = 40075017L;
+    static final long EARTH_CIRCUMFERENCE_MERIDIONAL = 40007860L;
 	static final double EARTH_RADIUS = 6371 * 1000;
 	
 	

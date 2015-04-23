@@ -1,4 +1,4 @@
-package data_structures.graph;
+package old;
 
 import gui.MainWindow;
 import gui.overlay.OverlayAggregate;
@@ -18,6 +18,8 @@ import java.util.Arrays;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
+import data_structures.graph.Graph;
+import data_structures.graph.InvalidGraphFormatException;
 import util.Distance;
 
 

@@ -1,5 +1,6 @@
 package path.search;
 
+import old.Dijkstra_Old;
 import data_structures.graph.Graph;
 import data_structures.graph.GraphFactory;
 import util.StopWatch;
