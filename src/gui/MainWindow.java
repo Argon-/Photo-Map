@@ -765,12 +765,18 @@ public class MainWindow extends JFrame implements Serializable
             case JFileChooser.APPROVE_OPTION:
                 File file = fd.getSelectedFile();
                 try {
+                    g = null;
+                    d = null;
+                    clearMap();
+                    persistentOverlayLines.clear();
+                    System.gc();
+                    
                     StopWatch sw = new StopWatch();
                     sw.lap();
                     g = GraphFactory.loadArrayRepresentation(file.getAbsolutePath());
                     sw.lap();
                     d = new Dijkstra(g);
-                    clearMap();
+                    
                     drawGraphRect();
                     clearMap();
                     System.out.println("Graph loaded in " + sw.getLastInSecStrShort() + " sec");
