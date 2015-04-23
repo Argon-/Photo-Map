@@ -24,7 +24,6 @@ public class GraphGenerator
     public static final String ID_SEP      = " ";
     public static final String KV_SEP      = "\" \"";
 
-    
     private final String node_file_loc;
     private final String way_file_loc;
     private final TLongObjectHashMap<Node> nodes = new TLongObjectHashMap<Node>();
@@ -54,20 +53,29 @@ public class GraphGenerator
             String line = "";
             while ((line = way_file.readLine()) != null)
             {
-                String[] tmp = line.split(W_TAG_START, 2);
-                String[] nodelist = tmp[0].split(DATA_SEP, 2)[1].split(ID_SEP);
+                final String[] tmp, nodelist;
+                
+                try {
+                    tmp = line.split(W_TAG_START, 2);
+                    if (tmp.length < 2)
+                        throw new Exception();
+                    nodelist = tmp[0].split(DATA_SEP, 2)[1].split(ID_SEP);
+                }
+                catch (Exception e) {
+                    continue;
+                }
                 
                 int highway = -2;
                 boolean oneway = false;
                 
                 // split tags into key value pairs and parse them
                 for (String s : tmp[1].split(W_TAG_SEP)) {
-                    String[] pair = s.split(KV_SEP);
+                    final String[] pair = s.split(KV_SEP);
                     if (pair.length != 2) {
                         continue;
                     }
-                    String k = pair[0].startsWith("\"") ? pair[0].substring(1) : pair[0];
-                    String v = pair[1].endsWith("\"") ? pair[1].substring(0, pair[1].length() - 1) : pair[1];
+                    final String k = pair[0].startsWith("\"") ? pair[0].substring(1) : pair[0];
+                    final String v = pair[1].endsWith("\"") ? pair[1].substring(0, pair[1].length() - 1) : pair[1];
                     
                     if (k.startsWith("highway")) {
                         highway = highwayType(v, false);
@@ -131,11 +139,19 @@ public class GraphGenerator
             System.out.println("Reading data for relevant nodes");
             while ((line = node_file.readLine()) != null)
             {
-                String[] tmp = line.split(ID_SEP, 5);
+                final long id;
+                final double lat, lon;
+                final String[] tmp;
                 
-                long id = Long.parseLong(tmp[1]);
-                double lat = Double.parseDouble(tmp[2]);
-                double lon = Double.parseDouble(tmp[3]);
+                try {
+                    tmp = line.split(ID_SEP, 5);
+                    id = Long.parseLong(tmp[1]);
+                    lat = Double.parseDouble(tmp[2]);
+                    lon = Double.parseDouble(tmp[3]);
+                }
+                catch (Exception e) {
+                    continue;
+                }
                 
                 
                 // node was previously picked up as part of a way -> add lat/lon
@@ -204,7 +220,7 @@ public class GraphGenerator
         System.out.println("Creating output file");
         
         try {
-            BufferedWriter out_file = new BufferedWriter(new FileWriter(out_file_loc));
+            final BufferedWriter out_file = new BufferedWriter(new FileWriter(out_file_loc));
             
             // write header
             out_file.write(Long.toString(nodes.size()));
