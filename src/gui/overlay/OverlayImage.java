@@ -16,6 +16,7 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.Waypoint;
 
+import util.Accommodation;
 import util.ImageUtil;
 import util.StringUtil;
 
@@ -74,6 +75,7 @@ public final class OverlayImage implements OverlayObject
     // metadata
     private GeoPosition     mapPos        = null;
     private Date            date          = null;
+    private Accommodation   accommodation = null;
     
     private final BufferedImage img;
     private BufferedImage   cachedImg;
@@ -418,6 +420,7 @@ public final class OverlayImage implements OverlayObject
 
     public void draw(Graphics2D g, JXMapViewer map)
     {
+        // update cached values
         if (cachedFontHeight == 0 || cachedFontWidth == 0 || cachedFontAscent == 0) {
             FontMetrics fm = g.getFontMetrics();
             cachedFontWidth = fm.stringWidth(label);
@@ -425,10 +428,17 @@ public final class OverlayImage implements OverlayObject
             cachedFontAscent = fm.getAscent();
         }
         
+        // update cached values
         if (map.getZoom() != mapZoom) {
             mapZoom = map.getZoom();
             cachedMapZoomFactor = (mapZoom) / (Math.log(mapZoom) + 1);
             forceResize = true;
+        }
+        
+        // draw accommodation + link
+        if (accommodation != null) {
+            OverlayElement.lineRedMedium(accommodation.getPos(), mapPos).draw(g, map);
+            accommodation.getOverlay().draw(g, map);
         }
 
         if (!visible) {
@@ -438,7 +448,6 @@ public final class OverlayImage implements OverlayObject
         if (forceResize) {
             resizeInternal(targetWidth, targetHeight);
         }
-
         
         int x = 0, y = 0;
         
@@ -495,6 +504,28 @@ public final class OverlayImage implements OverlayObject
     public GeoPosition getPosition()
     {
         return mapPos;
+    }
+    
+    
+    /**
+     * Return associated accommodation for this image.
+     * 
+     * @return Accommodation
+     */
+    public Accommodation getAccommodation()
+    {
+        return accommodation;
+    }
+    
+    
+    /**
+     * Set associated accommodation for this image.
+     * 
+     * @param a Accommodation
+     */
+    public void setAccommodation(Accommodation a)
+    {
+        accommodation = a;
     }
     
     
