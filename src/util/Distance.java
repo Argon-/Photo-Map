@@ -4,9 +4,7 @@ package util;
 
 public final class Distance
 {
-    // everything in meters
-    static final long EARTH_CIRCUMFERENCE_EQUATORIAL = 40075017L;
-    static final long EARTH_CIRCUMFERENCE_MERIDIONAL = 40007860L;
+    // in meters
 	static final double EARTH_RADIUS = 6371 * 1000;
 	
 	
@@ -23,6 +21,33 @@ public final class Distance
 		return EARTH_RADIUS * c;
 	}
 	*/
+	
+	
+	/**
+	 * Translate the given latitude by the given distance.
+	 * 
+	 * @param lat latitude
+	 * @param meters
+	 * @return translated latitude
+	 */
+	public static double translateLat(double lat, int meters)
+	{
+	    return lat + Math.toDegrees(meters/EARTH_RADIUS);
+	}
+	
+	
+	/**
+     * Translate the given longitude by the given distance.
+     * 
+	 * @param lon longitude
+	 * @param meters
+	 * @param at_lat latitude at this longitude
+	 * @return translated longitude
+	 */
+	public static double translateLon(double lon, int meters, double at_lat)
+    {
+        return lon + Math.toDegrees(meters/EARTH_RADIUS) / Math.cos(Math.toRadians(at_lat));
+    }
 	
 	
 	/**
