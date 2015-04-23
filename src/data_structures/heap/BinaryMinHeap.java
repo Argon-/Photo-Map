@@ -17,7 +17,7 @@ public final class BinaryMinHeap
 
 
     /**
-     * Initializes a new empty minimum heap with initial size {@code size}.<br>
+     * Initializes a new empty minimum heap with initial size {@code Math.max(1, size)}.<br>
      * This heap is specifically tailored for storing a node ID along with its value,
      * as used by {@link path.search.Dijkstra Dijkstra}.
      * The value is used for sorting.
@@ -29,12 +29,17 @@ public final class BinaryMinHeap
      */
     public BinaryMinHeap(int size)
     {
-        heap_nid = new int[size];
-        heap_val = new int[size];
+        heap_nid = new int[Math.max(1, size)];
+        heap_val = new int[Math.max(1, size)];
         this.size = 0;
     }
 
 
+    /**
+     * Grow the heap by {@code GROWTH_FACTOR}.<br>
+     * Guarantees to increase the heap size by at least 1
+     * (this is assumed by {@link #insert(int, int)}.
+     */
     private void grow()
     {
         final int new_capacity = heap_nid.length + (int) (heap_nid.length * GROWTH_FACTOR) + 1;
@@ -140,7 +145,7 @@ public final class BinaryMinHeap
 
 
     /**
-     * <b>Note:</b> this will remove the node.
+     * <b>Note:</b> this will remove the node from the heap.
      * 
      * @return the min heap node
      */
@@ -155,7 +160,7 @@ public final class BinaryMinHeap
 
 
     /**
-     * Remove the heap minimum without returning it.
+     * Remove the heap minimum <i>without</i> returning it.
      */
     public void removeMin()
     {
