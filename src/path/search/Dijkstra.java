@@ -12,7 +12,7 @@ import data_structures.heap.BinaryMinHeap;
 
 public final class Dijkstra implements Runnable
 {
-    private final int HEAP_SIZE_FACTOR = 10;
+    private final int HEAP_SIZE_FACTOR = 1000;
 	private final int UNSETTLED = Integer.MAX_VALUE;
 	private final int   SETTLED = Integer.MAX_VALUE - 1;
 	private final boolean weighted;
