@@ -53,7 +53,7 @@ public final class StopWatch
      * Return the time between the last two {@link #lap()} calls as formatted
      * string in (fractional) second resolution and {@code 9} decimal places.
      */
-    public String getLastInSecStr()
+    public String getLastInSecStrLong()
     {
         return getLastInSecStr(9);
     }
@@ -62,7 +62,7 @@ public final class StopWatch
      * Return the time between the last two {@link #lap()} calls as formatted
      * string in (fractional) second resolution and {@code 3} decimal places.
      */
-    public String getLastInSecStrShort()
+    public String getLastInSecStr()
     {
         return getLastInSecStr(3);
     }
