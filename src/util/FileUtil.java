@@ -31,7 +31,6 @@ public final class FileUtil
         File file = new File(f);
         int l = c.size();
         
-        // f is a directory
         if (file.isDirectory())
         {
             try {
@@ -57,7 +56,6 @@ public final class FileUtil
             }
         }
         
-        // f is a single file
         else if (file.isFile())
         {
             try {
