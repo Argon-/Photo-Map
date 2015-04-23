@@ -256,35 +256,35 @@ public class HeapTest_Old
 		for (int i = FROM; i < TO; ++i) {
 			insertTest1(i);
 		}
-		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStrLong() + " sec");
 		
 		System.out.println("Insert Test 2");
 		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			insertTest2(i);
 		}
-		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStrLong() + " sec");
 		
 		System.out.println("Build Test");
 		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			buildTest(i);
 		}
-		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStrLong() + " sec");
 		
 		System.out.println("DecreaseKey Test");
 		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			decreaseKeyTest(i);
 		}
-		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStrLong() + " sec");
 		
 		System.out.println("DecreaseKeyByNodeID Test");
 		sw.lap();
 		for (int i = FROM; i < TO; ++i) {
 			decreaseKeyByNodeIDTest(i);
 		}
-		System.out.println("...took " + sw.lap().getLastInSecStr() + " sec");
+		System.out.println("...took " + sw.lap().getLastInSecStrLong() + " sec");
 		
 	}
 }

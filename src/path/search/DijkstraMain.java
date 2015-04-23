@@ -19,7 +19,7 @@ public class DijkstraMain {
 		sw.lap();
 		Graph g = GraphFactory.load(f);
 		//g.save("./15000K.bin");
-		System.out.println(sw.getLastInSecStr() + " sec");
+		System.out.println(sw.getLastInSecStrLong() + " sec");
 		System.out.println("");
 		
 		
@@ -46,7 +46,7 @@ public class DijkstraMain {
 	    StopWatch sw = new StopWatch();
 		sw.lap();
 		d_old.pathFromTo(from, to);
-		System.out.println(sw.getLastInSecStr() + " sec");
+		System.out.println(sw.getLastInSecStrLong() + " sec");
 		System.out.println("");
 		
 		sw.lap();
@@ -61,7 +61,7 @@ public class DijkstraMain {
 		
 		sw.lap();
 		d_pq.pathFromTo(from, to);
-		System.out.println(sw.getLastInSecStr() + " sec");
+		System.out.println(sw.getLastInSecStrLong() + " sec");
 		System.out.println("");
 		
 		sw.lap();
@@ -76,7 +76,7 @@ public class DijkstraMain {
 		
 		sw.lap();
 		d_2h.pathFromTo(from, to);
-		System.out.println(sw.getLastInSecStr() + " sec");
+		System.out.println(sw.getLastInSecStrLong() + " sec");
 		System.out.println("");
 		
 		sw.lap();
