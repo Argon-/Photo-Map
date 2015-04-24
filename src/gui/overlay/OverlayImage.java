@@ -452,12 +452,6 @@ public final class OverlayImage implements OverlayObject
             forceResize = true;
         }
         
-        // draw accommodation + link
-        if (accommodation != null) {
-            OverlayElement.lineRedMedium(accommodation.getPos(), mapPos).draw(g, map);
-            accommodation.getOverlay().draw(g, map);
-        }
-
         if (!visible) {
             return;
         }
@@ -510,6 +504,12 @@ public final class OverlayImage implements OverlayObject
             }
         }
         g.drawImage(cachedImg, x, y, null);
+        
+        // draw accommodation + link
+        if (accommodation != null) {
+            OverlayElement.lineRedMedium(accommodation.getPos(), mapPos).draw(g, map);
+            accommodation.getOverlay().draw(g, map);
+        }
     }
     
     
