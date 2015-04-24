@@ -27,12 +27,12 @@ public final class Distance
 	 * Translate the given latitude by the given distance.
 	 * 
 	 * @param lat latitude
-	 * @param meters
+	 * @param meters distance
 	 * @return translated latitude
 	 */
 	public static double translateLat(double lat, int meters)
 	{
-	    return lat + Math.toDegrees(meters/EARTH_RADIUS);
+	    return lat + Math.toDegrees(meters / EARTH_RADIUS);
 	}
 	
 	
@@ -40,13 +40,13 @@ public final class Distance
      * Translate the given longitude by the given distance.
      * 
 	 * @param lon longitude
-	 * @param meters
+	 * @param meters distance
 	 * @param at_lat latitude at this longitude
 	 * @return translated longitude
 	 */
 	public static double translateLon(double lon, int meters, double at_lat)
     {
-        return lon + Math.toDegrees(meters/EARTH_RADIUS) / Math.cos(Math.toRadians(at_lat));
+        return lon + Math.toDegrees(meters / EARTH_RADIUS) / Math.cos(Math.toRadians(at_lat));
     }
 	
 	
