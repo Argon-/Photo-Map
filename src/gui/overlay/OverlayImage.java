@@ -65,6 +65,10 @@ public final class OverlayImage implements OverlayObject
      * Padding left/right above/below between text and box around the text.
      */
     public static final int     LABEL_X_PADDING     = 5, LABEL_Y_PADDING = 2;
+    /**
+     * Appended as suffix to decorated labels.
+     */
+    public static final String DEC_NO_DATE = "*", DEC_NO_GEOLOC = "#";
 
     // cached data
     private int cachedFontHeight = 0;
@@ -131,11 +135,7 @@ public final class OverlayImage implements OverlayObject
         if (strict && mapPos == null) {
             throw new RuntimeException("image contains no valid geo location (strict checking)");
         }
-        
-        if (date == null) {
-            date = new Date(0);
-        }
-        
+                
         forceResize = true;
     }
         
@@ -188,6 +188,8 @@ public final class OverlayImage implements OverlayObject
      */
     public Date getDate()
     {
+        if (date == null)
+            return new Date(0);
         return date;
     }
     
@@ -199,6 +201,19 @@ public final class OverlayImage implements OverlayObject
     {
         return label;
     }
+    
+    
+    /**
+     * Append suffixes to the label in case no date or geo location is available.
+     * 
+     * @return label of the image, usually the file name
+     */
+    public String getDecoratedLabel()
+    {
+        final String l = label == null? "(null) " : label + " ";
+        return l + (date == null ? DEC_NO_DATE : "") + (mapPos == null ? DEC_NO_GEOLOC : "");
+    }
+
     
     
     /**
@@ -251,7 +266,9 @@ public final class OverlayImage implements OverlayObject
 
     
     /**
-     * Resize the image.
+     * Resize the image.<br>
+     * No effort is made in order to preserve aspect ratio.
+     * See {@link #maxSize(int)} in case this is required.
      * 
      * @param w width in px
      * @param h height in px
@@ -304,7 +321,7 @@ public final class OverlayImage implements OverlayObject
     
     /**
      * Specify the maximum size of this image.
-     * The aspect ratio is preserved the the bigger side of the image
+     * The aspect ratio is preserved and the longer side of the image
      * is limited to {@code m}.
      * 
      * @param m size in px
@@ -368,7 +385,7 @@ public final class OverlayImage implements OverlayObject
 
 
     /**
-     * Whether to use fixed positioning for this image, 
+     * Whether to use fixed positioning for this image, i.e.
      * not based on geographic coordinates.
      * 
      * @param useFixedPos
@@ -381,7 +398,7 @@ public final class OverlayImage implements OverlayObject
     
     
     /**
-     * Whether to use fixed positioning for this image, 
+     * Whether we use fixed positioning for this image, i.e.
      * not based on geographic coordinates.
      * 
      * @return fixedPosition
@@ -531,7 +548,8 @@ public final class OverlayImage implements OverlayObject
     
     public String toString() 
     {
-        return label != null ? label : "(null)";
+        //return label != null ? getLabel() : "(null)";
+        return getDecoratedLabel();
     }
 
 }
