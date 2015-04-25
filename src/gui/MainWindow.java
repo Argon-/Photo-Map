@@ -210,7 +210,7 @@ public class MainWindow extends JFrame implements Serializable
     private void initGUIComponents()
     {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 1300, 900);
+        setBounds(100, 100, 1400, 900);
         contentPane = new JPanel();
         contentPane.setBorder(null);
         setContentPane(contentPane);
@@ -688,7 +688,7 @@ public class MainWindow extends JFrame implements Serializable
         if (SwingUtilities.isLeftMouseButton(e)) {
             currSource = g.getPosition(n);
             currTarget = null;
-            overlay.add(OverlayAggregate.route_var3(clickPos, currSource));
+            overlay.add(OverlayAggregate.route_var6(clickPos, currSource));
             d.setSource(n);
         }
         else if (SwingUtilities.isRightMouseButton(e)) {
@@ -699,7 +699,7 @@ public class MainWindow extends JFrame implements Serializable
                 boolean r = d.pathFromTo();
                 sw.lap();
                 if (r) {
-                    overlay.add(OverlayAggregate.route_multi_var2(d.getRoute()));
+                    overlay.add(OverlayAggregate.route_multi_var3(d.getRoute()));
                     System.out.println("Calculated route in " + sw.getLastInSecStr() + " sec");
                 }
             }
