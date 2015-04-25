@@ -320,6 +320,30 @@ final public class ArrayRepresentation implements Graph, Serializable {
     }
     
     
+    /**
+     * Search the ID of the node closest to the given coordinates.
+     * 
+     * @param pos GeoPosition
+     * @return ID of the found node or {@code -1}
+     */
+    public int getNearestNode(GeoPosition pos)
+    {
+        return getNearestNode(grid, pos.getLatitude(), pos.getLongitude());
+    }
+    
+    
+    /**
+     * Search the ID of the non-routable node closest to the given coordinates.
+     * 
+     * @param pos GeoPosition
+     * @return ID of the found node or {@code -1}
+     */
+    public int getNearestNNode(GeoPosition pos)
+    {
+        return getNearestNode(ngrid, pos.getLatitude(), pos.getLongitude());
+    }
+    
+    
     private int getNearestNode(LookupGrid lg, double lat, double lon)
     {
         if (lg != null) {

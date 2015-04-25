@@ -20,6 +20,8 @@ public interface Graph {
     // getters using locations
     public int getNearestNode(double lat, double lon);
     public int getNearestNNode(double lat, double lon);
+    public int getNearestNode(GeoPosition pos);
+    public int getNearestNNode(GeoPosition pos);
     public LinkedList<Integer> getNodesInRange(double lat, double lon, int range);
     public LinkedList<Integer> getNNodesInRange(double lat, double lon, int range);
 
