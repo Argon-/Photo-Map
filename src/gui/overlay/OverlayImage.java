@@ -452,17 +452,26 @@ public final class OverlayImage implements OverlayObject
             forceResize = true;
         }
         
-        if (visible) {
-            if (forceResize) {
-                resizeInternal(targetWidth, targetHeight);
-            }
-            
-            int x = 0, y = 0;
-            
-            if (fixedPosition)
-            {
-                Rectangle rect = map.getViewportBounds();
-                switch (positionHint) {
+        // draw accommodation + link
+        if (accommodation != null) {
+            OverlayElement.lineRedMedium(accommodation.getPos(), mapPos).draw(g, map);
+            accommodation.getOverlay().draw(g, map);
+        }
+
+        
+        if (!visible) {
+            return;
+        }
+        
+        if (forceResize) {
+            resizeInternal(targetWidth, targetHeight);
+        }
+
+        int x = 0, y = 0;
+
+        if (fixedPosition) {
+            final Rectangle rect = map.getViewportBounds();
+            switch (positionHint) {
                 case TOP_LEFT:
                     x = rect.x;
                     y = rect.y;
@@ -479,35 +488,29 @@ public final class OverlayImage implements OverlayObject
                     x = rect.width - cachedImg.getWidth() + rect.x;
                     y = rect.height - cachedImg.getHeight() + rect.y;
                     break;
-                }
             }
-            else if (mapPos != null)
-            {
-                Point2D p = map.getTileFactory().geoToPixel(mapPos, mapZoom);
-                // reside centered above the location
-                x = (int) p.getX() - (cachedImg.getWidth() / 2);
-                y = (int) p.getY() - (cachedImg.getHeight() + WAYPOINT_Y_OFFSET + PADDING);
-                
-                if (displayLabel && label != null) {
-                    g.setPaint(new Color(0, 0, 0, 150));
-                    
-                    int box_x = (int) (p.getX() - (cachedFontWidth / 2));
-                    int box_y = (int) (p.getY() - (cachedFontHeight + WAYPOINT_Y_OFFSET + PADDING));
-                    y = y - cachedFontHeight - LABEL_Y_PADDING * 2;
-                    
-                    g.fillRoundRect(box_x - LABEL_X_PADDING, box_y - LABEL_Y_PADDING, cachedFontWidth + LABEL_X_PADDING * 2, cachedFontHeight + LABEL_Y_PADDING * 2, 10, 10);
-                    g.setPaint(Color.WHITE);
-                    g.drawString(label, box_x, box_y + cachedFontAscent);
-                }
-            }
-            g.drawImage(cachedImg, x, y, null);
         }
+        else if (mapPos != null) {
+            final Point2D p = map.getTileFactory().geoToPixel(mapPos, mapZoom);
+            // reside centered above mapPos
+            x = (int) p.getX() - (cachedImg.getWidth() / 2);
+            y = (int) p.getY() - (cachedImg.getHeight() + WAYPOINT_Y_OFFSET + PADDING);
+
+            if (displayLabel && label != null) {
+                g.setPaint(new Color(0, 0, 0, 150));
+
+                final int box_x = (int) (p.getX() - (cachedFontWidth / 2));
+                final int box_y = (int) (p.getY() - (cachedFontHeight + WAYPOINT_Y_OFFSET + PADDING));
+                y = y - cachedFontHeight - LABEL_Y_PADDING * 2;
+
+                g.fillRoundRect(box_x - LABEL_X_PADDING, box_y - LABEL_Y_PADDING,
+                        cachedFontWidth + LABEL_X_PADDING * 2, cachedFontHeight + LABEL_Y_PADDING * 2, 10, 10);
+                g.setPaint(Color.WHITE);
+                g.drawString(label, box_x, box_y + cachedFontAscent);
+            }
+        }
+        g.drawImage(cachedImg, x, y, null);
         
-        // draw accommodation + link
-        if (accommodation != null) {
-            OverlayElement.lineRedMedium(accommodation.getPos(), mapPos).draw(g, map);
-            accommodation.getOverlay().draw(g, map);
-        }
     }
     
     
