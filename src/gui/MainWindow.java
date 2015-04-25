@@ -85,6 +85,7 @@ public class MainWindow extends JFrame implements Serializable
     
     private static final int MAX_CONCURRENTLY_VISIBLE_IMAGES = 1;
     private static final int MAX_LOG_LENGTH = 200;
+    private static final int LOG_BUFFER_LENGTH = 10;
 
     private ArrayRepresentation g = null;
     private Dijkstra d = null;
@@ -111,6 +112,7 @@ public class MainWindow extends JFrame implements Serializable
     private int     imagesSize = 400;
     
     private int logLines = 0;
+    private String[] logBuffer = new String[LOG_BUFFER_LENGTH];
     private boolean imageSelectedFromList = false;
     
     private JPanel              contentPane;
@@ -1192,11 +1194,19 @@ public class MainWindow extends JFrame implements Serializable
     
     public void log(String s)
     {
-        if (logLines++ > MAX_LOG_LENGTH) {
-            logLines = 1;
-            textArea_Log.setText("");
+        ++logLines;
+        for (int i = 0; i < logBuffer.length - 1; ++i) {
+            logBuffer[i] = logBuffer[i + 1];
         }
-        textArea_Log.append(s);
+        logBuffer[logBuffer.length - 1] = s;
+        
+        if (logLines >= MAX_LOG_LENGTH) {
+            logLines = logBuffer.length;
+            textArea_Log.setText(String.join("", logBuffer));
+        }
+        else {
+            textArea_Log.append(s);
+        }
     }
     
     public void addOverlayAggregate(OverlayAggregate oa)
