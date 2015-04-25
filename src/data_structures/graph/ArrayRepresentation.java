@@ -47,7 +47,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     private final double types[];
     
     /*
-     * Not-routable nodes info (tourism nodes)
+     * non-routable nodes info (tourism nodes)
      * Reasoning for not saving them with the routable nodes and providing
      * some kind of index structure to know which nodes are not routable is
      * the assumption of a way lower number of not routable nodes.
@@ -308,7 +308,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Search the ID of the not-routable node closest to the given coordinates.
+     * Search the ID of the non-routable node closest to the given coordinates.
      * 
      * @param lat latitude in decimal degrees
      * @param lon longitude in decimal degrees
@@ -379,7 +379,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Draw a visual marker for every not-routable node on the map.
+     * Draw a visual marker for every non-routable node on the map.
      * 
      * @param win
      */
@@ -474,7 +474,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * @return latitude of given not-routable node ID in decimal degrees
+     * @return latitude of given non-routable node ID in decimal degrees
      */
     public double getNLat(int n)
     {
@@ -492,7 +492,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * @return longitude of given not-routable node ID in decimal degrees
+     * @return longitude of given non-routable node ID in decimal degrees
      */
     public double getNLon(int n)
     {
@@ -514,7 +514,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Return the location of not-routable node {@code n} as a 
+     * Return the location of non-routable node {@code n} as a 
      * {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} object.
      * 
      * @param n node ID
@@ -527,7 +527,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     
     /**
-     * Return the name of the given not-routable node {@code n}.
+     * Return the name of the given non-routable node {@code n}.
      * @param n
      * @return name of node
      */
@@ -608,7 +608,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
 
 
     /**
-     * Color the nodes touched when searching for a nearest not-routable node.<br>
+     * Color the nodes touched when searching for a nearest non-routable node.<br>
      * Not necessarily thread safe.
      * 
      * @param t
