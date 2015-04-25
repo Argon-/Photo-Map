@@ -58,7 +58,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
@@ -68,6 +67,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 
 import java.awt.Component;
 
@@ -89,10 +89,11 @@ public class MainWindow extends JFrame implements Serializable
     private ArrayRepresentation g = null;
     private Dijkstra d = null;
     
-    private final LinkedBlockingDeque<OverlayAggregate> overlay = new LinkedBlockingDeque<OverlayAggregate>();
-    private final LinkedBlockingDeque<OverlayAggregate> persistentOverlay = new LinkedBlockingDeque<OverlayAggregate>();
-    private final LinkedBlockingDeque<OverlayImage> overlayImages = new LinkedBlockingDeque<OverlayImage>();
-    private final LinkedBlockingDeque<Accommodation> accommodations = new LinkedBlockingDeque<Accommodation>();
+    // LinkedBlockingDeque
+    private final LinkedList<OverlayAggregate> overlay = new LinkedList<OverlayAggregate>();
+    private final LinkedList<OverlayAggregate> persistentOverlay = new LinkedList<OverlayAggregate>();
+    private final LinkedList<OverlayImage> overlayImages = new LinkedList<OverlayImage>();
+    private final LinkedList<Accommodation> accommodations = new LinkedList<Accommodation>();
     
     // specifies if a click in mapMouseClicked() is supposed to target an Overlay element
     // this is determined in mapMouseMoved()
@@ -159,11 +160,14 @@ public class MainWindow extends JFrame implements Serializable
             e1.printStackTrace();
         }
         
+        ToolTipManager.sharedInstance().setDismissDelay(6000);
+        
         initGUIComponents();
         configureMap();
         
         log("Welcome! Load a graph file and/or images to get started." + System.getProperty("line.separator"));
-        log("Left mouse click places a starting position, right mouse click a destination." + System.getProperty("line.separator") + System.getProperty("line.separator"));
+        log("Left mouse click places a starting position, right mouse click a destination."
+                + System.getProperty("line.separator") + System.getProperty("line.separator"));
     }
     
     
@@ -398,7 +402,8 @@ public class MainWindow extends JFrame implements Serializable
                 btn_RemoveAccommodation(e);
             }
         });
-        this.btn_RemoveAccommodation.setToolTipText("Remove the accommodation associated with the selected photo.");
+        this.btn_RemoveAccommodation.setToolTipText("Remove the selected photo's association with an accommodation." + 
+                                                    " This will not remove the accommodation from the map.");
         GridBagConstraints gbc_btn_RemoveAccommodation = new GridBagConstraints();
         gbc_btn_RemoveAccommodation.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_RemoveAccommodation.insets = new Insets(0, 0, 5, 5);
@@ -579,10 +584,10 @@ public class MainWindow extends JFrame implements Serializable
                 g.translate(-rect.x, -rect.y);
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
-                for (OverlayObject o : overlayImages)     { o.draw(g, map); }
                 for (OverlayObject o : overlay)           { o.draw(g, map); }
                 for (OverlayObject o : persistentOverlay) { o.draw(g, map); }
                 for (Accommodation a : accommodations)    { a.getOverlay().draw(g, map); }
+                for (OverlayObject o : overlayImages)     { o.draw(g, map); }
                 
                 g.dispose();
             }
@@ -614,29 +619,31 @@ public class MainWindow extends JFrame implements Serializable
     
     private void handleTargetedClick(MouseEvent e)
     {
-        if (clickTarget == null) {
-            System.out.println("clickTarget == null, this should not have happened");
+        // swing dispatches events one at a time and callbacks block the dispatching
+        // so this shouldn't be necessary (if it were we'd need proper locking anyway)
+        if (clickTarget == null || !targetedClick) {
+            System.out.println("clickTarget == null || !targetedClick, this should not have happened");
             return;
         }
-        
+
         OverlayImage oi = getSelectedImage();
         if (oi == null)
             return;
         
-        // don't accidently replace the current accommodation
-        if (targetedClick) {
-            if (oi.getAccommodation() == null) {
-                accommodations.remove(clickTarget);
-                oi.setAccommodation(clickTarget);
-                map.repaint();
-            }
-            else {
-                System.out.println("oi.getAccommodation() != null");
-            }
+        // no change
+        if (oi.getAccommodation() == clickTarget) {
+            return;
         }
-        else {
-            System.out.println("targetedClick == false, this shouldn't have happened either");
+        
+        // there is already an accommodation associated with oi
+        // we are going to replace it, therefore move it back into the accomm list
+        if (oi.getAccommodation() != null) {
+            accommodations.add(oi.getAccommodation());
         }
+        
+        oi.setAccommodation(clickTarget);
+        accommodations.remove(clickTarget);
+        map.repaint();
     }
     
     
@@ -701,7 +708,7 @@ public class MainWindow extends JFrame implements Serializable
     
     
     private void mapMouseMoved(MouseEvent e)
-    {
+    {        
         final int zoom = map.getZoom();
         final Rectangle rect = map.getViewportBounds();
         GeoPosition pos = null;
@@ -721,7 +728,6 @@ public class MainWindow extends JFrame implements Serializable
             {
                 targetedClick = true;
                 clickTarget = a;
-                System.out.println(targetedClick); // TODO: remove
             }
         }
 
@@ -797,12 +803,18 @@ public class MainWindow extends JFrame implements Serializable
             case JFileChooser.APPROVE_OPTION:
                 File file = fd.getSelectedFile();
                 try {
+                    // reset everything old
+                    accommodations.clear();
+                    for (OverlayImage oi : overlayImages) { 
+                        oi.setAccommodation(null);
+                    }
                     g = null;
                     d = null;
-                    clearMap();
                     persistentOverlay.clear();
+                    clearMap();
                     System.gc();
                     
+                    // load new graph
                     final StopWatch sw = new StopWatch();
                     sw.lap();
                     g = GraphFactory.loadArrayRepresentation(file.getAbsolutePath());
@@ -812,9 +824,6 @@ public class MainWindow extends JFrame implements Serializable
                     drawGraphRect();
                     clearMap();
                     System.out.println("Graph loaded in " + sw.getLastInSecStr() + " sec");
-                    //g.drawNonRoutableNodes(this);
-                    //g.visualizeGridLookup(true, this);
-                    //g.visualizeNGridLookup(true, this);
                 }
                 catch (InvalidGraphFormatException ex) {
                     System.out.println("Error: supplied graph has invalid format");
@@ -924,20 +933,39 @@ public class MainWindow extends JFrame implements Serializable
 
         // request tourism nodes in range
         final StopWatch sw = new StopWatch().lap();
-        final LinkedList<Integer> l = g.getNNodesInRange(oi.getPosition().getLatitude(), oi.getPosition().getLongitude(), radius);
+        final LinkedList<Integer> l = g.getNNodesInRange(oi.getPosition().getLatitude(), 
+                                                         oi.getPosition().getLongitude(), radius);
         sw.lap();
         if (l != null && l.size() < 1) {
             System.out.println("No accommodation found! Try increasing the range");
             return;
         }
         System.out.println("Found " + l.size() + " nearby accommodation(s) in " + sw.getLastInSecStr() + " sec");
-        System.out.println("Select one to associate it with the selected photo");
+        System.out.println("Click one to associate it with the currently selected photo");
         
         // visualize tourism nodes
         accommodations.clear();
         for (int i : l) {
             accommodations.add(new Accommodation(g.getNPosition(i), g.getName(i)));
         }
+        
+        /*
+         * There's one small problem resulting in a visual deviation.
+         * Accommodations associated to an image are owned and drawn by this image,
+         * while all the unassociated ones are organized in `accommodations` and
+         * drawn with the general painter.
+         * Therefore we can add (and draw) accommodations here which are already
+         * drawn by an image. In fact, in this case there exist multiple instances
+         * for the same accommodation.
+         * However, this has no actual negative affect on the logic/program itself,
+         * merely the visual aspects of two identical objects being drawn at the same 
+         * position.
+         * The following not a real fix and does not help in a case where image A 
+         * is associated with an accommodation found with image B. But this would
+         * require more effort (computationally) just to fix a visual thingy...
+         */
+        if (oi.getAccommodation() != null)
+            accommodations.remove(oi.getAccommodation());
         
         mapKit.repaint();
     }
@@ -994,23 +1022,28 @@ public class MainWindow extends JFrame implements Serializable
             return;
         }
 
+        /*
         for (OverlayImage ois : overlayImages)
             ois.setVisible(false);
         oi.setVisible(true);
         imageSelectedFromList = true;
         repaint();
-
+        */
+        
         if (oi.getPosition() != null) {
-            int h = map.getHeight();
+            final int h = map.getHeight();
             mapKit.setAddressLocation(oi.getPosition());
-            Point2D p = map.getCenter();
+            final Point2D p = map.getCenter();
             
+            /*
             if (oi.getHeight() > (3 * h / 4)) {
                 p.setLocation(p.getX(), p.getY() - (h/2) + OverlayImage.PADDING);
             }
             else if (oi.getHeight() > (h / 3)) {
                 p.setLocation(p.getX(), p.getY() - (h/4));
             }
+            */
+            p.setLocation(p.getX(), p.getY() - (h/4));
             map.setCenter(p);
         }
     }
