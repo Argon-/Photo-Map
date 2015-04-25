@@ -35,6 +35,12 @@ public final class OverlayAggregate implements OverlayObject
 	}
 	
 	
+	public LinkedList<OverlayLabel> getLabels()
+    {
+        return labels;
+    }
+	
+	
 	public OverlayAggregate addPoint(OverlayElement oe)
 	{
 		points.add(oe);
@@ -54,6 +60,21 @@ public final class OverlayAggregate implements OverlayObject
         labels.add(ol);
         return this;
     }
+	
+	
+	public OverlayAggregate add(OverlayAggregate oa)
+	{
+        for (OverlayElement oe : oa.getPoints()) {
+            points.add(oe);
+        }
+        for (OverlayElement oe : oa.getLines()) {
+            lines.add(oe);
+        }
+        for (OverlayLabel ol : oa.getLabels()) {
+            labels.add(ol);
+        }
+	    return this;
+	}
 	
 	
 	public void draw(Graphics2D g, JXMapViewer map)
