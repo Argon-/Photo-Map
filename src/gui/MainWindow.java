@@ -644,6 +644,7 @@ public class MainWindow extends JFrame implements Serializable
         oi.setAccommodation(clickTarget);
         accommodations.remove(clickTarget);
         map.repaint();
+        System.out.println("Associated photo with \"" + clickTarget.getName() + "\"");
     }
     
     
@@ -977,6 +978,7 @@ public class MainWindow extends JFrame implements Serializable
         if (oi == null || oi.getAccommodation() == null)
             return;
         
+        System.out.println("Removed photo's association with \"" + oi.getAccommodation().getName() + "\"");
         accommodations.add(oi.getAccommodation());
         oi.setAccommodation(null);
         map.repaint();
