@@ -1,6 +1,7 @@
 package gui;
 
 
+import gui.overlay.Accommodation;
 import gui.overlay.OverlayAggregate;
 import gui.overlay.OverlayElement;
 import gui.overlay.OverlayImage;
@@ -31,10 +32,9 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
 import path.search.Dijkstra;
-import util.Accommodation;
 import util.FileUtil;
 import util.StopWatch;
-import data_structures.graph.ArrayRepresentation;
+import data_structures.graph.Graph;
 import data_structures.graph.GraphFactory;
 import data_structures.graph.InvalidGraphFormatException;
 
@@ -87,7 +87,7 @@ public class MainWindow extends JFrame implements Serializable
     private static final int MAX_LOG_LENGTH = 200;
     private static final int LOG_BUFFER_LENGTH = 10;
 
-    private ArrayRepresentation g = null;
+    private Graph g = null;
     private Dijkstra d = null;
     
     // LinkedBlockingDeque
@@ -97,7 +97,7 @@ public class MainWindow extends JFrame implements Serializable
     private final LinkedList<Accommodation> accommodations = new LinkedList<Accommodation>();
     
     // specifies if a click in mapMouseClicked() is supposed to target an Overlay element
-    // this is determined in mapMouseMoved()
+    // these values are written in mapMouseMoved() and used in mapMouseClicked() & handleTargetedClick()
     private boolean targetedClick = false;
     private Accommodation clickTarget = null;
     
@@ -847,7 +847,7 @@ public class MainWindow extends JFrame implements Serializable
                     // load new graph
                     final StopWatch sw = new StopWatch();
                     sw.lap();
-                    g = GraphFactory.loadArrayRepresentation(file.getAbsolutePath());
+                    g = GraphFactory.load(file.getAbsolutePath());
                     sw.lap();
                     d = new Dijkstra(g);
                     

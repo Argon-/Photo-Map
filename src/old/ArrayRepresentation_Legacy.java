@@ -18,13 +18,12 @@ import java.util.Arrays;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
-import data_structures.graph.Graph;
 import data_structures.graph.InvalidGraphFormatException;
 import util.Distance;
 
 
 
-final public class ArrayRepresentation_Legacy implements Graph, Serializable {
+final public class ArrayRepresentation_Legacy implements Serializable {
 
 	private static final long serialVersionUID = 8955873766213220121L;
 	
