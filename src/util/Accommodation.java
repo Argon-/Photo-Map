@@ -48,4 +48,17 @@ public class Accommodation
         return oa;
     }
 
+
+    /**
+     * This assumes there's only one accommodation with name {@code name}
+     * at position {@code gp}.
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof Accommodation) {
+            Accommodation a = (Accommodation) obj;
+            return gp.equals(a.getPos()) && name.equals(a.getName());
+        }
+        return false;
+    }
 }
