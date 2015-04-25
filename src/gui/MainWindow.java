@@ -110,39 +110,41 @@ public class MainWindow extends JFrame implements Serializable
     private boolean imagesDynamicResize = true;
     private int     imagesSize = 400;
     
-    private int currLines = 0;
+    private int logLines = 0;
     private boolean imageSelectedFromList = false;
     
-    private JPanel                contentPane;
-    private JXMapKit              mapKit;
-    private JXMapViewer           map;
-    private JList<OverlayImage>   list_Images;
-    private JScrollPane           scrollPane_Log;
-    private JScrollPane           scrollPane_Images;
-    private JTextArea             textArea_Log;
-    private JButton               btn_LoadGraph;
-    private JButton               btn_ClearMarkers;
-    private JButton               btn_ClearAccommodations;
-    private JButton               btn_AddImages;
-    private JButton               btn_RemoveImage;
-    private JButton               btn_CalculateRoute;
-    private JButton               btn_SaveOptGraph;
-    private JComboBox<String>     cb_ResizeMethod;
-    private JComboBox<String>     cb_ImageSize;
-    private JComboBox<String>     cb_VisitOrder;
-    private JComboBox<String>     cb_ImageQuality;
-    private JLabel                lbl_ResizeMethod;
-    private JLabel                lbl_ImageSize;
-    private JLabel                lbl_VisitOrder;
-    private JLabel                lbl_ImageQuality;
-    private JSeparator            separator_1;
-    private Component             verticalStrut;
-    private JFileChooser          fd;
-    private JButton btn_ShowAccommodations;
-    private JSeparator separator_2;
-    private JButton btn_RemoveAccommodation;
-    private JTextField textField_MaxAccommodationDist;
-    private JLabel lbl_MaxAccommodationDist;
+    private JPanel              contentPane;
+    private JXMapKit            mapKit;
+    private JXMapViewer         map;
+    private JList<OverlayImage> list_Images;
+    private JScrollPane         scrollPane_Log;
+    private JScrollPane         scrollPane_Images;
+    private JTextArea           textArea_Log;
+    private JTextField          textField_MaxAccommodationDist;
+    private JButton             btn_LoadGraph;
+    private JButton             btn_ClearMarkers;
+    private JButton             btn_ClearAccommodations;
+    private JButton             btn_AddImages;
+    private JButton             btn_RemoveImage;
+    private JButton             btn_CalculateRoute;
+    private JButton             btn_SaveOptGraph;
+    private JButton             btn_ShowAccommodations;
+    private JButton             btn_RemoveAccommodation;
+    private JComboBox<String>   cb_ResizeMethod;
+    private JComboBox<String>   cb_ImageSize;
+    private JComboBox<String>   cb_VisitOrder;
+    private JComboBox<String>   cb_ImageQuality;
+    private JComboBox<String>   cb_StartingPosition;
+    private JLabel              lbl_ResizeMethod;
+    private JLabel              lbl_ImageSize;
+    private JLabel              lbl_VisitOrder;
+    private JLabel              lbl_ImageQuality;
+    private JLabel              lbl_MaxAccommodationDist;
+    private JLabel              lbl_StartingPosition;
+    private JSeparator          separator_1;
+    private JSeparator          separator_2;
+    private Component           verticalStrut;
+    private JFileChooser        fd;
 
 
     /**
@@ -165,8 +167,9 @@ public class MainWindow extends JFrame implements Serializable
         initGUIComponents();
         configureMap();
         
-        log("Welcome! Load a graph file and/or images to get started." + System.getProperty("line.separator"));
-        log("Left mouse click places a starting position, right mouse click a destination."
+        log("Welcome! Load a graph file and/or photos to get started." + System.getProperty("line.separator"));
+        log("Use your mouse to place markers." + System.getProperty("line.separator"));
+        log("Left click marks a starting position, right click a destination."
                 + System.getProperty("line.separator") + System.getProperty("line.separator"));
     }
     
@@ -368,19 +371,19 @@ public class MainWindow extends JFrame implements Serializable
         gbc_separator_1.gridy = 3;
         contentPane.add(separator_1, gbc_separator_1);
         
-        this.btn_ShowAccommodations = new JButton("Show accommodations");
-        this.btn_ShowAccommodations.addActionListener(new ActionListener() {
+        btn_ShowAccommodations = new JButton("Show accomms.");
+        btn_ShowAccommodations.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 btn_ShowAccommodations(e);
             }
         });
-        this.btn_ShowAccommodations.setToolTipText("Show possible accommodations near the selected photo.");
+        btn_ShowAccommodations.setToolTipText("Show possible accommodations near the selected photo.");
         GridBagConstraints gbc_btn_ShowAccommodations = new GridBagConstraints();
         gbc_btn_ShowAccommodations.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_ShowAccommodations.insets = new Insets(0, 0, 5, 5);
         gbc_btn_ShowAccommodations.gridx = 6;
         gbc_btn_ShowAccommodations.gridy = 3;
-        this.contentPane.add(this.btn_ShowAccommodations, gbc_btn_ShowAccommodations);
+        contentPane.add(btn_ShowAccommodations, gbc_btn_ShowAccommodations);
         GridBagConstraints gbc_btn_RemoveImage = new GridBagConstraints();
         gbc_btn_RemoveImage.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_RemoveImage.insets = new Insets(0, 0, 5, 0);
@@ -396,20 +399,20 @@ public class MainWindow extends JFrame implements Serializable
             }
         });
         
-        this.btn_RemoveAccommodation = new JButton("Remove accomm.");
-        this.btn_RemoveAccommodation.addActionListener(new ActionListener() {
+        btn_RemoveAccommodation = new JButton("Remove accomm.");
+        btn_RemoveAccommodation.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 btn_RemoveAccommodation(e);
             }
         });
-        this.btn_RemoveAccommodation.setToolTipText("Remove the selected photo's association with an accommodation." + 
+        btn_RemoveAccommodation.setToolTipText("Remove the selected photo's association with an accommodation." + 
                                                     " This will not remove the accommodation from the map.");
         GridBagConstraints gbc_btn_RemoveAccommodation = new GridBagConstraints();
         gbc_btn_RemoveAccommodation.fill = GridBagConstraints.HORIZONTAL;
         gbc_btn_RemoveAccommodation.insets = new Insets(0, 0, 5, 5);
         gbc_btn_RemoveAccommodation.gridx = 6;
         gbc_btn_RemoveAccommodation.gridy = 4;
-        this.contentPane.add(this.btn_RemoveAccommodation, gbc_btn_RemoveAccommodation);
+        contentPane.add(btn_RemoveAccommodation, gbc_btn_RemoveAccommodation);
         
         verticalStrut = Box.createVerticalStrut(20);
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
@@ -418,36 +421,57 @@ public class MainWindow extends JFrame implements Serializable
         gbc_verticalStrut.gridy = 5;
         contentPane.add(verticalStrut, gbc_verticalStrut);
         
-        this.separator_2 = new JSeparator();
-        this.separator_2.setOrientation(SwingConstants.VERTICAL);
+        separator_2 = new JSeparator();
+        separator_2.setOrientation(SwingConstants.VERTICAL);
         GridBagConstraints gbc_separator_2 = new GridBagConstraints();
         gbc_separator_2.gridheight = 6;
         gbc_separator_2.fill = GridBagConstraints.VERTICAL;
         gbc_separator_2.insets = new Insets(0, 0, 0, 5);
         gbc_separator_2.gridx = 7;
         gbc_separator_2.gridy = 3;
-        this.contentPane.add(this.separator_2, gbc_separator_2);
+        contentPane.add(separator_2, gbc_separator_2);
         
-        this.lbl_MaxAccommodationDist = new JLabel("Range:");
+        lbl_MaxAccommodationDist = new JLabel("Range:");
+        lbl_MaxAccommodationDist.setToolTipText("Maximum distance in meters from the selected photo");
         GridBagConstraints gbc_lbl_MaxAccommodationDist = new GridBagConstraints();
         gbc_lbl_MaxAccommodationDist.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_MaxAccommodationDist.anchor = GridBagConstraints.EAST;
         gbc_lbl_MaxAccommodationDist.gridx = 5;
         gbc_lbl_MaxAccommodationDist.gridy = 6;
-        this.contentPane.add(this.lbl_MaxAccommodationDist, gbc_lbl_MaxAccommodationDist);
+        contentPane.add(lbl_MaxAccommodationDist, gbc_lbl_MaxAccommodationDist);
         
-        this.textField_MaxAccommodationDist = new JTextField();
-        this.textField_MaxAccommodationDist.setToolTipText("Maximum distance in meters from the selected photo");
-        this.textField_MaxAccommodationDist.setText("1000");
+        textField_MaxAccommodationDist = new JTextField();
+        textField_MaxAccommodationDist.setToolTipText("Maximum distance in meters from the selected photo");
+        textField_MaxAccommodationDist.setText("1000");
         GridBagConstraints gbc_textField_MaxAccommodationDist = new GridBagConstraints();
         gbc_textField_MaxAccommodationDist.fill = GridBagConstraints.HORIZONTAL;
         gbc_textField_MaxAccommodationDist.insets = new Insets(0, 0, 5, 5);
         gbc_textField_MaxAccommodationDist.gridx = 6;
         gbc_textField_MaxAccommodationDist.gridy = 6;
-        this.contentPane.add(this.textField_MaxAccommodationDist, gbc_textField_MaxAccommodationDist);
-        this.textField_MaxAccommodationDist.setColumns(3);
+        contentPane.add(textField_MaxAccommodationDist, gbc_textField_MaxAccommodationDist);
+        textField_MaxAccommodationDist.setColumns(3);
+        
+        lbl_StartingPosition = new JLabel("Start:");
+        lbl_StartingPosition.setToolTipText("Where to start (and end) the route from: the last placed starting marker or the currently selected photo.");
+        GridBagConstraints gbc_lbl_StartingPosition = new GridBagConstraints();
+        gbc_lbl_StartingPosition.anchor = GridBagConstraints.EAST;
+        gbc_lbl_StartingPosition.insets = new Insets(0, 0, 5, 5);
+        gbc_lbl_StartingPosition.gridx = 2;
+        gbc_lbl_StartingPosition.gridy = 7;
+        contentPane.add(lbl_StartingPosition, gbc_lbl_StartingPosition);
+        
+        cb_StartingPosition = new JComboBox<String>();
+        cb_StartingPosition.setToolTipText("Where to start (and end) the route from: the last placed starting marker or the currently selected photo.");
+        cb_StartingPosition.setModel(new DefaultComboBoxModel<String>(new String[] {"first photo", "last start mark"}));
+        GridBagConstraints gbc_cb_StartingPosition = new GridBagConstraints();
+        gbc_cb_StartingPosition.anchor = GridBagConstraints.WEST;
+        gbc_cb_StartingPosition.insets = new Insets(0, 0, 5, 5);
+        gbc_cb_StartingPosition.gridx = 3;
+        gbc_cb_StartingPosition.gridy = 7;
+        contentPane.add(cb_StartingPosition, gbc_cb_StartingPosition);
         
         lbl_ImageQuality = new JLabel("Photo quality:");
+        lbl_ImageQuality.setToolTipText("Quality for photo resizing. This greatly affects performance.");
         GridBagConstraints gbc_lbl_ImageQuality = new GridBagConstraints();
         gbc_lbl_ImageQuality.anchor = GridBagConstraints.EAST;
         gbc_lbl_ImageQuality.insets = new Insets(0, 0, 0, 5);
@@ -476,6 +500,7 @@ public class MainWindow extends JFrame implements Serializable
         contentPane.add(btn_AddImages, gbc_btn_AddImages);
         
         lbl_VisitOrder = new JLabel("Visit order:");
+        lbl_VisitOrder.setToolTipText("The order to use for visiting the waypoints on the map.");
         GridBagConstraints gbc_lbl_VisitOrder = new GridBagConstraints();
         gbc_lbl_VisitOrder.anchor = GridBagConstraints.EAST;
         gbc_lbl_VisitOrder.insets = new Insets(0, 0, 5, 5);
@@ -499,6 +524,7 @@ public class MainWindow extends JFrame implements Serializable
         contentPane.add(cb_VisitOrder, gbc_cb_VisitOrder);
         
         lbl_ResizeMethod = new JLabel("Resize photos:");
+        lbl_ResizeMethod.setToolTipText("Select whether to automatically adjust the size of photos when zooming the map.");
         GridBagConstraints gbc_lbl_ResizeMethod = new GridBagConstraints();
         gbc_lbl_ResizeMethod.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_ResizeMethod.anchor = GridBagConstraints.EAST;
@@ -522,6 +548,7 @@ public class MainWindow extends JFrame implements Serializable
         contentPane.add(cb_ResizeMethod, gbc_cb_ResizeMethod);
         
         lbl_ImageSize = new JLabel("Limit size:");
+        lbl_ImageSize.setToolTipText("Maximum size for photos (on the lowest zoom level).");
         GridBagConstraints gbc_lbl_ImageSize = new GridBagConstraints();
         gbc_lbl_ImageSize.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_ImageSize.anchor = GridBagConstraints.EAST;
@@ -1165,8 +1192,8 @@ public class MainWindow extends JFrame implements Serializable
     
     public void log(String s)
     {
-        if (currLines++ > MAX_LOG_LENGTH) {
-            currLines = 1;
+        if (logLines++ > MAX_LOG_LENGTH) {
+            logLines = 1;
             textArea_Log.setText("");
         }
         textArea_Log.append(s);
