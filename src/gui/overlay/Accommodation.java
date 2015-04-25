@@ -1,10 +1,6 @@
-package util;
+package gui.overlay;
 
 import java.awt.Color;
-
-import gui.overlay.OverlayAggregate;
-import gui.overlay.OverlayElement;
-import gui.overlay.OverlayLabel;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 

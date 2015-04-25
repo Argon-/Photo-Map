@@ -16,7 +16,6 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.Waypoint;
 
-import util.Accommodation;
 import util.ImageUtil;
 import util.StringUtil;
 
