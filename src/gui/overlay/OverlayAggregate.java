@@ -1,5 +1,6 @@
 package gui.overlay;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.LinkedList;
 
@@ -225,6 +226,41 @@ public final class OverlayAggregate implements OverlayObject
         for (GeoPosition p : l) {
             oa.addLine(OverlayElement.lineBlackMedium(last, p));
             last = p;
+        }
+        oa.addPoint(OverlayElement.pointBlueBig(last));
+        return oa;
+    }
+    
+    
+    /**
+     * Red source, big<br>
+     * Black line, medium<br>
+     * Blue target, big<br>
+     */
+    public static OverlayAggregate route_multi_multi_var1(LinkedList<LinkedList<GeoPosition> > list) {
+        // vary color and width
+        final Color[] c = new Color[] { new Color(0, 0, 0), 
+                                        //new Color(64, 64, 64), 
+                                        new Color(128, 128, 128), 
+                                        //new Color(192, 192, 192),
+                                      };
+        final int[] w = new int[] { 3,
+                                    3,
+                                  };
+        
+        OverlayAggregate oa = new OverlayAggregate();
+        GeoPosition last = list.getFirst().removeFirst();
+        oa.addPoint(OverlayElement.pointRedBig(last));
+        
+        int i = 0;
+        for (LinkedList<GeoPosition> l : list)
+        {
+            for (GeoPosition p : l)
+            {
+                oa.addLine(new OverlayElement(last, p, c[i % c.length], w[i % w.length]));
+                last = p;
+            }
+            ++i;
         }
         oa.addPoint(OverlayElement.pointBlueBig(last));
         return oa;
