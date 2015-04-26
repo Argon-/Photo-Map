@@ -5,8 +5,9 @@ import java.awt.Color;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 
+
 /**
- * Convenience class to encapsulate relevant data for a accommodation.
+ * See {@link #Accommodation(GeoPosition, String)}.
  */
 public class Accommodation
 {
@@ -17,6 +18,9 @@ public class Accommodation
     private final OverlayAggregate oa;
     
     
+    /**
+     * Convenience class to encapsulate relevant data for a accommodation.
+     */
     public Accommodation(GeoPosition gp, String name)
     {
         this.gp = gp;
