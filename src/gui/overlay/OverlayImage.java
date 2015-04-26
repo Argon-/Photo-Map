@@ -518,7 +518,7 @@ public final class OverlayImage implements OverlayObject
      * 
      * @return mapPos
      */
-    public GeoPosition getPosition()
+    public GeoPosition getPos()
     {
         return mapPos;
     }
