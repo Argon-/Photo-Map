@@ -369,7 +369,7 @@ final public class ArrayRepresentation_Legacy implements Serializable {
 				oa.addPoint(new OverlayElement(g, c[base % c.length], 3));
 			}
 		}
-		win.addPersistentOverlayAggregate(oa);
+		win.addPersistentOverlay(oa);
 	}
 	
 	
