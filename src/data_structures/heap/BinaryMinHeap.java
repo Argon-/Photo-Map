@@ -43,7 +43,7 @@ public final class BinaryMinHeap
     private void grow()
     {
         final int new_capacity = heap_nid.length + (int) (heap_nid.length * GROWTH_FACTOR) + 1;
-        System.out.println(">>> Increasing BinaryMinHeap Capacity: " + heap_nid.length + " -> " + new_capacity + " <<<");
+        //System.out.println(">>> Increasing BinaryMinHeap Capacity: " + heap_nid.length + " -> " + new_capacity + " <<<");
         heap_nid = Arrays.copyOf(heap_nid, new_capacity);
         heap_val = Arrays.copyOf(heap_val, new_capacity);
     }
