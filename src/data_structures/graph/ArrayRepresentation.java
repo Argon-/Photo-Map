@@ -398,7 +398,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
             GeoPosition g = new GeoPosition(lat[i], lon[i]);
             oa.addPoint(new OverlayElement(g, c[i % c.length], 7));
         }
-        win.addPersistentOverlayAggregate(oa);
+        win.addPersistentOverlay(oa);
     }
     
     
@@ -417,7 +417,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
             oa.addPoint(new OverlayElement(g, c[i % c.length], 7)).addLabel(new OverlayLabel(name[i], g));
         }
         
-        win.addPersistentOverlayAggregate(oa);
+        win.addPersistentOverlay(oa);
     }
     
     

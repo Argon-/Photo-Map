@@ -190,7 +190,7 @@ public class LookupGrid implements Serializable
                 final int pos = grid[grid_offset[e] + i];
                 oa.addPoint(new OverlayElement(lat_ref[pos], lon_ref[pos], c[vis_i % c.length], 2));
             }
-            win.addOverlayAggregate(oa);
+            win.addOverlay(oa);
         }
 
         return min_id;
