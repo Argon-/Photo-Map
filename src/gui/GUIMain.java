@@ -14,10 +14,15 @@ public class GUIMain
 			{
 				try {
 					MainWindow w = new MainWindow();
-					final PrintStream original = System.out;
-
 					System.out.println("Mirroring stdout to GUI");
-			        System.setOut(new PrintStream(original) {
+					
+					/**
+					 * Create a new PrintStream, replacing System.out.
+					 * This one is multiplexing the data to the original
+					 * System.out and a GUI text field.
+					 */
+                    final PrintStream original = System.out;
+					System.setOut(new PrintStream(original) {
                         public void println()
                         {
                             original.print(System.getProperty("line.separator"));

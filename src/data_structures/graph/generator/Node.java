@@ -6,6 +6,9 @@ import util.StringUtil;
 
 
 
+/**
+ * See {@link #Node(double, double)}.
+ */
 public class Node
 {
     private long id;
@@ -16,7 +19,18 @@ public class Node
     private int[] highway_types = new int[0];
     
     
+    /**
+     * See {@link #Node(double, double)}.
+     */
     public Node() {}
+    
+    
+    /**
+     * Provides an encapsulation for information extracted during
+     * graph generation.
+     * Data is supposed to be added incrementally, prioritizing
+     * memory consumption. 
+     */
     public Node(double lat, double lon)
     {
         this.lat = lat;

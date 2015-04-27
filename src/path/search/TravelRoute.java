@@ -13,6 +13,9 @@ import data_structures.graph.Graph;
 
 
 
+/**
+ * See {@link #TravelRoute(Graph, ArrayList, int, GeoPosition)}.
+ */
 public class TravelRoute
 {
     /**
@@ -27,13 +30,25 @@ public class TravelRoute
     private final Graph graph;
     private final GeoPosition start;
 
-    private int accDist = 0;
     private int visitOrder = VISIT_ORDER_BY_USER;
     private LinkedList<TravelRouteNode> nodes;
     private LinkedList<LinkedList<GeoPosition> > route = new LinkedList<LinkedList<GeoPosition> >();
 
     
-    
+    /**
+     * A travel route takes the passed list of elements
+     * and searches for a route visiting every element.<br>
+     * The start of each route is either the first element in
+     * {@code elements} or {@code startPos} when not {@code null}.
+     * Every route will end wherever it started from.
+     * <br><br>
+     * The visit order if specified by {@code order}.<br>
+     * <b>Please note</b>: the elements in {@code elements} might change
+     * their positions, depending on the selected order!
+     * 
+     * @throws NoSuchRouteOrderException when {@code order} is unexpected
+     * @throws RuntimeException when {@code elements.size() < 2}
+     */
     public TravelRoute(Graph graph, ArrayList<OverlayImage> elements, int order, GeoPosition startPos) throws NoSuchRouteOrderException
     {
         this.graph = graph;
@@ -59,18 +74,27 @@ public class TravelRoute
     }
     
     
+    /**
+     * See {@link #TravelRoute(Graph, ArrayList, int, GeoPosition)}.
+     */
     public TravelRoute(Graph graph, ArrayList<OverlayImage> elements, int order) throws NoSuchRouteOrderException
     {
         this(graph, elements, order, null);
     }
     
     
+    /**
+     * @return the specified route order
+     */
     public int getOrder()
     {
         return visitOrder;
     }
             
     
+    /**
+     * Find a route with the requested parameters (i.e. order).
+     */
     public TravelRoute calculate()
     {
         switch(visitOrder) {
@@ -89,6 +113,9 @@ public class TravelRoute
     }
     
     
+    /**
+     * Just connect all nodes in {@code nodes}.
+     */
     private void simpleRoute(LinkedList<TravelRouteNode> nodes)
     {
         route.clear();
@@ -105,7 +132,7 @@ public class TravelRoute
             dst = it.next().getPos();
             dst_nid = graph.getNearestNode(dst);
             if (d.pathFromTo(src_nid, dst_nid)) {
-                route.add(d.getRoute());
+                route.add(d.getPath());
             }
             src = dst;
             src_nid = dst_nid;
@@ -113,6 +140,10 @@ public class TravelRoute
     }
     
     
+    /**
+     * Simple greedy approach to find a shortest route.<br>
+     * The resulting route can be potentially pretty bad, but it's reasonably fast.
+     */
     private void shortestRouteGreedy(LinkedList<TravelRouteNode> nodes)
     {
         route.clear();
@@ -137,6 +168,7 @@ public class TravelRoute
             LinkedList<GeoPosition> shortest = new LinkedList<GeoPosition>();
             int shortest_dist = Integer.MAX_VALUE;
             
+            // find the best next node
             Iterator<TravelRouteNode> it = candidates.iterator();
             while (it.hasNext())
             {
@@ -145,7 +177,7 @@ public class TravelRoute
                 final int cand_nid = graph.getNearestNode(cand);
                 
                 if (d.pathFromTo(src_nid, cand_nid)) {
-                    LinkedList<GeoPosition> r = d.getRoute();
+                    LinkedList<GeoPosition> r = d.getPath();
                     if (d.getDist() < shortest_dist) {
                         shortest_trn = cand_trn;
                         shortest_dist = d.getDist();
@@ -181,7 +213,7 @@ public class TravelRoute
         
         if (d.pathFromTo(src_nid, dst_nid)) {
             nodes.add(dst_trn);
-            route.add(d.getRoute());
+            route.add(d.getPath());
         }
         //else {
         //    System.out.println("FOUND NO ROUTE BACK HOME");
@@ -189,6 +221,9 @@ public class TravelRoute
     }
     
     
+    /**
+     * Wrap supplied elements into our internal format.
+     */
     private LinkedList<TravelRouteNode> createPosList(ArrayList<OverlayImage> e, boolean visitAccommodationAfter)
     {
         LinkedList<TravelRouteNode> p = new LinkedList<TravelRouteNode>();
@@ -208,22 +243,22 @@ public class TravelRoute
         return p;
     }
     
-        
+    
+    /**
+     * @return a list of TravelRouteNodes in order of the last calculated route
+     */
     public LinkedList<TravelRouteNode> getNodes()
     {
         return nodes;
     }
     
     
+    /**
+     * @return a list of lists of positions for the last calculated route
+     */
     public LinkedList<LinkedList<GeoPosition> > getRoute()
     {
         return route;
-    }
-    
-    
-    public int getDist()
-    {
-        return accDist;
     }
     
 }

@@ -80,7 +80,7 @@ public class DijkstraMain {
 		System.out.println("");
 		
 		sw.lap();
-		d_2h.printRouteStats(from, to);
+		d_2h.printPathStats(from, to);
 		//System.out.println(StopWatch.lapSecStr() + " sec");
 		System.out.println("");
 				

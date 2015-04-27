@@ -10,6 +10,9 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 
 
+/**
+ * See {@link #OverlayLabel(String, GeoPosition, int)}.
+ */
 public final class OverlayLabel implements OverlayObject
 {
     // pixel constants for alignment and padding in draw()
@@ -29,6 +32,17 @@ public final class OverlayLabel implements OverlayObject
     GeoPosition pos;
     
     
+    /**
+     * Represents a text label drawable onto the map.<br>
+     * A label consists of the text to draw, the position where to draw at
+     * and an offset below the text.<br>
+     * A box with transparent dark background is drawn behind the text to 
+     * increase readability.
+     * 
+     * @param text label
+     * @param g position
+     * @param offset in pixel
+     */
     public OverlayLabel(String text, GeoPosition g, int offset)
     {
         label = text;
@@ -40,12 +54,19 @@ public final class OverlayLabel implements OverlayObject
     }
 
 
+    /**
+     * Using {@code offset = 7}.
+     * See {@link #OverlayLabel(String, GeoPosition, int)}.
+     */
     public OverlayLabel(String text, GeoPosition g)
     {
         this(text, g, 7);
     }
         
     
+    /**
+     * Text to draw.
+     */
     public OverlayLabel setLabel(String l)
     {
         label = l;
@@ -54,6 +75,10 @@ public final class OverlayLabel implements OverlayObject
         return this;
     }
 
+    
+    /**
+     * Where to draw the text at.
+     */
     public OverlayLabel setGeoPos(GeoPosition g)
     {
         pos = g;
@@ -61,6 +86,9 @@ public final class OverlayLabel implements OverlayObject
     }
     
     
+    /**
+     * Text color.
+     */
     public OverlayLabel setForeground(Color c)
     {
         foreground = c;
@@ -68,6 +96,9 @@ public final class OverlayLabel implements OverlayObject
     }
     
     
+    /**
+     * Color of the box drawn behind the text.
+     */
     public OverlayLabel setBackground(Color c)
     {
         background = c;

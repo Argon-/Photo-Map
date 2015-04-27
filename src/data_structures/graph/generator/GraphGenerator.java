@@ -17,6 +17,9 @@ import util.Distance;
 
 public class GraphGenerator
 {
+    /*
+     * Several constants used to split strings and extract information.
+     */
     public static final String W_TAG_START = "    \"";
     public static final String W_TAG_SEP   = "\"    \"";
     public static final String N_TAG_SEP   = "\"  \"";
@@ -39,6 +42,9 @@ public class GraphGenerator
     }
     
     
+    /**
+     * Parses the input files and save the information in data structures.
+     */
     public void generate()
     {
         try 
@@ -215,6 +221,9 @@ public class GraphGenerator
     }
     
     
+    /**
+     * Write out the graph to a file.
+     */
     public void writeOut(String out_file_loc)
     {
         System.out.println("Creating output file");

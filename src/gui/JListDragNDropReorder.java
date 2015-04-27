@@ -8,6 +8,9 @@ import javax.swing.JList;
 
 
 
+/**
+ * See {@link #JListDragNDropReorder(JList)}.
+ */
 public class JListDragNDropReorder<T> extends MouseAdapter
 {
 
@@ -15,6 +18,11 @@ public class JListDragNDropReorder<T> extends MouseAdapter
     private int start, stop;
 
 
+    /**
+     * This enables drag&drop for a {@link JList} using a {@link DefaultListModel}.
+     * 
+     * @param l
+     */
     public JListDragNDropReorder(JList<T> l)
     {
         start = 0;

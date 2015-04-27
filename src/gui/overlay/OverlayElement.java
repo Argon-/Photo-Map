@@ -10,6 +10,19 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 
 
+/**
+ * Represents a basic overlay element on the map.<br>
+ * It represents a point in case {@code sorce == target}, otherwise a line.
+ * <br><br>
+ * See {@link #OverlayElement(GeoPosition)}.<br>
+ * See {@link #OverlayElement(double, double)}.<br>
+ * See {@link #OverlayElement(GeoPosition, GeoPosition)}.<br>
+ * See {@link #OverlayElement(GeoPosition, Color, int)}.<br>
+ * See {@link #OverlayElement(double, double, Color, int)}.<br>
+ * See {@link #OverlayElement(double, double, double, double)}.<br>
+ * See {@link #OverlayElement(GeoPosition, GeoPosition, Color, int)}.<br>
+ * See {@link #OverlayElement(double, double, double, double, Color, int)}.<br>
+ */
 public final class OverlayElement implements OverlayObject
 {
 	private final GeoPosition	source;
@@ -18,14 +31,19 @@ public final class OverlayElement implements OverlayObject
 	private int					strokeWidth	= 6;
 	
 
-
+	/**
+	 * A simple point.
+	 */
 	public OverlayElement(GeoPosition point)
 	{
 		source = point;
 		target = point;
 	}
 
-
+	
+    /**
+     * A point with custom color and width.
+     */
 	public OverlayElement(GeoPosition point, Color color, int strokeWidth)
 	{
 		this(point);
@@ -34,6 +52,9 @@ public final class OverlayElement implements OverlayObject
 	}
 
 
+	/**
+     * A simple line.
+     */
 	public OverlayElement(GeoPosition source, GeoPosition target)
 	{
 		this.source = source;
@@ -41,6 +62,9 @@ public final class OverlayElement implements OverlayObject
 	}
 
 
+	/**
+     * A line with custom color and width.
+     */
 	public OverlayElement(GeoPosition source, GeoPosition target, Color color, int strokeWidth)
 	{
 		this(source, target);
@@ -49,6 +73,9 @@ public final class OverlayElement implements OverlayObject
 	}
 
 
+	/**
+     * A simple point.
+     */
 	public OverlayElement(double point_lat, double point_lon)
 	{
 		source = new GeoPosition(point_lat, point_lon);
@@ -56,6 +83,9 @@ public final class OverlayElement implements OverlayObject
 	}
 
 
+	/**
+     * A point with custom color and width.
+     */
 	public OverlayElement(double point_lat, double point_lon, Color color, int strokeWidth)
 	{
 		this(point_lat, point_lon);
@@ -64,6 +94,9 @@ public final class OverlayElement implements OverlayObject
 	}
 
 
+	/**
+     * A simple line.
+     */
 	public OverlayElement(double source_lat, double source_lon, double target_lat, double target_lon)
 	{
 		source = new GeoPosition(source_lat, source_lon);
@@ -71,6 +104,9 @@ public final class OverlayElement implements OverlayObject
 	}
 
 
+	/**
+     * A line with custom color and width.
+     */
 	public OverlayElement(double source_lat, double source_lon, double target_lat, double target_lon, Color color,
 			int strokeWidth)
 	{
@@ -80,24 +116,36 @@ public final class OverlayElement implements OverlayObject
 	}
 
 
+	/**
+	 * @return this element's source location
+	 */
 	public GeoPosition getSource()
 	{
 		return source;
 	}
 
 
+	/**
+     * @return this element's target location
+     */
 	public GeoPosition getTarget()
 	{
 		return target;
 	}
 
 
+	/**
+     * @return this element's color
+     */
 	public Color getColor()
 	{
 		return color;
 	}
 
 
+	/**
+     * @return this element's width
+     */
 	public int getWidth()
 	{
 		return strokeWidth;

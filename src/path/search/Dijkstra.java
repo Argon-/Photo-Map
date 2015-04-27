@@ -10,15 +10,38 @@ import data_structures.heap.BinaryMinHeap;
 
 
 
+/**
+ * See {@link #Dijkstra(Graph)}.<br>
+ * See {@link #Dijkstra(Graph, boolean)}.<br>
+ * See {@link #Dijkstra(Graph, int, int)}.<br>
+ * See {@link #Dijkstra(Graph, boolean, int, int)}.
+ */
 public final class Dijkstra implements Runnable
 {
+    /**
+     * Factor used when allocating the heap to save some memory.
+     */
     private final int     HEAP_SIZE_FACTOR = 500;
-    private final int     UNSETTLED        = Integer.MAX_VALUE;
-    private final int     SETTLED          = Integer.MAX_VALUE - 1;
+    /**
+     * Magic values used internally in the {@code state} field.
+     * We are in big trouble when these values are used as distances.
+     */
+    private final int     UNSETTLED = Integer.MAX_VALUE, SETTLED = Integer.MAX_VALUE - 1;
     private final boolean weighted;
 
+    /**
+     * The graph we are working on.
+     */
     private final Graph   g;
+    /**
+     * This field contains the current minimum distance for every node,
+     * {@code SETTLED} when the node is optimal or {@code UNSETTLED}
+     * when completely untouched.
+     */
     private final int[]   state;
+    /**
+     * Contains the predecessor node for every node.
+     */
     private final int[]   pred;
 
     private BinaryMinHeap heap             = null;
@@ -28,6 +51,9 @@ public final class Dijkstra implements Runnable
     private int           accDist          = 0;
 
 
+    /**
+     * See {@link #Dijkstra(Graph, boolean, int, int)}.
+     */
     public Dijkstra(Graph graph, boolean weighted)
     {
         g = graph;
@@ -38,12 +64,35 @@ public final class Dijkstra implements Runnable
     }
 
 
+    /**
+     * Using {@code weighted == true}.<br>
+     * See {@link #Dijkstra(Graph, boolean, int, int)}.
+     */
     public Dijkstra(Graph graph)
     {
         this(graph, true);
     }
 
-
+    
+    /**
+     * Search for a shortest path from {@code from} to {@code to}
+     * within the given {@code graph}.<br>
+     * This class is maintaining a {@link data_structures.heap.BinaryMinHeap BinaryMinHeap}
+     * which will remain allocated even after a path was successfully found.
+     * As long as the source {@code from} remains the same, the same heap is reused,
+     * significantly speeding up subsequent queries.
+     * <br><br>
+     * This class implements {@code Runnable} and provides necessary means to
+     * collect the calculated path after it was executed in a separate thread.
+     * <br><br>
+     * <b>Note</b>: for every parameter designating nodes 
+     * {@link data_structures.graph.Graph Graph}-internal node IDs are used.
+     * 
+     * @param graph
+     * @param weighted use distances weighted by street types?
+     * @param from
+     * @param to
+     */
     public Dijkstra(Graph graph, boolean weighted, int from, int to)
     {
         this(graph, weighted);
@@ -52,6 +101,10 @@ public final class Dijkstra implements Runnable
     }
 
 
+    /**
+     * Using {@code weighted == true}.<br>
+     * See {@link #Dijkstra(Graph, boolean, int, int)}.
+     */
     public Dijkstra(Graph graph, int from, int to)
     {
         this(graph, true, from, to);
@@ -66,6 +119,15 @@ public final class Dijkstra implements Runnable
     }
 
 
+    /**
+     * Search for a path from {@code from} to {@code to}.<br>
+     * Will re-use previously calculated information in case {@code from}
+     * is the current source.
+     * 
+     * @param from
+     * @param to
+     * @return {@code false} when no path from {@code from} to {@code to} was found, otherwise {@code true}
+     */
     public boolean pathFromTo(int from, int to)
     {
         setSource(from);
@@ -74,6 +136,10 @@ public final class Dijkstra implements Runnable
     }
 
 
+    /**
+     * Is using the currently designated source and destination values.<br>
+     * See {@link #pathFromTo(int, int)}.
+     */
     public boolean pathFromTo()
     {
         if (state[target] == SETTLED) {
@@ -126,6 +192,9 @@ public final class Dijkstra implements Runnable
     }
 
 
+    /**
+     * New source, the start of a path.
+     */
     public Dijkstra setSource(int from)
     {
         if (source != from) {
@@ -136,6 +205,9 @@ public final class Dijkstra implements Runnable
     }
 
 
+    /**
+     * New target, the destination of a path.
+     */
     public Dijkstra setTarget(int to)
     {
         target = to;
@@ -143,15 +215,22 @@ public final class Dijkstra implements Runnable
     }
 
 
-    public void printRouteStats()
+    /**
+     * Using the current source and target.<br>
+     * See {@link #printPathStats(int, int)}.
+     */
+    public void printPathStats()
     {
-        printRouteStats(source, target);
+        printPathStats(source, target);
     }
 
 
-    public void printRouteStats(int from, int to)
+    /**
+     * Print some debugging stats for a path from {@code from} to {@code to}.
+     */
+    public void printPathStats(int from, int to)
     {
-        LinkedList<Integer> l = getRouteNodeIDs();
+        LinkedList<Integer> l = getPathNodeIDs();
         int last = l.pop();
         int curr;
         int dist = 0;
@@ -179,15 +258,19 @@ public final class Dijkstra implements Runnable
         System.out.println("Shortest path from " + source + " to " + target);
         System.out.println("   >  Hops: " + hops);
         System.out.println("   >  Dist: " + dist);
-        // System.out.println("   > Route: " + s);
+        // System.out.println("   > Path: " + s);
         // System.out.println("----------------------------------------------------------------------");
     }
 
 
-    public LinkedList<GeoPosition> getRoute()
+    /**
+     * @return list of locations ({@link GeoPosition}) on the shortest path from current source to destination
+     * @throws RuntimeException when the current target is {@code -1}
+     */
+    public LinkedList<GeoPosition> getPath()
     {
         if (target == -1)
-            throw new RuntimeException("Can't return route without target");
+            throw new RuntimeException("Can't return path without target");
 
         LinkedList<GeoPosition> l = new LinkedList<GeoPosition>();
         l.addFirst(g.getPosition(target));
@@ -208,6 +291,9 @@ public final class Dijkstra implements Runnable
     }
 
 
+    /**
+     * @return accumulated distance of all edges in the shortest path
+     */
     public int calculateDist()
     {
         accDist = 0;
@@ -231,10 +317,14 @@ public final class Dijkstra implements Runnable
     }
 
 
-    public LinkedList<Integer> getRouteNodeIDs()
+    /**
+     * @return list of node IDs on the shortest path from current source to destination
+     * @throws RuntimeException when the current target is {@code -1}
+     */
+    public LinkedList<Integer> getPathNodeIDs()
     {
         if (target == -1)
-            throw new RuntimeException("Can't return route without target");
+            throw new RuntimeException("Can't return path without target");
 
         LinkedList<Integer> l = new LinkedList<Integer>();
         l.addFirst(target);

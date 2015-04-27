@@ -88,7 +88,7 @@ public class MainWindow extends JFrame implements Serializable
     private static final int MAX_LOG_LENGTH = 200;
     private static final int LOG_BUFFER_LENGTH = 10;
 
-    private Graph g = null;
+    private Graph graph = null;
     private Dijkstra d = null;
     
     // LinkedBlockingDeque in case we want to thread this stuff
@@ -152,7 +152,11 @@ public class MainWindow extends JFrame implements Serializable
 
 
     /**
-     * Create the frame.
+     * Create the main window.<br>
+     * The UI is essentially single threaded, i.e. handlers (button clicks, etc.) are
+     * not threaded and they will block the UI. This spares us the need for locking.
+     * While time consuming actions are in progress the UI is not really useful anyway.
+     * 
      * @throws IOException 
      */
     public MainWindow()
@@ -178,24 +182,9 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void testInit()
-    {
-        if (!graphLoaded()) {
-            try {
-                g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/out-stg.txt");
-                d = new Dijkstra(g);
-            }
-            catch (InvalidGraphFormatException e) {
-                System.out.println("Supplied graph has invalid format");
-            }
-            catch (IOException e) {
-                System.out.println("Error reading graph");
-            }
-        }
-        drawGraphRect();
-    }
-    
-    
+    /**
+     * Draw a rectangle enclosing every node of the loaded {@link Graph}.
+     */
     public void drawGraphRect()
     {
         if (!graphLoaded())
@@ -204,8 +193,8 @@ public class MainWindow extends JFrame implements Serializable
         persistentOverlay.clear();
         overlay.clear();
         
-        double[] lat = g.getBoundingRectLat();
-        double[] lon = g.getBoundingRectLon();
+        double[] lat = graph.getBoundingRectLat();
+        double[] lon = graph.getBoundingRectLon();
         for (int i = 0; i < lat.length; ++i) {
             GeoPosition s = new GeoPosition(lat[i], lon[i]);
             GeoPosition t = new GeoPosition(lat[(i + 1) % lat.length],   lon[(i + 1) % lat.length]);
@@ -326,7 +315,6 @@ public class MainWindow extends JFrame implements Serializable
         });
         list_Images.setToolTipText("Select a photo to jump to its location. Use drag and drop to reorder photos.");
         list_Images.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        //list_Images.setDragEnabled(true);
         scrollPane_Images.setViewportView(list_Images);
         
         scrollPane_Log = new JScrollPane();
@@ -594,6 +582,9 @@ public class MainWindow extends JFrame implements Serializable
     }
 
 
+    /**
+     * Set-up for the map and the overlay rendering.
+     */
     private void configureMap()
     {
         mapKit.setDefaultProvider(JXMapKit.DefaultProviders.OpenStreetMaps);
@@ -632,6 +623,10 @@ public class MainWindow extends JFrame implements Serializable
     }
         
     
+    /**
+     * Mouse click listener.<br>
+     * Dispatches the click depending on whether this click is considered "targeted".
+     */
     private void mapMouseClicked(MouseEvent e)
     {
         // middle mouse button -> clear
@@ -710,30 +705,30 @@ public class MainWindow extends JFrame implements Serializable
 
         final StopWatch sw = new StopWatch();
         sw.lap();
-        int n = g.getNearestNode(clickPos);
+        int n = graph.getNearestNode(clickPos);
         sw.lap();
         if (n == -1) {
             System.out.println("Found no node!");
             return;
         }
-        System.out.println("Closest node: " + String.format("%.4f", g.getLat(n)) + ", "
-                + String.format("%.4f", g.getLon(n)) + "  (found in " + sw.getLastInSecStr() + " sec)");
+        System.out.println("Closest node: " + String.format("%.4f", graph.getLat(n)) + ", "
+                + String.format("%.4f", graph.getLon(n)) + "  (found in " + sw.getLastInSecStr() + " sec)");
 
         if (SwingUtilities.isLeftMouseButton(e)) {
-            currSource = g.getPosition(n);
+            currSource = graph.getPosition(n);
             currTarget = null;
             overlay.add(OverlayAggregate.route_var6(clickPos, currSource));
             d.setSource(n);
         }
         else if (SwingUtilities.isRightMouseButton(e)) {
-            currTarget = g.getPosition(n);
+            currTarget = graph.getPosition(n);
             d.setTarget(n);
             if (currSource != null && currTarget != null) {
                 sw.lap();
                 boolean r = d.pathFromTo();
                 sw.lap();
                 if (r) {
-                    overlay.add(OverlayAggregate.route_multi_var3(d.getRoute()));
+                    overlay.add(OverlayAggregate.route_multi_var3(d.getPath()));
                     System.out.println("Shortest route found in " + sw.getLastInSecStr(7) + " sec)");
                 }
                 else {
@@ -745,6 +740,14 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Check if the mouse is close to some relevant overlay objects:
+     * <ul>
+     * <li>Accommodation: consider this a "targeted" click
+     * <li>Waypoint: display the corresponding image
+     * </ul>
+     * Both can happen at the same time.
+     */
     private void mapMouseMoved(MouseEvent e)
     {        
         final int zoom = map.getZoom();
@@ -752,7 +755,6 @@ public class MainWindow extends JFrame implements Serializable
         GeoPosition pos = null;
         boolean change = false;
         int visibleNum = 0;
-
 
         // when the mouse is above an accommodation the next click is handled 
         // as "targeted" click in mapMouseClicked
@@ -768,7 +770,6 @@ public class MainWindow extends JFrame implements Serializable
                 clickTarget = a;
             }
         }
-
         
         for (OverlayImage oi : overlayImages) 
         {
@@ -830,6 +831,9 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Load a new {@link Graph} and initialize a new {@link Dijkstra} object for the new graph.
+     */
     private void btn_LoadGraph(ActionEvent e)
     {
         fd.setDialogTitle("Select a graph file");
@@ -846,7 +850,7 @@ public class MainWindow extends JFrame implements Serializable
                     for (OverlayImage oi : overlayImages) { 
                         oi.setAccommodation(null);
                     }
-                    g = null;
+                    graph = null;
                     d = null;
                     persistentOverlay.clear();
                     clearMap();
@@ -855,9 +859,9 @@ public class MainWindow extends JFrame implements Serializable
                     // load new graph
                     final StopWatch sw = new StopWatch();
                     sw.lap();
-                    g = GraphFactory.load(file.getAbsolutePath());
+                    graph = GraphFactory.load(file.getAbsolutePath());
                     sw.lap();
-                    d = new Dijkstra(g);
+                    d = new Dijkstra(graph);
                     
                     drawGraphRect();
                     clearMap();
@@ -878,6 +882,10 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Use {@link TravelRoute} to calculate a route with the given images as points
+     * and other parameters.
+     */
     private void btn_CalculateRoute(ActionEvent e)
     {
         if (!graphLoaded()) {
@@ -895,7 +903,7 @@ public class MainWindow extends JFrame implements Serializable
 
         TravelRoute tr = null;
         try {
-            tr = new TravelRoute(g, Collections.list(dm.elements()), order, startWithMarker && currSource != null ? currSource : null);
+            tr = new TravelRoute(graph, Collections.list(dm.elements()), order, startWithMarker && currSource != null ? currSource : null);
         }
         catch (Exception e1) {
             System.out.println(e1.getMessage());
@@ -939,6 +947,9 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Use a JFileChooser to load images.
+     */
     private void btn_AddImages(ActionEvent e)
     {
         fd.setDialogTitle("Select image(s) or a directory containing images");
@@ -975,6 +986,10 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Select all accommodations around the currently selected image
+     * and visualize them.
+     */
     private void btn_ShowAccommodations(ActionEvent e)
     {
         if (!graphLoaded())
@@ -996,7 +1011,7 @@ public class MainWindow extends JFrame implements Serializable
 
         // request tourism nodes in range
         final StopWatch sw = new StopWatch().lap();
-        final LinkedList<Integer> l = g.getNNodesInRange(oi.getPos().getLatitude(), 
+        final LinkedList<Integer> l = graph.getNNodesInRange(oi.getPos().getLatitude(), 
                                                          oi.getPos().getLongitude(), radius);
         sw.lap();
         if (l != null && l.size() < 1) {
@@ -1009,7 +1024,7 @@ public class MainWindow extends JFrame implements Serializable
         // visualize tourism nodes
         accommodations.clear();
         for (int i : l) {
-            accommodations.add(new Accommodation(g.getNPosition(i), g.getName(i)));
+            accommodations.add(new Accommodation(graph.getNPosition(i), graph.getName(i)));
         }
         
         /*
@@ -1034,6 +1049,9 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Unlink the currently selected image with its accommodation.
+     */
     private void btn_RemoveAccommodation(ActionEvent e)
     {
         OverlayImage oi = getSelectedImage();
@@ -1047,6 +1065,9 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Write out the currently loaded graph.
+     */
     private void btn_SaveOptGraph(ActionEvent e)
     {
         if (!graphLoaded()) {
@@ -1064,7 +1085,7 @@ public class MainWindow extends JFrame implements Serializable
             case JFileChooser.APPROVE_OPTION:
                 File file = fd.getSelectedFile();
                 try {
-                    g.save(file.getAbsolutePath());
+                    graph.save(file.getAbsolutePath());
                     System.out.println("Successfully saved optimized graph");
                 }
                 catch (IOException e1) {
@@ -1079,6 +1100,11 @@ public class MainWindow extends JFrame implements Serializable
     }
 
     
+    /**
+     * Focus the waypoint of a image selected in the GUI list.<br>
+     * This used to also show the selected image. Necessary parts of the
+     * code are still there.
+     */
     private void list_Images(ListSelectionEvent e)
     {
         OverlayImage oi = list_Images.getSelectedValue();
@@ -1116,13 +1142,13 @@ public class MainWindow extends JFrame implements Serializable
     
     private void cb_VisitOrder(ActionEvent e)
     {
-
+        // not needed, the value is read in btn_CalculateRoute()
     }
     
     
     private void cb_ResizeMethod(ActionEvent e)
     {
-        imagesDynamicResize = cb_ResizeMethod.getSelectedIndex() == 0;              // TODO: this is bad
+        imagesDynamicResize = cb_ResizeMethod.getSelectedIndex() == 0;     // TODO: this is bad
         for (OverlayImage oi : overlayImages) {
             oi.dynamicResize(imagesDynamicResize);
         }
@@ -1135,7 +1161,7 @@ public class MainWindow extends JFrame implements Serializable
         String value = (String) cb_ImageSize.getSelectedItem();
         imagesSize = -1;
         
-        if (value.matches("[0-9]{2,3}0 px")) {                                      // TODO: this is bad
+        if (value.matches("[0-9]{2,3}0 px")) {                             // TODO: this is bad
             value = value.substring(0, value.length() - 3);
             imagesSize = Integer.parseInt(value);
         }
@@ -1149,7 +1175,7 @@ public class MainWindow extends JFrame implements Serializable
     
     private void cb_ImageQuality(ActionEvent e)
     {
-        imagesHighQuality = (String) cb_ImageQuality.getSelectedItem() == "high";   // TODO: this is bad
+        imagesHighQuality = cb_ImageQuality.getSelectedIndex() == 0;       // TODO: this is bad
         for (OverlayImage oi : overlayImages) {
             oi.setHighQuality(imagesHighQuality);
         }
@@ -1169,6 +1195,10 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * Clear some (not all!) overlay lists and reset
+     * the currently selected source and target values.
+     */
     private void clearMap()
     {
         overlay.clear();
@@ -1181,7 +1211,7 @@ public class MainWindow extends JFrame implements Serializable
     
     private boolean graphLoaded()
     {
-        if (g != null) {
+        if (graph != null) {
             return true;
         }
         System.out.println("No graph loaded!");
@@ -1189,6 +1219,9 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
+    /**
+     * @return the currently selected OverlayImage or {@code null}
+     */
     private OverlayImage getSelectedImage()
     {
         if (list_Images.getModel().getSize() < 1) {
@@ -1208,7 +1241,10 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    // textArea_Log.append is not thread-safe
+    /**
+     * Log text to a GUI text area.<br>
+     * <b>Note</b>: textArea_Log.append is not thread-safe
+     */
     synchronized public void log(String s)
     {
         ++logLines;

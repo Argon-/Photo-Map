@@ -9,6 +9,13 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 
 
+/**
+ * See {@link #OverlayAggregate()}.
+ * <br><br>
+ * To make usage more convenient several static methods exist to construct
+ * OverlayAggregate objects from positions or lists of positions with different
+ * visual formatting.
+ */
 public final class OverlayAggregate implements OverlayObject
 {
 	private final LinkedList<OverlayElement> points;
@@ -16,6 +23,12 @@ public final class OverlayAggregate implements OverlayObject
     private final LinkedList<OverlayLabel> labels;
 
 	
+    /**
+     * A OverlayAggregate aggregates multiple {@link OverlayElement} and {@link OverlayLabel} objects
+     * to create more complex compound visuals and allows for grouping.
+     * <br>
+     * Internally they are organized in {@code points}, {@code lines} and {@code labels}.
+     */
 	public OverlayAggregate()
 	{
 		points = new LinkedList<OverlayElement>();
@@ -23,25 +36,37 @@ public final class OverlayAggregate implements OverlayObject
 	    labels = new LinkedList<OverlayLabel>();
 	}
 	
-	
+
+	/**
+	 * @return get the internal list of OverlayElements regarded as points
+	 */
 	public LinkedList<OverlayElement> getPoints()
 	{
 		return points;
 	}
 	
 	
+	/**
+     * @return get the internal list of OverlayElements regarded as lines
+     */
 	public LinkedList<OverlayElement> getLines()
 	{
 		return lines;
 	}
 	
 	
+	/**
+     * @return get the internal list of OverlayLabels
+     */
 	public LinkedList<OverlayLabel> getLabels()
     {
         return labels;
     }
 	
 	
+	/**
+	 * Add a OverlayElement as point.
+	 */
 	public OverlayAggregate addPoint(OverlayElement oe)
 	{
 		points.add(oe);
@@ -49,6 +74,9 @@ public final class OverlayAggregate implements OverlayObject
 	}
 	
 	
+	/**
+     * Add a OverlayElement as line.
+     */
 	public OverlayAggregate addLine(OverlayElement oe)
 	{
 		lines.add(oe);
@@ -56,6 +84,9 @@ public final class OverlayAggregate implements OverlayObject
 	}
 	
 	
+	/**
+     * Add a OverlayLabel as label.
+     */
 	public OverlayAggregate addLabel(OverlayLabel ol)
     {
         labels.add(ol);
@@ -63,6 +94,10 @@ public final class OverlayAggregate implements OverlayObject
     }
 	
 	
+	/**
+	 * Add all elements and labels of the given OverlayAggregate
+	 * to this object.
+	 */
 	public OverlayAggregate add(OverlayAggregate oa)
 	{
         for (OverlayElement oe : oa.getPoints()) {

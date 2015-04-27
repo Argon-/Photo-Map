@@ -4,9 +4,15 @@ import java.io.File;
 
 
 
+/**
+ * Various String related utility methods.
+ */
 public class StringUtil
 {
     
+    /**
+     * @return the basename of a supplied path f
+     */
     public static String basename(String f)
     {
         if (f == null || f.equals("") || f.length() < 2) {
@@ -35,6 +41,9 @@ public class StringUtil
     }
     
 
+    /**
+     * Join non-String arrays with "{@code ,}".
+     */
     public static <T> String arrayToString(T[] n)
     {
         String s = "";
@@ -50,6 +59,9 @@ public class StringUtil
     }
 
 
+    /**
+     * Join non-String arrays with "{@code ,}".
+     */
     public static String arrayToString(int[][] n)
     {
         String s = "";
@@ -65,6 +77,9 @@ public class StringUtil
     }
 
 
+    /**
+     * Join non-String arrays with "{@code ,}".
+     */
     public static String arrayToString(int[] n)
     {
         String s = "";
@@ -80,6 +95,9 @@ public class StringUtil
     }
     
     
+    /**
+     * Join non-String arrays with "{@code ,}".
+     */
     public static String arrayToString(long[] n)
     {
         String s = "";

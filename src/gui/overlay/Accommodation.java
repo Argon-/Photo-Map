@@ -22,6 +22,7 @@ public class Accommodation implements TravelRouteNoteData
     
     /**
      * Convenience class to encapsulate relevant data for a accommodation.
+     * It also creates the necessary objects for visualizing.
      */
     public Accommodation(GeoPosition gp, String name)
     {
@@ -33,18 +34,27 @@ public class Accommodation implements TravelRouteNoteData
     }
     
     
+    /**
+     * This accommodation's {@link GeoPosition}.
+     */
     public GeoPosition getPos()
     {
         return gp;
     }
     
     
+    /**
+     * A label ("name") associated with this accommodation.
+     */
     public String getLabel()
     {
         return label;
     }
     
     
+    /**
+     * A visualization for this accommodation.
+     */
     public OverlayAggregate getOverlay()
     {
         return oa;
