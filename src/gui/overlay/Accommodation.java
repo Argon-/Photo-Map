@@ -4,17 +4,19 @@ import java.awt.Color;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
+import path.search.TravelRouteNoteData;
+
 
 
 /**
  * See {@link #Accommodation(GeoPosition, String)}.
  */
-public class Accommodation
+public class Accommodation implements TravelRouteNoteData
 {
     public final static int STROKE_WIDTH = 2 * 6;
     
     private final GeoPosition gp;
-    private final String name;
+    private final String label;
     private final OverlayAggregate oa;
     
     
@@ -24,7 +26,7 @@ public class Accommodation
     public Accommodation(GeoPosition gp, String name)
     {
         this.gp = gp;
-        this.name = name;
+        this.label = name;
         oa = new OverlayAggregate();
         oa.addPoint(new OverlayElement(gp, Color.BLUE, STROKE_WIDTH));
         oa.addLabel(new OverlayLabel(name, gp, STROKE_WIDTH - 2));
@@ -37,9 +39,9 @@ public class Accommodation
     }
     
     
-    public String getName()
+    public String getLabel()
     {
-        return name;
+        return label;
     }
     
     
@@ -57,7 +59,7 @@ public class Accommodation
     {
         if (obj instanceof Accommodation) {
             Accommodation a = (Accommodation) obj;
-            return gp.equals(a.getPos()) && name.equals(a.getName());
+            return gp.equals(a.getPos()) && label.equals(a.getLabel());
         }
         return false;
     }

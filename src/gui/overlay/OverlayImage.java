@@ -16,6 +16,7 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.Waypoint;
 
+import path.search.TravelRouteNoteData;
 import util.ImageUtil;
 import util.StringUtil;
 
@@ -42,7 +43,7 @@ import com.drew.metadata.exif.GpsDirectory;
  * A resize is only guaranteed to happen when an image is explicitly requested
  * by the user ({@code isVisible(true)} followed by a call to {@code draw()}).
  */
-public final class OverlayImage implements OverlayObject
+public final class OverlayImage implements OverlayObject, TravelRouteNoteData
 {
     /**
      * Minimum size for images.
@@ -453,7 +454,7 @@ public final class OverlayImage implements OverlayObject
         
         // draw accommodation + link
         if (accommodation != null) {
-            OverlayElement.lineRedMedium(accommodation.getPos(), mapPos).draw(g, map);
+            OverlayElement.lineRedThin(accommodation.getPos(), mapPos).draw(g, map);
             accommodation.getOverlay().draw(g, map);
         }
 
