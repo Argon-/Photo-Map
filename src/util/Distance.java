@@ -8,21 +8,6 @@ public final class Distance
 	static final double EARTH_RADIUS = 6371 * 1000;
 	
 	
-	/* This is actually slower on my machine
-	public static double haversine_fm(double lat1, double lon1, double lat2, double lon2)
-	{
-		double dLat = FastMath.toRadians(lat2 - lat1);
-		double dLng = FastMath.toRadians(lon2 - lon1);
-
-		double a = FastMath.sin(dLat / 2) * FastMath.sin(dLat / 2) + FastMath.cos(Math.toRadians(lat1))
-				* FastMath.cos(FastMath.toRadians(lat2)) * FastMath.sin(dLng / 2) * FastMath.sin(dLng / 2);
-		double c = 2 * FastMath.atan2(Math.sqrt(a), FastMath.sqrt(1 - a));
-
-		return EARTH_RADIUS * c;
-	}
-	*/
-	
-	
 	/**
 	 * Translate the given latitude by the given distance.
 	 * 
