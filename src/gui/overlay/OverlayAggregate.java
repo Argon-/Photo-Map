@@ -239,12 +239,15 @@ public final class OverlayAggregate implements OverlayObject
      */
     public static OverlayAggregate route_multi_multi_var1(LinkedList<LinkedList<GeoPosition> > list) {
         // vary color and width
-        final Color[] c = new Color[] { new Color(0, 0, 0), 
-                                        //new Color(64, 64, 64), 
-                                        new Color(128, 128, 128), 
+        final Color[] c = new Color[] { //new Color(0, 0, 0), 
+                                        //new Color(64, 64, 64),
+                                        //Color.GRAY,
+                                        new Color(0, 255, 0, 128),           // green
+                                        new Color(255, 0, 255, 128),         // magenta
                                         //new Color(192, 192, 192),
                                       };
-        final int[] w = new int[] { 3,
+        final int[] w = new int[] { 6,
+                                    //5,
                                     3,
                                   };
         
@@ -262,7 +265,7 @@ public final class OverlayAggregate implements OverlayObject
             }
             ++i;
         }
-        oa.addPoint(OverlayElement.pointBlueBig(last));
+        //oa.addPoint(OverlayElement.pointRedBig(last)).addLabel(new OverlayLabel("hoo", last));
         return oa;
     }
 
