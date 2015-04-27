@@ -122,7 +122,6 @@ public final class Dijkstra implements Runnable
             return true;
         }
 
-        System.out.println("Found no route from " + source + " to " + target);
         return false;
     }
 

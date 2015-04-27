@@ -5,7 +5,6 @@ import gui.overlay.Accommodation;
 import gui.overlay.OverlayAggregate;
 import gui.overlay.OverlayElement;
 import gui.overlay.OverlayImage;
-import gui.overlay.OverlayImageComparator;
 import gui.overlay.OverlayObject;
 
 import javax.swing.JFrame;
@@ -32,6 +31,9 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
 import path.search.Dijkstra;
+import path.search.TravelRoute;
+import path.search.TravelRouteNode;
+import path.search.TravelRouteNoteData;
 import util.FileUtil;
 import util.StopWatch;
 import data_structures.graph.Graph;
@@ -57,7 +59,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
@@ -90,11 +91,13 @@ public class MainWindow extends JFrame implements Serializable
     private Graph g = null;
     private Dijkstra d = null;
     
-    // LinkedBlockingDeque
+    // LinkedBlockingDeque in case we want to thread this stuff
     private final LinkedList<OverlayAggregate> overlay = new LinkedList<OverlayAggregate>();
     private final LinkedList<OverlayAggregate> persistentOverlay = new LinkedList<OverlayAggregate>();
     private final LinkedList<OverlayImage> overlayImages = new LinkedList<OverlayImage>();
+    private final LinkedList<OverlayAggregate> overlayTour = new LinkedList<OverlayAggregate>();
     private final LinkedList<Accommodation> accommodations = new LinkedList<Accommodation>();
+    private final LinkedList<String> logBuffer = new LinkedList<String>();
     
     // specifies if a click in mapMouseClicked() is supposed to target an Overlay element
     // these values are written in mapMouseMoved() and used in mapMouseClicked() & handleTargetedClick()
@@ -112,7 +115,6 @@ public class MainWindow extends JFrame implements Serializable
     private int     imagesSize = 400;
     
     private int logLines = 0;
-    private String[] logBuffer = new String[LOG_BUFFER_LENGTH];
     private boolean imageSelectedFromList = false;
     
     private JPanel              contentPane;
@@ -338,11 +340,11 @@ public class MainWindow extends JFrame implements Serializable
         contentPane.add(scrollPane_Log, gbc_scrollPane_Log);
         
         textArea_Log = new JTextArea();
-        textArea_Log.setFont(new Font("Hasklig", Font.PLAIN, 11));
+        textArea_Log.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         scrollPane_Log.setViewportView(textArea_Log);
         
-        btn_CalculateRoute = new JButton("Calculate route");
-        btn_CalculateRoute.setToolTipText("Calculate a route visiting all currently existing waypoints on the map.");
+        btn_CalculateRoute = new JButton("Calculate tour");
+        btn_CalculateRoute.setToolTipText("Calculate a tour visiting all currently existing waypoints on the map.");
         btn_CalculateRoute.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 btn_CalculateRoute(e);
@@ -517,7 +519,7 @@ public class MainWindow extends JFrame implements Serializable
                 cb_VisitOrder(e);
             }
         });
-        cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"chronological", "selected order", "shortest route"}));
+        cb_VisitOrder.setModel(new DefaultComboBoxModel<String>(new String[] {"selected order", "chronological", "shortest (greedy)"}));
         GridBagConstraints gbc_cb_VisitOrder = new GridBagConstraints();
         gbc_cb_VisitOrder.anchor = GridBagConstraints.WEST;
         gbc_cb_VisitOrder.insets = new Insets(0, 0, 5, 5);
@@ -612,9 +614,10 @@ public class MainWindow extends JFrame implements Serializable
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                for (OverlayObject o : overlay)           { o.draw(g, map); }
+
                 for (OverlayObject o : persistentOverlay) { o.draw(g, map); }
+                for (OverlayObject o : overlayTour)       { o.draw(g, map); }
+                for (OverlayObject o : overlay)           { o.draw(g, map); }
                 for (Accommodation a : accommodations)    { a.getOverlay().draw(g, map); }
                 for (OverlayObject o : overlayImages)     { o.draw(g, map); }
                 
@@ -622,7 +625,7 @@ public class MainWindow extends JFrame implements Serializable
             }
         };
         
-        final CompoundPainter<Painter<JXMapViewer>> c = new CompoundPainter<Painter<JXMapViewer>>(waypointPainter, overlayPainter);
+        final CompoundPainter<Painter<JXMapViewer> > c = new CompoundPainter<Painter<JXMapViewer> >(waypointPainter, overlayPainter);
         c.setCacheable(false);
         map.setOverlayPainter(c);      // $hide$ (WindowBuilder doesn't like this line)
         updateWaypoints();
@@ -631,6 +634,13 @@ public class MainWindow extends JFrame implements Serializable
     
     private void mapMouseClicked(MouseEvent e)
     {
+        // middle mouse button -> clear
+        if (SwingUtilities.isMiddleMouseButton(e)) {
+            clearMap();
+            return;
+        }
+        
+        // we are now left with either right or left click
         // targeted click -> get the Overlay element he clicked
         // not?           -> assume the user wanted to place a marker for standard route calculation
         if (targetedClick)
@@ -673,17 +683,12 @@ public class MainWindow extends JFrame implements Serializable
         oi.setAccommodation(clickTarget);
         accommodations.remove(clickTarget);
         map.repaint();
-        System.out.println("Associated photo with \"" + clickTarget.getName() + "\"");
+        System.out.println("Associated photo with \"" + clickTarget.getLabel() + "\"");
     }
     
     
     private void handleRegularMapClick(MouseEvent e)
     {
-        // middle mouse button -> clear
-        if (SwingUtilities.isMiddleMouseButton(e)) {
-            clearMap();
-            return;
-        }
         // we can only proceed with a graph
         if (!graphLoaded()) {
             return;
@@ -695,8 +700,8 @@ public class MainWindow extends JFrame implements Serializable
         }
 
         // from here on it's either a left mouse button click (-> select source)
-        // or a right mouse button click with a previously selected source (->
-        // select target, calculate route)
+        // or a right mouse button click with a previously selected source 
+        // (-> select target, calculate route)
 
         System.out.println();
         GeoPosition clickPos = map.convertPointToGeoPosition(e.getPoint());
@@ -705,7 +710,7 @@ public class MainWindow extends JFrame implements Serializable
 
         final StopWatch sw = new StopWatch();
         sw.lap();
-        int n = g.getNearestNode(clickPos.getLatitude(), clickPos.getLongitude());
+        int n = g.getNearestNode(clickPos);
         sw.lap();
         if (n == -1) {
             System.out.println("Found no node!");
@@ -729,7 +734,10 @@ public class MainWindow extends JFrame implements Serializable
                 sw.lap();
                 if (r) {
                     overlay.add(OverlayAggregate.route_multi_var3(d.getRoute()));
-                    System.out.println("Calculated route in " + sw.getLastInSecStr() + " sec");
+                    System.out.println("Shortest route found in " + sw.getLastInSecStr(7) + " sec)");
+                }
+                else {
+                    System.out.println("Found no route to specified destination!");
                 }
             }
         }
@@ -773,7 +781,7 @@ public class MainWindow extends JFrame implements Serializable
                 continue;
             }
             
-            pos = oi.getPosition();
+            pos = oi.getPos();
             if (pos == null) {
                 continue;
             }
@@ -872,20 +880,45 @@ public class MainWindow extends JFrame implements Serializable
     
     private void btn_CalculateRoute(ActionEvent e)
     {
-        // TODO: better don't load a new graph or add/remove photos during this
-        
-        if (list_Images.getModel().getSize() < 1) {
-            System.out.println("No photos loaded!");
+        if (!graphLoaded()) {
             return;
         }
         
         DefaultListModel<OverlayImage> dm = ((DefaultListModel<OverlayImage>) list_Images.getModel());
-        List<OverlayImage> chron = Collections.list(dm.elements());
-        chron.sort(new OverlayImageComparator());
+        if (dm.size() < 2) {
+            System.out.println("Not enough photos loaded");
+            return;
+        }
         
-        System.out.println("Chronsort:");
-        for (OverlayImage oi : chron) {
-            System.out.println(oi.getDate() + " -> " + oi.getLabel());
+        final boolean startWithMarker = cb_StartingPosition.getSelectedIndex() == 1;        // TODO: this is bad
+        final int order = cb_VisitOrder.getSelectedIndex();                                 // TODO: this is bad
+
+        TravelRoute tr = null;
+        try {
+            tr = new TravelRoute(g, Collections.list(dm.elements()), order, startWithMarker && currSource != null ? currSource : null);
+        }
+        catch (Exception e1) {
+            System.out.println(e1.getMessage());
+            return;
+        }
+        
+        
+        StopWatch sw = new StopWatch().lap();
+        tr.calculate();
+        
+        if (!tr.getRoute().isEmpty()) {
+            System.out.println(System.getProperty("line.separator") + "Calculated tour:    (in " + sw.lap().getLastInSecStr() + " sec)");
+            for (TravelRouteNode trn : tr.getNodes()) {
+                TravelRouteNoteData data = trn.getData();
+                System.out.println("   -> " + (data != null ? data.getLabel() : "(start marker)"));
+            }
+            
+            overlayTour.clear();
+            overlayTour.add(OverlayAggregate.route_multi_multi_var1(tr.getRoute()));
+            map.repaint();
+        }
+        else {
+            System.out.println("Found no route!");
         }
     }
     
@@ -963,11 +996,11 @@ public class MainWindow extends JFrame implements Serializable
 
         // request tourism nodes in range
         final StopWatch sw = new StopWatch().lap();
-        final LinkedList<Integer> l = g.getNNodesInRange(oi.getPosition().getLatitude(), 
-                                                         oi.getPosition().getLongitude(), radius);
+        final LinkedList<Integer> l = g.getNNodesInRange(oi.getPos().getLatitude(), 
+                                                         oi.getPos().getLongitude(), radius);
         sw.lap();
         if (l != null && l.size() < 1) {
-            System.out.println("No accommodation found! Try increasing the range");
+            System.out.println("No accommodation found! Try again with higher range");
             return;
         }
         System.out.println("Found " + l.size() + " nearby accommodation(s) in " + sw.getLastInSecStr() + " sec");
@@ -1007,7 +1040,7 @@ public class MainWindow extends JFrame implements Serializable
         if (oi == null || oi.getAccommodation() == null)
             return;
         
-        System.out.println("Removed photo's association with \"" + oi.getAccommodation().getName() + "\"");
+        System.out.println("Removed photo's association with \"" + oi.getAccommodation().getLabel() + "\"");
         accommodations.add(oi.getAccommodation());
         oi.setAccommodation(null);
         map.repaint();
@@ -1053,7 +1086,8 @@ public class MainWindow extends JFrame implements Serializable
             return;
         }
 
-        /*
+        /* See commit 9f31026c5d83da909b4fbe89b66de5bef072fd84 for the reason
+         * of this being commented  out
         for (OverlayImage ois : overlayImages)
             ois.setVisible(false);
         oi.setVisible(true);
@@ -1061,9 +1095,9 @@ public class MainWindow extends JFrame implements Serializable
         repaint();
         */
         
-        if (oi.getPosition() != null) {
+        if (oi.getPos() != null) {
             final int h = map.getHeight();
-            mapKit.setAddressLocation(oi.getPosition());
+            mapKit.setAddressLocation(oi.getPos());
             final Point2D p = map.getCenter();
             
             /*
@@ -1082,21 +1116,13 @@ public class MainWindow extends JFrame implements Serializable
     
     private void cb_VisitOrder(ActionEvent e)
     {
-        //System.err.println("cb_VisitOrder not yet implemented!");
+
     }
     
     
     private void cb_ResizeMethod(ActionEvent e)
     {
-        if (!(e.getSource() instanceof JComboBox<?>)) {
-            System.err.println("cb_ResizeMethod: e.getSource() is no instance of JComboBox");
-            return;
-        }
-        
-        @SuppressWarnings("unchecked")
-        JComboBox<String> cb = (JComboBox<String>) e.getSource();
-        imagesDynamicResize = cb.getSelectedIndex() == 0;       // TODO: this is bad
-        
+        imagesDynamicResize = cb_ResizeMethod.getSelectedIndex() == 0;              // TODO: this is bad
         for (OverlayImage oi : overlayImages) {
             oi.dynamicResize(imagesDynamicResize);
         }
@@ -1106,17 +1132,10 @@ public class MainWindow extends JFrame implements Serializable
     
     private void cb_ImageSize(ActionEvent e)
     {
-        if (!(e.getSource() instanceof JComboBox<?>)) {
-            System.err.println("cb_ImageSize: e.getSource() is no instance of JComboBox");
-            return;
-        }
-        
-        @SuppressWarnings("unchecked")
-        JComboBox<String> cb = (JComboBox<String>)e.getSource();
-        String value = (String) cb.getSelectedItem();
+        String value = (String) cb_ImageSize.getSelectedItem();
         imagesSize = -1;
         
-        if (value.matches("[0-9]{2,3}0 px")) {                  // TODO: this is bad
+        if (value.matches("[0-9]{2,3}0 px")) {                                      // TODO: this is bad
             value = value.substring(0, value.length() - 3);
             imagesSize = Integer.parseInt(value);
         }
@@ -1130,16 +1149,7 @@ public class MainWindow extends JFrame implements Serializable
     
     private void cb_ImageQuality(ActionEvent e)
     {
-        if (!(e.getSource() instanceof JComboBox<?>)) {
-            System.err.println("cb_ImageQuality: e.getSource() is no instance of JComboBox");
-            return;
-        }
-        
-        @SuppressWarnings("unchecked")
-        JComboBox<String> cb = (JComboBox<String>)e.getSource();
-        String value = (String) cb.getSelectedItem();
-        imagesHighQuality = value == "high";
-        
+        imagesHighQuality = (String) cb_ImageQuality.getSelectedItem() == "high";   // TODO: this is bad
         for (OverlayImage oi : overlayImages) {
             oi.setHighQuality(imagesHighQuality);
         }
@@ -1162,6 +1172,7 @@ public class MainWindow extends JFrame implements Serializable
     private void clearMap()
     {
         overlay.clear();
+        overlayTour.clear();
         mapKit.repaint();
         currSource = null;
         currTarget = null;
@@ -1173,13 +1184,18 @@ public class MainWindow extends JFrame implements Serializable
         if (g != null) {
             return true;
         }
-        System.out.println("Error: must load a graph first!");
+        System.out.println("No graph loaded!");
         return false;
     }
     
     
     private OverlayImage getSelectedImage()
     {
+        if (list_Images.getModel().getSize() < 1) {
+            System.out.println("No photos loaded!");
+            return null;
+        }
+
         OverlayImage oi = list_Images.getSelectedValue();
         if (oi == null) {
             System.out.println("No photo selected!");
@@ -1192,30 +1208,34 @@ public class MainWindow extends JFrame implements Serializable
     }
     
     
-    public void log(String s)
+    // textArea_Log.append is not thread-safe
+    synchronized public void log(String s)
     {
         ++logLines;
-        for (int i = 0; i < logBuffer.length - 1; ++i) {
-            logBuffer[i] = logBuffer[i + 1];
-        }
-        logBuffer[logBuffer.length - 1] = s;
+        logBuffer.addLast(s);
+        if (logBuffer.size() > LOG_BUFFER_LENGTH)
+            logBuffer.removeFirst();
         
         if (logLines >= MAX_LOG_LENGTH) {
-            logLines = logBuffer.length;
+            logLines = logBuffer.size();
             textArea_Log.setText(String.join("", logBuffer));
         }
         else {
             textArea_Log.append(s);
         }
+        // caret-position auto-update stops working after some text within the text area
+        // was selected by the user, so we better scroll down manually
+        textArea_Log.setCaretPosition(textArea_Log.getDocument().getLength());
     }
     
-    public void addOverlayAggregate(OverlayAggregate oa)
+    
+    public void addOverlay(OverlayAggregate oa)
     {
         overlay.add(oa);
     }
     
     
-    public void addPersistentOverlayAggregate(OverlayAggregate oa)
+    public void addPersistentOverlay(OverlayAggregate oa)
     {
         persistentOverlay.add(oa);
     }
