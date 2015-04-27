@@ -265,7 +265,6 @@ public final class OverlayAggregate implements OverlayObject
             }
             ++i;
         }
-        //oa.addPoint(OverlayElement.pointRedBig(last)).addLabel(new OverlayLabel("hoo", last));
         return oa;
     }
 
