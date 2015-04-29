@@ -1075,7 +1075,6 @@ public class MainWindow extends JFrame implements Serializable
         }
         
         fd.setDialogTitle("Save as");
-        fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
         fd.setSelectedFile(new File("graph"));
         fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fd.setMultiSelectionEnabled(false);

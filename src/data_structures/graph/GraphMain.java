@@ -13,7 +13,7 @@ public class GraphMain
 	{
 	    System.in.read();
 	    StopWatch sw = new StopWatch().lap();
-	    ArrayRepresentation g = GraphFactory.loadArrayRepresentation("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation/graph-de");
+	    ArrayRepresentation g = GraphFactory.loadArrayRepresentation("graph");
 	    System.out.println(sw.lap().getLastInSecStr());
 	    System.in.read();
 	}
