@@ -346,6 +346,20 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     private int getNearestNode(LookupGrid lg, double lat, double lon)
     {
+        /* naive approach yielding ideal result -> check every existing node
+        int id = -1;
+        double dist = Double.MAX_VALUE;
+        
+        for (int i = 0; i < this.lat.length; ++i) {
+            final double d = Distance.haversine(lat, lon, this.lat[i], this.lon[i]);
+            if (d < dist) {
+                id = i;
+                dist = d;
+            }
+        }
+        return id;
+        */
+        
         if (lg != null) {
             return lg.getNearestNode(lat, lon);
         }

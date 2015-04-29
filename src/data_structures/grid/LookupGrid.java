@@ -46,7 +46,7 @@ public class LookupGrid implements Serializable
     /**
      * See {@link #LookupGrid(double[], double[], double, double, double, double) LookupGrid}.
      * <br>
-     * Please note this: is merely a convenience constructor and will loop both passed arrays
+     * <b>Note</b>: this is merely a convenience constructor and will loop both passed arrays
      * two times consecutively.
      * 
      * @param lat array
@@ -102,8 +102,8 @@ public class LookupGrid implements Serializable
         LAT_CELL_SIZE = (maxLat - minLat) / GRID_LAT_CELLS;
         LON_CELL_SIZE = (maxLon - minLon) / GRID_LON_CELLS;
 
-        System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
-        System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
+        //System.out.println("GRID_LAT_CELLS = " + GRID_LAT_CELLS);
+        //System.out.println("GRID_LON_CELLS = " + GRID_LON_CELLS);
         
         // create grid arrays and fill them
         grid = new int[lon_ref.length];
@@ -286,7 +286,7 @@ public class LookupGrid implements Serializable
             
             ++ring; ++vis_i;
         } while (additional_rings > 0);
-        System.out.println("Searched " + (ring-1) + " rings");
+        //System.out.println("Searched " + (ring-1) + " rings");
         
         return min_id;
     }
