@@ -472,7 +472,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      * @param from node ID
      * @param to node ID
      * @return dist from {@code from} to {@code to} or {@code -1}
-     * @throws RuntimeException when not {@code -1 < n < }{@link #size()}
+     * @throws RuntimeException when not {@code -1 < from < }{@link #size()}
      */
     public int getDist(int from, int to)
     {
@@ -490,6 +490,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     /**
      * @return latitude of given node ID in decimal degrees
+     * @throws ArrayIndexOutOfBoundsException when not {@code -1 < n < size()}
      */
     public double getLat(int n)
     {
@@ -499,6 +500,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     /**
      * @return latitude of given non-routable node ID in decimal degrees
+     * @throws ArrayIndexOutOfBoundsException when not {@code -1 < n < }{@link #sizeN()}
      */
     public double getNLat(int n)
     {
@@ -508,6 +510,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     /**
      * @return longitude of given node ID in decimal degrees
+     * @throws ArrayIndexOutOfBoundsException when not {@code -1 < n < }{@link #size()}
      */
     public double getLon(int n)
     {
@@ -517,6 +520,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     
     /**
      * @return longitude of given non-routable node ID in decimal degrees
+     * @throws ArrayIndexOutOfBoundsException when not {@code -1 < n < }{@link #sizeN()}
      */
     public double getNLon(int n)
     {
@@ -530,6 +534,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      * 
      * @param n node ID
      * @return {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} of {@code n}
+     * @throws ArrayIndexOutOfBoundsException when not {@code -1 < n < }{@link #size()}
      */
     public GeoPosition getPosition(int n)
     {
@@ -543,6 +548,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      * 
      * @param n node ID
      * @return {@link org.jdesktop.swingx.mapviewer.GeoPosition GeoPosition} of {@code n}
+     * @throws ArrayIndexOutOfBoundsException when not {@code -1 < n < }{@link #sizeN()}
      */
     public GeoPosition getNPosition(int n)
     {
@@ -554,6 +560,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      * Return the name of the given non-routable node {@code n}.
      * @param n
      * @return name of node
+     * @throws ArrayIndexOutOfBoundsException when not {@code -1 < n < }{@link #sizeN()}
      */
     public String getName(int n)
     {
@@ -565,6 +572,15 @@ final public class ArrayRepresentation implements Graph, Serializable {
      * Size of the loaded graph (number of nodes).
      */
     public int size()
+    {
+        return lat.length;
+    }
+    
+    
+    /**
+     * Size of the loaded graph (number of non-routable nodes).
+     */
+    public int sizeN()
     {
         return lat.length;
     }
@@ -583,6 +599,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
      * @param i 
      * @param weighted dist weighted by street type
      * @return distance
+     * @throws ArrayIndexOutOfBoundsException
      */
     public int getIthEdgeDistFor(int n, int i, boolean weighted)
     {

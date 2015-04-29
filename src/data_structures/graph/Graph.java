@@ -43,6 +43,7 @@ public interface Graph {
     public double[] getBoundingRectLat();
     public double[] getBoundingRectLon();
     public int size();
+    public int sizeN();
 
     // visualization
     public void visualizeGridLookup(boolean t, MainWindow w);
