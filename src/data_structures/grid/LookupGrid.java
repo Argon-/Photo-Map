@@ -63,7 +63,7 @@ public class LookupGrid implements Serializable
      * Fast lookup for "get nearest node to point (x, y)" queries.<br>
      * Creates a grid, dividing the passed locations into cells.
      * Lookups are performed by iterating these cells in circles. See 
-     * {@link #getNearestNode(double, double) getNearestNode}
+     * {@link #getNearestNode(double, double) getNearestNode()}
      * for more information.
      * <br><br>
      * This class is effectively final (except for the visualization part, but this is
@@ -96,8 +96,8 @@ public class LookupGrid implements Serializable
         // determine grid sizes (amount of cells)
         final int m = (int) Math.ceil(lat_ref.length * GRID_FACTOR);
         // try to get the width and height reasonably square
-        GRID_LAT_CELLS =  m < 1 ? 1 : (int) Math.ceil(m * (maxLon - minLon) / (maxLat - minLat));
-        GRID_LON_CELLS =  m < 1 ? 1 : m;
+        GRID_LAT_CELLS =  Math.max(1, (int) Math.ceil(m * (maxLon - minLon) / (maxLat - minLat)));
+        GRID_LON_CELLS =  Math.max(1, m);
         
         LAT_CELL_SIZE = (maxLat - minLat) / GRID_LAT_CELLS;
         LON_CELL_SIZE = (maxLon - minLon) / GRID_LON_CELLS;
@@ -198,8 +198,8 @@ public class LookupGrid implements Serializable
     
     
     /**
-     * Search for the (or rather "a"?) node closest to {@code (lat, lon)} in
-     * a grid with an expanding ring, originating from the cell containing 
+     * Search for the (or rather "a") node closest to {@code (lat, lon)} within
+     * this grid's cells in expanding rings, originating from the cell containing 
      * {@code (lat, lon)}.<br>
      * The ring expands by one per iteration, starting with 0 (= the cell
      * containing {@code (lat, lon)}).
