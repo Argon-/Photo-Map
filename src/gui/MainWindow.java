@@ -729,7 +729,7 @@ public class MainWindow extends JFrame implements Serializable
                 sw.lap();
                 if (r) {
                     overlay.add(OverlayAggregate.route_multi_var3(d.getPath()));
-                    System.out.println("Shortest route found in " + sw.getLastInSecStr(7) + " sec)");
+                    System.out.println("Shortest route found in " + sw.getLastInSecStr(7) + " sec");
                 }
                 else {
                     System.out.println("Found no route to specified destination!");

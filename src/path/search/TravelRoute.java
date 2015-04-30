@@ -164,6 +164,7 @@ public class TravelRoute
         
         while (!candidates.isEmpty())
         {
+            // the node added during the last iteration
             final TravelRouteNode src_trn = nodes.getLast();
             final GeoPosition src = src_trn.getPos();
             final int src_nid = graph.getNearestNode(src);
