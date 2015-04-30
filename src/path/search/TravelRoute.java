@@ -137,7 +137,7 @@ public class TravelRoute
                 route.add(d.getPath());
             }
             else {
-                throw new NoSuchRouteException("Unable to find a way between two locations");
+                throw new NoSuchRouteException("Unable to find a way between two locations!");
             }
             src = dst;
             src_nid = dst_nid;
@@ -198,7 +198,7 @@ public class TravelRoute
             }
             
             if (shortest_trn == null) {
-                throw new NoSuchRouteException("At least one location is not reachable by any candidate locations");
+                throw new NoSuchRouteException("At least one location is not reachable by any candidate locations!");
             }
             //System.out.println("   src: shortest candidate: " + (shortest_trn.getData() == null? "(null)" :shortest_trn.getData().getLabel()) + " (" + shortest_dist + ")");
             nodes.add(shortest_trn);
@@ -221,7 +221,7 @@ public class TravelRoute
             route.add(d.getPath());
         }
         else {
-            throw new NoSuchRouteException("Unable to find a way back home");
+            throw new NoSuchRouteException("Unable to find a way back home!");
         }
     }
     

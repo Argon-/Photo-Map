@@ -893,7 +893,7 @@ public class MainWindow extends JFrame implements Serializable
         
         DefaultListModel<OverlayImage> dm = ((DefaultListModel<OverlayImage>) list_Images.getModel());
         if (dm.size() < 2) {
-            System.out.println("Not enough photos loaded");
+            System.out.println("Not enough photos loaded!");
             return;
         }
         

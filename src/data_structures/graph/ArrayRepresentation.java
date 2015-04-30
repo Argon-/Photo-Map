@@ -183,9 +183,9 @@ final public class ArrayRepresentation implements Graph, Serializable {
             
             
             // read edges
-            source = new int[edge_num];
+            source = new int[edge_num];         // TODO: actually... we don't need this
             target = new int[edge_num];
-            offset = new int[node_num + 1];    // +1 because of getNeighbor()
+            offset = new int[node_num + 1];     // +1 because of getNeighbor()
             dist   = new int[edge_num];
             dist_w = new int[edge_num];
             Arrays.fill(offset, -1);
