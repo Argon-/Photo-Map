@@ -94,8 +94,9 @@ public class TravelRoute
     
     /**
      * Find a route with the requested parameters (i.e. order).
+     * @throws NoSuchRouteException when there's no way found from a location to other locations
      */
-    public TravelRoute calculate()
+    public TravelRoute calculate() throws NoSuchRouteException
     {
         switch(visitOrder) {
             case VISIT_ORDER_BY_USER:
@@ -115,8 +116,9 @@ public class TravelRoute
     
     /**
      * Just connect all nodes in {@code nodes}.
+     * @throws NoSuchRouteException 
      */
-    private void simpleRoute(LinkedList<TravelRouteNode> nodes)
+    private void simpleRoute(LinkedList<TravelRouteNode> nodes) throws NoSuchRouteException
     {
         route.clear();
         Dijkstra d = new Dijkstra(graph);
@@ -134,6 +136,9 @@ public class TravelRoute
             if (d.pathFromTo(src_nid, dst_nid)) {
                 route.add(d.getPath());
             }
+            else {
+                throw new NoSuchRouteException("Unable to find a way between two locations");
+            }
             src = dst;
             src_nid = dst_nid;
         }
@@ -143,8 +148,9 @@ public class TravelRoute
     /**
      * Simple greedy approach to find a shortest route.<br>
      * The resulting route can be potentially pretty bad, but it's reasonably fast.
+     * @throws NoSuchRouteException 
      */
-    private void shortestRouteGreedy(LinkedList<TravelRouteNode> nodes)
+    private void shortestRouteGreedy(LinkedList<TravelRouteNode> nodes) throws NoSuchRouteException
     {
         route.clear();
         Dijkstra d = new Dijkstra(graph);
@@ -192,8 +198,7 @@ public class TravelRoute
             }
             
             if (shortest_trn == null) {
-                //System.out.println("   FOUND NO ROUTE");
-                continue;
+                throw new NoSuchRouteException("At least one location is not reachable by any candidate locations");
             }
             //System.out.println("   src: shortest candidate: " + (shortest_trn.getData() == null? "(null)" :shortest_trn.getData().getLabel()) + " (" + shortest_dist + ")");
             nodes.add(shortest_trn);
@@ -215,9 +220,9 @@ public class TravelRoute
             nodes.add(dst_trn);
             route.add(d.getPath());
         }
-        //else {
-        //    System.out.println("FOUND NO ROUTE BACK HOME");
-        //}
+        else {
+            throw new NoSuchRouteException("Unable to find a way back home");
+        }
     }
     
     

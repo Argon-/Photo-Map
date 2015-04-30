@@ -837,7 +837,6 @@ public class MainWindow extends JFrame implements Serializable
     private void btn_LoadGraph(ActionEvent e)
     {
         fd.setDialogTitle("Select a graph file");
-        fd.setCurrentDirectory(new File("/Users/Julian/Documents/Uni/_Fapra OSM/3/file-generation"));
         fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int c = fd.showOpenDialog(this);
         
@@ -901,18 +900,18 @@ public class MainWindow extends JFrame implements Serializable
         final boolean startWithMarker = cb_StartingPosition.getSelectedIndex() == 1;        // TODO: this is bad
         final int order = cb_VisitOrder.getSelectedIndex();                                 // TODO: this is bad
 
+        StopWatch sw = new StopWatch();
         TravelRoute tr = null;
         try {
             tr = new TravelRoute(graph, Collections.list(dm.elements()), order, startWithMarker && currSource != null ? currSource : null);
+            sw.lap();
+            tr.calculate();
         }
         catch (Exception e1) {
             System.out.println(e1.getMessage());
             return;
         }
-        
-        
-        StopWatch sw = new StopWatch().lap();
-        tr.calculate();
+
         
         if (!tr.getRoute().isEmpty()) {
             System.out.println(System.getProperty("line.separator") + "Calculated tour:    (in " + sw.lap().getLastInSecStr() + " sec)");
