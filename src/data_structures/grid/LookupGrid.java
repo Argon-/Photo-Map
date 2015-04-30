@@ -61,13 +61,14 @@ public class LookupGrid implements Serializable
     
     /**
      * Fast lookup for "get nearest node to point (x, y)" queries.<br>
-     * Creates a grid, dividing the passed locations into cells.
+     * Creates a grid, dividing the given locations into cells.
      * Lookups are performed by iterating these cells in circles. See 
      * {@link #getNearestNode(double, double) getNearestNode()}
      * for more information.
      * <br><br>
      * This class is effectively final (except for the visualization part, but this is
      * only considered some sort of debug output anyway and disabled by default).
+     * Getters don't have side effects and get by without locking.
      *
      * @param lat
      * @param lon

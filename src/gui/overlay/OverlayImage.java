@@ -35,13 +35,13 @@ import com.drew.metadata.exif.GpsDirectory;
  * <strong>Note</strong>: for performance reasons (indirect) resizing operations
  * are usually deferred as long as possible. This would leads to several getters
  * returning potentially outdated information because the actual requested 
- * resize did not yet happen.
+ * resize did not yet happen.<br>
  * Therefore various variables and methods are used to cache or
  * pre-calculate values. For this reason methods like {@code getHeight} are
  * not just returning member variables, but actually involve calculations.
  * <br><br>
  * A resize is only guaranteed to happen when an image is explicitly requested
- * by the user ({@code isVisible(true)} followed by a call to {@code draw()}).
+ * by the user ({@link #isVisible()}{@code == true} followed by a call to {@link #draw()}).
  */
 public final class OverlayImage implements OverlayObject, TravelRouteNoteData
 {
