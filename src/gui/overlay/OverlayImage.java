@@ -260,6 +260,9 @@ public final class OverlayImage implements OverlayObject, TravelRouteNoteData
      */
     public OverlayImage setLabel(String l)
     {
+        cachedFontHeight = 0; 
+        cachedFontWidth = 0; 
+        cachedFontAscent = 0;
         label = l;
         return this;
     }
