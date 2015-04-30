@@ -295,7 +295,7 @@ public class LookupGrid implements Serializable
             
             ++ring; ++vis_i;
         } while (additional_rings > 0);
-        System.out.println("Searched " + (ring-1) + " rings");
+        //System.out.println("Searched " + (ring-1) + " rings");
         
         return min_id;
     }
