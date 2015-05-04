@@ -47,7 +47,7 @@ final public class ArrayRepresentation implements Graph, Serializable {
     private final double types[];
     
     /*
-     * non-routable nodes info (tourism nodes)
+     * Non-routable nodes info (tourism nodes)
      * Reasoning for not saving them with the routable nodes and providing
      * some kind of index structure to know which nodes are not routable is
      * the assumption of a way lower number of not routable nodes.
