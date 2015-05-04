@@ -2,6 +2,8 @@
 
 set -e
 
+# OSM data in PBF format can be found here: http://download.geofabrik.de/
+
 if [[ $# -eq 0 ]]; then
     echo "No argument given (pbf file or raw file expected)"
     exit 0
