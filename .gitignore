@@ -1,5 +1,7 @@
 /bin/
 *.pyc
+.settings/
+
 
 15000K.bin
 15000K.txt
