@@ -1037,9 +1037,10 @@ public class MainWindow extends JFrame implements Serializable
          * However, this has no actual negative affect on the logic/program itself,
          * merely the visual aspects of two identical objects being drawn at the same 
          * position.
-         * The following not a real fix and does not help in a case where image A 
-         * is associated with an accommodation found with image B. But this would
-         * require more effort (computationally) just to fix a visual thingy...
+         * The following is not a real fix and does not help in a case where image A 
+         * is associated with an accommodation which was just found with image B.
+         * However, a proper fix would require more effort (computationally) just for
+         * the sake of a minor visual thingy... (visible only when transparency is used)
          */
         if (oi.getAccommodation() != null)
             accommodations.remove(oi.getAccommodation());
