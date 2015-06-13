@@ -25,10 +25,10 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
  */
 public final class OverlayElement implements OverlayObject
 {
-    private final GeoPosition    source;
-    private final GeoPosition    target;
-    private Color                color        = Color.BLACK;
-    private int                    strokeWidth    = 6;
+    private final GeoPosition source;
+    private final GeoPosition target;
+    private Color             color       = Color.BLACK;
+    private int               strokeWidth = 6;
     
 
     /**
@@ -168,102 +168,102 @@ public final class OverlayElement implements OverlayObject
      * Factories
      ************************************************************************/
 
-    public static OverlayElement lineBlackThin(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineBlackThin(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.BLACK, 1);
     }
-    public static OverlayElement lineBlueThin(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineBlueThin(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.BLUE, 1);
     }
-    public static OverlayElement lineRedThin(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineRedThin(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.RED, 1);
     }
-    public static OverlayElement lineGreenThin(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineGreenThin(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.GREEN, 1);
     }
-    public static OverlayElement lineYellowThin(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineYellowThin(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.YELLOW, 1);
     }
     
-    public static OverlayElement lineBlackMedium(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineBlackMedium(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.BLACK, 3);
     }
-    public static OverlayElement lineBlueMedium(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineBlueMedium(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.BLUE, 3);
     }
-    public static OverlayElement lineRedMedium(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineRedMedium(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.RED, 3);
     }
-    public static OverlayElement lineGreenMedium(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineGreenMedium(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.GREEN, 3);
     }
-    public static OverlayElement lineYellowMedium(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineYellowMedium(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.YELLOW, 3);
     }
 
-    public static OverlayElement lineBlackThick(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineBlackThick(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.BLACK, 5);
     }
-    public static OverlayElement lineBlueThick(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineBlueThick(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.BLUE, 5);
     }
-    public static OverlayElement lineRedThick(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineRedThick(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.RED, 5);
     }
-    public static OverlayElement lineGreenThick(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineGreenThick(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.GREEN, 5);
     }
-    public static OverlayElement lineYellowThick(GeoPosition source, GeoPosition target)    {
+    public static OverlayElement lineYellowThick(GeoPosition source, GeoPosition target) {
         return new OverlayElement(source, target, Color.YELLOW, 5);
     }
 
 
-    public static OverlayElement pointBlackSmall(GeoPosition point)    {
+    public static OverlayElement pointBlackSmall(GeoPosition point) {
         return new OverlayElement(point, Color.BLACK, 3);
     }
-    public static OverlayElement pointBlackMedium(GeoPosition point)    {
+    public static OverlayElement pointBlackMedium(GeoPosition point) {
         return new OverlayElement(point, Color.BLACK, 6);
     }
-    public static OverlayElement pointBlackBig(GeoPosition point)    {
+    public static OverlayElement pointBlackBig(GeoPosition point) {
         return new OverlayElement(point, Color.BLACK, 9);
     }
     
-    public static OverlayElement pointBlueSmall(GeoPosition point)    {
+    public static OverlayElement pointBlueSmall(GeoPosition point) {
         return new OverlayElement(point, Color.BLUE, 3);
     }
-    public static OverlayElement pointBlueMedium(GeoPosition point)    {
+    public static OverlayElement pointBlueMedium(GeoPosition point) {
         return new OverlayElement(point, Color.BLUE, 6);
     }
-    public static OverlayElement pointBlueBig(GeoPosition point)    {
+    public static OverlayElement pointBlueBig(GeoPosition point) {
         return new OverlayElement(point, Color.BLUE, 9);
     }
     
-    public static OverlayElement pointRedSmall(GeoPosition point)    {
+    public static OverlayElement pointRedSmall(GeoPosition point) {
         return new OverlayElement(point, Color.RED, 3);
     }
-    public static OverlayElement pointRedMedium(GeoPosition point)    {
+    public static OverlayElement pointRedMedium(GeoPosition point) {
         return new OverlayElement(point, Color.RED, 6);
     }
-    public static OverlayElement pointRedBig(GeoPosition point)    {
+    public static OverlayElement pointRedBig(GeoPosition point) {
         return new OverlayElement(point, Color.RED, 9);
     }
     
-    public static OverlayElement pointGreenSmall(GeoPosition point)    {
+    public static OverlayElement pointGreenSmall(GeoPosition point) {
         return new OverlayElement(point, Color.GREEN, 3);
     }
-    public static OverlayElement pointGreenMedium(GeoPosition point)    {
+    public static OverlayElement pointGreenMedium(GeoPosition point) {
         return new OverlayElement(point, Color.GREEN, 6);
     }
-    public static OverlayElement pointGreenBig(GeoPosition point)    {
+    public static OverlayElement pointGreenBig(GeoPosition point) {
         return new OverlayElement(point, Color.GREEN, 9);
     }
     
-    public static OverlayElement pointYellowSmall(GeoPosition point)    {
+    public static OverlayElement pointYellowSmall(GeoPosition point) {
         return new OverlayElement(point, Color.YELLOW, 3);
     }
-    public static OverlayElement pointYellowMedium(GeoPosition point)    {
+    public static OverlayElement pointYellowMedium(GeoPosition point) {
         return new OverlayElement(point, Color.YELLOW, 6);
     }
-    public static OverlayElement pointYellowBig(GeoPosition point)    {
+    public static OverlayElement pointYellowBig(GeoPosition point) {
         return new OverlayElement(point, Color.YELLOW, 9);
     }
 

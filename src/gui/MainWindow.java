@@ -684,10 +684,6 @@ public class MainWindow extends JFrame implements Serializable
     
     private void handleRegularMapClick(MouseEvent e)
     {
-        // we can only proceed with a graph
-        if (!graphLoaded()) {
-            return;
-        }
         // right mouse button -> select target, but not without a source
         if (SwingUtilities.isRightMouseButton(e) && currSource == null) {
             System.out.println("Please set a source first");
@@ -703,6 +699,11 @@ public class MainWindow extends JFrame implements Serializable
         System.out.println("Clicked at  : " + String.format("%.4f", clickPos.getLatitude()) + ", "
                 + String.format("%.4f", clickPos.getLongitude()));
 
+        // we can only proceed with a graph
+        if (!graphLoaded()) {
+            return;
+        }
+        
         final StopWatch sw = new StopWatch();
         sw.lap();
         int n = graph.getNearestNode(clickPos);

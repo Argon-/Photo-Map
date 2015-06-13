@@ -24,8 +24,8 @@ public final class OverlayAggregate implements OverlayObject
 
     
     /**
-     * A OverlayAggregate aggregates multiple {@link OverlayElement} and {@link OverlayLabel} objects
-     * to create more complex compound visuals and allows for grouping.
+     * An OverlayAggregate aggregates multiple {@link OverlayElement} and {@link OverlayLabel} objects
+     * to create more complex compound visuals and also allows for grouping.
      * <br>
      * Internally they are organized in {@code points}, {@code lines} and {@code labels}.
      */
@@ -65,7 +65,7 @@ public final class OverlayAggregate implements OverlayObject
     
     
     /**
-     * Add a OverlayElement as point.
+     * Add OverlayElement as point.
      */
     public OverlayAggregate addPoint(OverlayElement oe)
     {
@@ -75,7 +75,7 @@ public final class OverlayAggregate implements OverlayObject
     
     
     /**
-     * Add a OverlayElement as line.
+     * Add OverlayElement as line.
      */
     public OverlayAggregate addLine(OverlayElement oe)
     {
@@ -85,7 +85,7 @@ public final class OverlayAggregate implements OverlayObject
     
     
     /**
-     * Add a OverlayLabel as label.
+     * Add OverlayLabel as label.
      */
     public OverlayAggregate addLabel(OverlayLabel ol)
     {

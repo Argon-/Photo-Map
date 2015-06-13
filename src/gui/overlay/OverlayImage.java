@@ -29,11 +29,11 @@ import com.drew.metadata.exif.GpsDirectory;
 
 
 /**
- * This class encapsulates an images which is intended as overlay for
+ * This class encapsulates an image which is intended as overlay for
  * the JXMapViewer map.<br>
  * <br>
  * <strong>Note</strong>: for performance reasons (indirect) resizing operations
- * are usually deferred as long as possible. This would leads to several getters
+ * are usually deferred as long as possible. This would lead to several getters
  * returning potentially outdated information because the actual requested 
  * resize did not yet happen.<br>
  * Therefore various variables and methods are used to cache or
@@ -98,7 +98,7 @@ public final class OverlayImage implements OverlayObject, TravelRouteNoteData
     
 
     /**
-     * Load a image from file {@code f} and extract relevant metadata.
+     * Load an image from file {@code f} and extract relevant metadata.
      * In case no date could be extracted {@code new Date(0)} is used.
      * 
      * @param f image file location
